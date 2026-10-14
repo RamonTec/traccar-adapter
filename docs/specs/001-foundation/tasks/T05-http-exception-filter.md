@@ -1,6 +1,6 @@
 ---
 id: 001-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [001-T01, 001-T04]
 covers: [AC-9, AC-10, AC-11]
 ---
@@ -38,15 +38,15 @@ Orden de decisión:
 4. Otro → 500 `INTERNAL_ERROR` + `logger.error({ err: exception }, 'Unhandled exception')`.
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/http/http-exception.filter.ts` (nuevo)
-- [ ] `src/shared/infrastructure/http/http-exception.filter.spec.ts` (nuevo) — app de prueba: `LoggingModule.forRoot(cfg, capture.stream)`, `{ provide: APP_FILTER, useClass: HttpExceptionFilter }`, controller dummy en el spec con rutas que lanzan cada caso; `app.useLogger(app.get(Logger))`; supertest con `x-correlation-id: cid-1`.
+- [x] `src/shared/infrastructure/http/http-exception.filter.ts` (nuevo)
+- [x] `src/shared/infrastructure/http/http-exception.filter.spec.ts` (nuevo) — app de prueba: `LoggingModule.forRoot(cfg, capture.stream)`, `{ provide: APP_FILTER, useClass: HttpExceptionFilter }`, controller dummy en el spec con rutas que lanzan cada caso; `app.useLogger(app.get(Logger))`; supertest con `x-correlation-id: cid-1`.
 
 ## Criterios de aceptación
-- [ ] **AC-9** — Un `DomainError` con `code = 'CONFLICT'` y mensaje `'Group exists'` → `409 { code: 'CONFLICT', message: 'Group exists', correlationId: 'cid-1' }`.
-- [ ] **AC-10a** — `throw new Error('db password=x')` → `500 { code: 'INTERNAL_ERROR', message: 'Internal server error', correlationId: 'cid-1' }`; el body no contiene `password` ni `stack`.
-- [ ] **AC-10b** — Ese caso produce una línea `level: 'error'` con `correlationId: 'cid-1'` y un `err` que incluye el mensaje original.
-- [ ] **AC-10c** — `DomainError` con `code = 'NOT_REGISTERED_CODE'` → 500 `INTERNAL_ERROR` + línea `error` con `msg: 'Unmapped domain error code'`.
-- [ ] **AC-11** — `GET /no-existe` → `404 { code: 'NOT_FOUND', message: 'Resource not found', correlationId: 'cid-1' }`; un `ConflictException` de Nest → 409 `CONFLICT`; un `MethodNotAllowed`/405 → `BAD_REQUEST` con status 405.
+- [x] **AC-9** — Un `DomainError` con `code = 'CONFLICT'` y mensaje `'Group exists'` → `409 { code: 'CONFLICT', message: 'Group exists', correlationId: 'cid-1' }`.
+- [x] **AC-10a** — `throw new Error('db password=x')` → `500 { code: 'INTERNAL_ERROR', message: 'Internal server error', correlationId: 'cid-1' }`; el body no contiene `password` ni `stack`.
+- [x] **AC-10b** — Ese caso produce una línea `level: 'error'` con `correlationId: 'cid-1'` y un `err` que incluye el mensaje original.
+- [x] **AC-10c** — `DomainError` con `code = 'NOT_REGISTERED_CODE'` → 500 `INTERNAL_ERROR` + línea `error` con `msg: 'Unmapped domain error code'`.
+- [x] **AC-11** — `GET /no-existe` → `404 { code: 'NOT_FOUND', message: 'Resource not found', correlationId: 'cid-1' }`; un `ConflictException` de Nest → 409 `CONFLICT`; un `MethodNotAllowed`/405 → `BAD_REQUEST` con status 405.
 
 ## Fuera de alcance
 - `details` de validación (spec 003). Registro global en `AppModule` (T07).
@@ -58,3 +58,7 @@ pnpm check
 ```
 
 ## Handoff
+- Implementado `HttpExceptionFilter` con la jerarquía de decisión y formato estándar de `ErrorBody`.
+- Extrae `correlationId` desde `request.id` provisto por `pino-http`.
+- Oculta detalles internos en errores no manejados/no mapeados y loguea el error con contexto estructurado.
+
