@@ -29,6 +29,8 @@ Stack: NestJS 12 (ESM, imports relativos con `.js`), TypeScript strict, Vitest, 
 ## Multi-agente (Claude Code + Antigravity)
 
 - Este archivo (`AGENTS.md`) es la **única** fuente de reglas. `CLAUDE.md` solo lo importa. No dupliques reglas en otro sitio.
-- Comandos SDD: fuente en `docs/sdd/commands/`; copias generadas en `.claude/commands/` y `.agents/workflows/` vía `pnpm sdd:sync`. **Nunca** edites las copias.
+- Comandos SDD: fuente en `docs/sdd/commands/` → copias en `.claude/commands/` y `.agents/workflows/`.
+- Skills: fuente en `docs/sdd/skills/<nombre>/SKILL.md` → copias en `.claude/skills/` y `.agents/skills/`. Un skill es el *cómo* y **referencia** estándares/ADRs, nunca los copia.
+- Las copias se generan con `pnpm sdd:sync`. **Nunca** edites las copias.
 - Los artefactos propios del agente (p.ej. *Implementation Plan* / *Task List* de Antigravity, o planes internos de Claude) **no sustituyen** a `docs/specs/**`. El estado oficial vive solo ahí.
 - Un task por conversación nueva, en cualquiera de los dos agentes. No trabajes en paralelo sobre el mismo spec desde dos agentes.
