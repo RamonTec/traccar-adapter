@@ -1,6 +1,6 @@
 ---
 id: 001-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-9, AC-11]
 ---
@@ -32,16 +32,16 @@ export function codeForHttpStatus(status: number): string;
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/domain/domain-error.ts` (nuevo)
-- [ ] `src/shared/domain/domain-error.spec.ts` (nuevo)
-- [ ] `src/shared/infrastructure/http/error-http-status.ts` (nuevo)
-- [ ] `src/shared/infrastructure/http/error-http-status.spec.ts` (nuevo)
+- [x] `src/shared/domain/domain-error.ts` (nuevo)
+- [x] `src/shared/domain/domain-error.spec.ts` (nuevo)
+- [x] `src/shared/infrastructure/http/error-http-status.ts` (nuevo)
+- [x] `src/shared/infrastructure/http/error-http-status.spec.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-9a** — Una subclase `class FooError extends DomainError { readonly code = 'FOO' }` creada con `'msg'` es `instanceof DomainError` y `Error`, con `name === 'FooError'`, `message === 'msg'`, `code === 'FOO'`.
-- [ ] **AC-9b** — `httpStatusForCode` devuelve el status de cada código de la tabla y `undefined` para un código desconocido.
-- [ ] **AC-11a** — `codeForHttpStatus(404) === 'NOT_FOUND'` y el inverso es correcto para todos los códigos de la tabla.
-- [ ] **AC-11b** — `codeForHttpStatus` devuelve `'BAD_REQUEST'` para 4xx sin mapear (p.ej. 405, 413) e `'INTERNAL_ERROR'` para 5xx sin mapear (p.ej. 502).
+- [x] **AC-9a** — Una subclase `class FooError extends DomainError { readonly code = 'FOO' }` creada con `'msg'` es `instanceof DomainError` y `Error`, con `name === 'FooError'`, `message === 'msg'`, `code === 'FOO'`.
+- [x] **AC-9b** — `httpStatusForCode` devuelve el status de cada código de la tabla y `undefined` para un código desconocido.
+- [x] **AC-11a** — `codeForHttpStatus(404) === 'NOT_FOUND'` y el inverso es correcto para todos los códigos de la tabla.
+- [x] **AC-11b** — `codeForHttpStatus` devuelve `'BAD_REQUEST'` para 4xx sin mapear (p.ej. 405, 413) e `'INTERNAL_ERROR'` para 5xx sin mapear (p.ej. 502).
 
 ## Fuera de alcance
 - Exception filter (T05). Códigos de dominio concretos (specs futuros).
@@ -53,3 +53,6 @@ pnpm check
 ```
 
 ## Handoff
+- `DomainError` en `shared/domain/domain-error.ts` (ruta del task); `docs/standards/coding.md` aún cita `shared/domain/errors.ts` → actualizar el estándar.
+- `httpStatusForCode` usa `Object.hasOwn` (claves heredadas como `'constructor'` → `undefined`).
+- `codeForHttpStatus`: status <400 sin mapear también cae en `'INTERNAL_ERROR'`. T05 consume ambas funciones.
