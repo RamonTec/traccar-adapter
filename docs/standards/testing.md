@@ -1,5 +1,7 @@
 # Estándar: Testing
 
+> Recetas de código y trampas conocidas: skill `automated-testing` (`docs/sdd/skills/automated-testing/`).
+
 ## Estrategia por capa
 
 | Capa | Tipo | Herramienta | Dobles |

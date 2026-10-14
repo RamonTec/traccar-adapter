@@ -24,7 +24,7 @@ Reglas de las fases:
 - Una fase **no** empieza si la anterior no pasó su gate.
 - Si en la fase N aparece algo que contradice la fase N-1: **parar**, anotar en `## Preguntas abiertas` del artefacto superior y pedir decisión. No improvisar.
 - `/clear` (o conversación nueva) entre tasks. El estado vive en archivos, no en la conversación.
-- Funciona igual en Claude Code (`.claude/commands/`) y Antigravity (`.agents/workflows/`): ambos se generan desde `docs/sdd/commands/` con `pnpm sdd:sync`.
+- Funciona igual en Claude Code (`.claude/commands/`) y Antigravity (`.agents/workflows/`): ambos se generan desde `docs/sdd/commands/` con `pnpm sdd:sync`. Igual los skills: `docs/sdd/skills/` → `.claude/skills/` y `.agents/skills/`.
 
 ## Micro-tasks: definición
 
