@@ -1,6 +1,6 @@
 ---
 id: 001-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-1, AC-2, AC-3]
 ---
@@ -33,16 +33,16 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig;
 Esquema de `loadConfig`: `PORT` opcional, entero 1-65535, default `3000` (coerción desde string); `LOG_LEVEL` opcional, enum `LOG_LEVELS`, default `'info'`. Variables no declaradas se ignoran.
 
 ## Archivos a crear/modificar
-- [ ] `pnpm add zod` (^4) → `package.json`, `pnpm-lock.yaml`
-- [ ] `src/shared/infrastructure/config/app-config.ts` (nuevo)
-- [ ] `src/shared/infrastructure/config/app-config.spec.ts` (nuevo)
+- [x] `pnpm add zod` (^4) → `package.json`, `pnpm-lock.yaml`
+- [x] `src/shared/infrastructure/config/app-config.ts` (nuevo)
+- [x] `src/shared/infrastructure/config/app-config.spec.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-1** — `loadConfig({})` → `{ port: 3000, logLevel: 'info' }`; `loadConfig({ PORT: '8080', LOG_LEVEL: 'debug' })` → `{ port: 8080, logLevel: 'debug' }`; `PORT: ''` → 3000.
-- [ ] **AC-2a** — `loadConfig({ PORT: 'abc', LOG_LEVEL: 'verbose' })` lanza `ConfigValidationError` con `invalidVariables` = `['PORT', 'LOG_LEVEL']` (ambas, no solo la primera).
-- [ ] **AC-2b** — `PORT: '0'`, `'65536'` y `'3.5'` son inválidos.
-- [ ] **AC-2c** — El `message` del error contiene los nombres y **no** contiene los valores (`abc`, `verbose`).
-- [ ] **AC-3** — Con un esquema de prueba `z.object({ SECRET: z.string().min(1) })`, `parseEnv(schema, {})` y `parseEnv(schema, { SECRET: '' })` lanzan con `['SECRET']`; `{ SECRET: 'x' }` devuelve `{ SECRET: 'x' }`.
+- [x] **AC-1** — `loadConfig({})` → `{ port: 3000, logLevel: 'info' }`; `loadConfig({ PORT: '8080', LOG_LEVEL: 'debug' })` → `{ port: 8080, logLevel: 'debug' }`; `PORT: ''` → 3000.
+- [x] **AC-2a** — `loadConfig({ PORT: 'abc', LOG_LEVEL: 'verbose' })` lanza `ConfigValidationError` con `invalidVariables` = `['PORT', 'LOG_LEVEL']` (ambas, no solo la primera).
+- [x] **AC-2b** — `PORT: '0'`, `'65536'` y `'3.5'` son inválidos.
+- [x] **AC-2c** — El `message` del error contiene los nombres y **no** contiene los valores (`abc`, `verbose`).
+- [x] **AC-3** — Con un esquema de prueba `z.object({ SECRET: z.string().min(1) })`, `parseEnv(schema, {})` y `parseEnv(schema, { SECRET: '' })` lanzan con `['SECRET']`; `{ SECRET: 'x' }` devuelve `{ SECRET: 'x' }`.
 
 ## Fuera de alcance
 - Llamar a `loadConfig` desde `main.ts` (T07). Variables de Traccar/NATS.
@@ -54,3 +54,6 @@ pnpm check
 ```
 
 ## Handoff
+- zod 4.6.7 instalado. `parseEnv` filtra claves con `''` antes de `safeParse` (genérico para futuros esquemas Traccar/NATS: basta con `parseEnv(schema, process.env)`).
+- `APP_CONFIG` (Symbol) exportado pero aún sin provider; T07 debe registrarlo con `loadConfig(process.env)`.
+- Orden de `invalidVariables` = orden de claves del esquema. 9 tests, `pnpm check` verde.
