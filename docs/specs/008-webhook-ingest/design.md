@@ -1,6 +1,6 @@
 ---
 spec: 008-webhook-ingest
-status: draft          # draft | approved
+status: approved       # draft | approved
 ---
 
 # 008 — Diseño

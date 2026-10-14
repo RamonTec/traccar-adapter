@@ -1,6 +1,6 @@
 ---
 spec: 010-deadletter-publish
-status: draft          # draft | approved
+status: approved       # draft | approved
 ---
 
 # 010 — Diseño

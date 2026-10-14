@@ -1,6 +1,6 @@
 ---
 spec: 009-jetstream-publish
-status: draft          # draft | approved
+status: approved       # draft | approved
 ---
 
 # 009 — Diseño
