@@ -22,12 +22,12 @@
 
 ## Validación
 
-- Entrada HTTP: DTO validado en el borde (librería a definir en spec de foundation).
+- Entrada HTTP: DTO validado en el borde (librería a definir en el primer spec con body de entrada, 003).
 - Invariantes de negocio: en el constructor/factory de la entidad o VO (`Imei.create(raw)`), no en el controller.
 
 ## Logging (NFR4, Phase 3)
 
-- Logger estructurado (JSON) con `correlationId` en cada línea.
+- Logger: `nestjs-pino`, formato y campos según **ADR-0002 §4** (JSON, `correlationId` en cada línea).
 - Obligatorio loguear: cada comando a Traccar (op, ids, resultado, duración), cada webhook recibido, cada publish a `telemetry.events` / `telemetry.deadletter`.
 - Nunca loguear tokens ni headers de auth.
 - El log **no** es mecanismo de entrega: un payload fallido va al deadletter, no solo al log.
