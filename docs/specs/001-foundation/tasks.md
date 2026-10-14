@@ -7,7 +7,7 @@ spec: 001-foundation
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
 | T01 | Add DomainError and error code ↔ HTTP status table | — | done |
-| T02 | Add env config loading and validation with zod | — | todo |
+| T02 | Add env config loading and validation with zod | — | done |
 | T03 | Add correlation ID resolver | — | todo |
 | T04 | Add structured logging module (nestjs-pino) | T02, T03 | todo |
 | T05 | Add global HTTP exception filter | T01, T04 | todo |
