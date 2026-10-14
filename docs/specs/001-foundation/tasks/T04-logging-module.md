@@ -1,6 +1,6 @@
 ---
 id: 001-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [001-T02, 001-T03]
 covers: [AC-4, AC-5, AC-6, AC-7, AC-8, AC-15]
 ---
@@ -42,18 +42,18 @@ export function createLogCapture(): { stream: DestinationStream; lines(): Record
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/logging/pino-http-options.ts` (nuevo)
-- [ ] `src/shared/infrastructure/logging/logging.module.ts` (nuevo)
-- [ ] `src/shared/infrastructure/logging/logging.module.spec.ts` (nuevo) — app Nest de prueba: `LoggingModule.forRoot(cfg, capture.stream)` + controller dummy definido en el spec (`GET /ok` → 200 y loguea con `new Logger('Dummy').log('hello')`, `GET /boom` → `throw new InternalServerErrorException()`, `GET /health` → 200); `app.useLogger(app.get(Logger))`; supertest.
-- [ ] `test/support/log-capture.ts` (nuevo)
+- [x] `src/shared/infrastructure/logging/pino-http-options.ts` (nuevo)
+- [x] `src/shared/infrastructure/logging/logging.module.ts` (nuevo)
+- [x] `src/shared/infrastructure/logging/logging.module.spec.ts` (nuevo) — app Nest de prueba: `LoggingModule.forRoot(cfg, capture.stream)` + controller dummy definido en el spec (`GET /ok` → 200 y loguea con `new Logger('Dummy').log('hello')`, `GET /boom` → `throw new InternalServerErrorException()`, `GET /health` → 200); `app.useLogger(app.get(Logger))`; supertest.
+- [x] `test/support/log-capture.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-4** — El log `hello` tiene `time` ISO-8601, `level: 'info'`, `service: 'traccar-adapter'`, `context: 'Dummy'`, `msg: 'hello'` y `correlationId`.
-- [ ] **AC-5** — Con header `x-correlation-id: abc-1`, la respuesta trae ese header y **todas** las líneas de esa request tienen `correlationId: 'abc-1'`.
-- [ ] **AC-6** — Sin header (y con `x-correlation-id: 'bad value'`), la respuesta trae un UUID v4 y coincide con el `correlationId` de los logs.
-- [ ] **AC-7** — Hay una línea por request con `req.method`, `req.url`, `res.statusCode`, `responseTime` numérico, `context: 'HTTP'`; nivel `info` para `/ok`, `debug` para `/health`, `warn` para una ruta inexistente (404), `error` para `/boom`.
-- [ ] **AC-8** — Con `logLevel: 'warn'`: `/ok` no produce ninguna línea `info`; `/boom` sí produce su línea `error`.
-- [ ] **AC-15** — Enviando `Authorization: Bearer s3cr3t` y `Cookie: sid=s3cr3t`, ninguna línea capturada contiene `s3cr3t`.
+- [x] **AC-4** — El log `hello` tiene `time` ISO-8601, `level: 'info'`, `service: 'traccar-adapter'`, `context: 'Dummy'`, `msg: 'hello'` y `correlationId`.
+- [x] **AC-5** — Con header `x-correlation-id: abc-1`, la respuesta trae ese header y **todas** las líneas de esa request tienen `correlationId: 'abc-1'`.
+- [x] **AC-6** — Sin header (y con `x-correlation-id: 'bad value'`), la respuesta trae un UUID v4 y coincide con el `correlationId` de los logs.
+- [x] **AC-7** — Hay una línea por request con `req.method`, `req.url`, `res.statusCode`, `responseTime` numérico, `context: 'HTTP'`; nivel `info` para `/ok`, `debug` para `/health`, `warn` para una ruta inexistente (404), `error` para `/boom`.
+- [x] **AC-8** — Con `logLevel: 'warn'`: `/ok` no produce ninguna línea `info`; `/boom` sí produce su línea `error`.
+- [x] **AC-15** — Enviando `Authorization: Bearer s3cr3t` y `Cookie: sid=s3cr3t`, ninguna línea capturada contiene `s3cr3t`.
 
 ## Fuera de alcance
 - Formato del cuerpo de error (T05). Wiring en `AppModule`/`main.ts` (T07).
@@ -65,3 +65,7 @@ pnpm check
 ```
 
 ## Handoff
+- `LoggingModule` y `buildPinoHttpOptions` implementados según contrato ADR-0002 §4 (`quietReqLogger: true` propaga `correlationId` en logs manuales y de request).
+- `createLogCapture` disponible en `test/support/log-capture.ts`.
+- Los specs limpian `resetRootLogger()` de nestjs-pino entre tests para aislar capturas en memoria. 6 tests de integración pasando.
+
