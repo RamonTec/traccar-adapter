@@ -4,7 +4,7 @@ spec: 007-normalize
 
 # 007 — Tasks
 
-> Requiere `design.md` aprobado. T01 necesita a una persona para asignar un group desde la web de Traccar, solo en la instancia local de pruebas.
+> T01 necesita a una persona para asignar un group desde la web de Traccar, solo en la instancia local de pruebas.
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|

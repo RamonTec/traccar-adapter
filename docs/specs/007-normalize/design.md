@@ -1,6 +1,6 @@
 ---
 spec: 007-normalize
-status: draft          # draft | approved
+status: approved       # draft | approved
 ---
 
 # 007 — Diseño

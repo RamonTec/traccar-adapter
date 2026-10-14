@@ -4,8 +4,6 @@ spec: 002-service-auth
 
 # 002 — Tasks
 
-> Requiere `design.md` aprobado.
-
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
 | T01 | Add auth config section and shared test env helper | 001 | todo |

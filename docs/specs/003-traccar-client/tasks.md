@@ -4,7 +4,7 @@ spec: 003-traccar-client
 
 # 003 — Tasks
 
-> Requiere `design.md` aprobado. T01 necesita a una persona: crear el usuario de servicio y el token en Traccar.
+> T01 necesita a una persona: crear el usuario de servicio y el token en Traccar.
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|

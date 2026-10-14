@@ -1,6 +1,6 @@
 ---
 spec: 003-traccar-client
-status: draft          # draft | approved
+status: approved       # draft | approved
 ---
 
 # 003 — Diseño
