@@ -173,3 +173,17 @@ sequenceDiagram
 2. groupId → tenant_id resolution strategy in telemetry-service: synchronous call to core-service per event, or a locally cached mapping kept in sync via events from core-service?
 3. Exact Traccar XML config parameter names for the shared-token header (position forwarding vs. event forwarding may differ).
 4. Traccar REST API auth mechanism to use for traccar-adapter's outbound calls.
+
+---
+
+## Decisiones posteriores (2026-10-13)
+
+> Resuelven las preguntas abiertas de este documento. Este documento no se reescribe; manda lo que dicen los ADRs.
+
+- Q1 / NFR2 → riesgo aceptado para el MVP + ajuste de `forward.retry.*`; reconciliación diferida (ADR-0005 §5, spec 011).
+- Q2 → fuera del alcance de este servicio (telemetry-service).
+- Q3 → `forward.header` / `event.forward.header`, verificado en Traccar 6.15.3 (ADR-0005 §2).
+- Q4 → Bearer token de un usuario de servicio (ADR-0005 §1).
+- Autenticación entre servicios (no estaba en el planning) → Keycloak client credentials (ADR-0003).
+- "telemetry.events" / "telemetry.deadletter" son prefijos de subject; los streams se llaman `TELEMETRY_EVENTS` / `TELEMETRY_DEADLETTER` (ADR-0004).
+- Reuso de IMEI frente a la unicidad de `uniqueId` en Traccar → se retira el device viejo (ADR-0005 §4).
