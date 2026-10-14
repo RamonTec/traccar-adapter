@@ -1,6 +1,6 @@
 ---
 id: 002-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-10]
 ---
@@ -31,17 +31,17 @@ export function testConfig(overrides?: Partial<AppConfig>): AppConfig; // loadCo
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/config/app-config.ts` (modificar)
-- [ ] `src/shared/infrastructure/config/app-config.spec.ts` (adaptar: base `TEST_ENV`)
-- [ ] `test/support/test-env.ts` (nuevo)
-- [ ] Ajuste mecánico de los literales `{ port, logLevel }` → `testConfig({...})` en `src/shared/infrastructure/http/http-exception.filter.spec.ts`, `src/shared/infrastructure/logging/logging.module.spec.ts` y `test/app.e2e-spec.ts`. En `startApp`, `env: { ...process.env, ...TEST_ENV, ...env }`.
+- [x] `src/shared/infrastructure/config/app-config.ts` (modificar)
+- [x] `src/shared/infrastructure/config/app-config.spec.ts` (adaptar: base `TEST_ENV`)
+- [x] `test/support/test-env.ts` (nuevo)
+- [x] Ajuste mecánico de los literales `{ port, logLevel }` → `testConfig({...})` en `src/shared/infrastructure/http/http-exception.filter.spec.ts`, `src/shared/infrastructure/logging/logging.module.spec.ts` y `test/app.e2e-spec.ts`. En `startApp`, `env: { ...process.env, ...TEST_ENV, ...env }`.
 
 ## Criterios de aceptación
-- [ ] **AC-10a** — `loadConfig({})` lanza `ConfigValidationError` con `invalidVariables` que contiene `KEYCLOAK_ISSUER_URL`.
-- [ ] **AC-10b** — `loadConfig({ ...TEST_ENV })` → `auth: { issuerUrl: TEST_ENV.KEYCLOAK_ISSUER_URL, audience: 'traccar-adapter' }`; con `KEYCLOAK_AUDIENCE: 'x'` → `audience: 'x'`.
-- [ ] **AC-10c** — `KEYCLOAK_ISSUER_URL: 'not-a-url'` es inválida.
-- [ ] **AC-10d** — Los tests previos de 001 (PORT y LOG_LEVEL) siguen pasando, usando `TEST_ENV` como base.
-- [ ] **AC-10e** — El e2e de proceso real sigue en verde: arranque, error de config y SIGTERM.
+- [x] **AC-10a** — `loadConfig({})` lanza `ConfigValidationError` con `invalidVariables` que contiene `KEYCLOAK_ISSUER_URL`.
+- [x] **AC-10b** — `loadConfig({ ...TEST_ENV })` → `auth: { issuerUrl: TEST_ENV.KEYCLOAK_ISSUER_URL, audience: 'traccar-adapter' }`; con `KEYCLOAK_AUDIENCE: 'x'` → `audience: 'x'`.
+- [x] **AC-10c** — `KEYCLOAK_ISSUER_URL: 'not-a-url'` es inválida.
+- [x] **AC-10d** — Los tests previos de 001 (PORT y LOG_LEVEL) siguen pasando, usando `TEST_ENV` como base.
+- [x] **AC-10e** — El e2e de proceso real sigue en verde: arranque, error de config y SIGTERM.
 
 ## Fuera de alcance
 - Usar `auth` en algún sitio (T02-T04).
@@ -54,3 +54,6 @@ pnpm check
 ```
 
 ## Handoff
+- `AppConfig` incluye ahora `auth: { issuerUrl, audience }` (`KEYCLOAK_ISSUER_URL` obligatoria normalizada sin trailing slash, `KEYCLOAK_AUDIENCE` default `'traccar-adapter'`).
+- Creado `test/support/test-env.ts` con `TEST_ENV` y `testConfig(...)` soportando deep merge en `auth`.
+- T02 puede consumir directamente `config.auth` para instanciar `JwtVerifier`.
