@@ -63,7 +63,7 @@ Los valores se pueden configurar por variables de entorno.
   "truncated": false
 }
 ```
-- `rawPayload` es el body tal cual: en `utf8` si es UTF-8 válido y en `base64` si no lo es. Con `PAYLOAD_TOO_LARGE` solo se guardan los primeros 64 KiB y `truncated` vale `true`.
+- `rawPayload` es el body tal cual: en `utf8` si es UTF-8 válido y en `base64` si no lo es. Si el body supera 64 KiB solo se guardan los primeros 64 KiB y `truncated` vale `true` (siempre ocurre con `PAYLOAD_TOO_LARGE`). El `id` se calcula sobre el body completo.
 
 ## Consecuencias
 - (+) Los consumidores filtran por subject y deduplican por `id`. Las unidades se normalizan en un solo lugar.
