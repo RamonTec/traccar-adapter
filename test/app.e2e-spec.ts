@@ -5,6 +5,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
+import { TEST_ENV, testConfig } from './support/test-env.js';
 
 async function resetLoggerState(): Promise<void> {
   const url = new URL('./rootLogger.js', import.meta.resolve('nestjs-pino'));
@@ -37,6 +38,7 @@ function startApp(env: Record<string, string>): ChildProcess {
   return spawn('node', ['dist/main.js'], {
     env: {
       ...process.env,
+      ...TEST_ENV,
       ...env,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -68,7 +70,9 @@ describe('Foundation (e2e)', () => {
     beforeEach(async () => {
       await resetLoggerState();
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule.register({ port: 0, logLevel: 'error' })],
+        imports: [
+          AppModule.register(testConfig({ port: 0, logLevel: 'error' })),
+        ],
       }).compile();
 
       app = moduleFixture.createNestApplication({ bufferLogs: true });

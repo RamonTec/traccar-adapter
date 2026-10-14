@@ -14,6 +14,7 @@ import {
   createLogCapture,
   type LogCapture,
 } from '../../../../test/support/log-capture.js';
+import { testConfig } from '../../../../test/support/test-env.js';
 
 const UUID_V4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -70,7 +71,7 @@ describe('LoggingModule (integration)', () => {
   beforeEach(async () => {
     await resetLoggerState();
     logs = createLogCapture();
-    app = await createTestApp({ port: 3000, logLevel: 'debug' }, logs);
+    app = await createTestApp(testConfig({ logLevel: 'debug' }), logs);
   });
 
   afterEach(async () => {
@@ -200,7 +201,7 @@ describe('LoggingModule (integration)', () => {
 
     const warnLogs = createLogCapture();
     const warnApp = await createTestApp(
-      { port: 3000, logLevel: 'warn' },
+      testConfig({ logLevel: 'warn' }),
       warnLogs,
     );
 

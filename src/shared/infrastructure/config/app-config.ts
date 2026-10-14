@@ -3,9 +3,15 @@ import { z } from 'zod';
 export const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
 
+export interface AuthConfig {
+  readonly issuerUrl: string;
+  readonly audience: string;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
+  readonly auth: AuthConfig;
 }
 
 export const APP_CONFIG = Symbol('AppConfig');
@@ -39,9 +45,18 @@ export function parseEnv<S extends z.ZodObject>(
 const appEnvSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
+  KEYCLOAK_ISSUER_URL: z.url().transform((val) => val.replace(/\/+$/, '')),
+  KEYCLOAK_AUDIENCE: z.string().min(1).default('traccar-adapter'),
 });
 
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
   const parsed = parseEnv(appEnvSchema, env);
-  return { port: parsed.PORT, logLevel: parsed.LOG_LEVEL };
+  return {
+    port: parsed.PORT,
+    logLevel: parsed.LOG_LEVEL,
+    auth: {
+      issuerUrl: parsed.KEYCLOAK_ISSUER_URL,
+      audience: parsed.KEYCLOAK_AUDIENCE,
+    },
+  };
 }
