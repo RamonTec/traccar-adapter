@@ -1,17 +1,25 @@
-# Roadmap de specs (propuesta, sin specs escritos aún)
+# Roadmap de specs
 
-Orden sugerido; cada fila se convierte en `docs/specs/NNN-slug/` con `/sdd-spec`.
+Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS flows) = 004-010; 002-003 son habilitadores.
 
-| Spec | Alcance | Requisitos | Bloqueado por |
-|------|---------|-----------|---------------|
-| 001-foundation | config validada, logger estructurado + correlationId, exception filter, health, limpiar boilerplate | NFR4 (base) | — |
-| 002-traccar-client | cliente HTTP base a Traccar (auth, errores, timeouts) | — | Q4 (auth Traccar) |
-| 003-group-create | `POST /groups` → crea group en Traccar | FR1, NFR3, NFR4 | 002 |
-| 004-device-register | `POST /devices` → crea device en group | FR2, FR3, NFR3, NFR4, NFR5 | 002 |
-| 005-device-status | disable / enable device | FR4, NFR1, NFR4 | 004 |
-| 006-webhook-ingest | endpoint webhook + token compartido | FR5 | Q3 (header traccar.xml) |
-| 007-normalize | payload Traccar → evento de plataforma | FR6 | 006 |
-| 008-publish-events | JetStream `telemetry.events`, `Nats-Msg-Id`, streams con retención | FR9, NFR6 | 007 |
-| 009-deadletter | JetStream `telemetry.deadletter` para todo fallo | FR10, NFR6 | 006 |
+| Spec | Alcance | Requisitos | ADRs | Depende de | Estado |
+|------|---------|-----------|------|-----------|--------|
+| 001-foundation | config, logging, errores, health | NFR4 (base) | 0001, 0002 | — | in-progress |
+| 002-service-auth | guard JWT Keycloak para endpoints S2S | NFR4 (actor) | 0003 | 001 | draft |
+| 003-traccar-client | cliente HTTP a Traccar (Bearer, timeouts, errores, readiness) | — | 0005 | 001 | draft |
+| 004-group-create | `POST /groups` get-or-create | FR1, NFR3, NFR4 | 0003, 0005 | 002, 003 | draft |
+| 005-device-register | `POST /devices` get-or-create + retiro de IMEI | FR2, FR3, NFR3, NFR4, NFR5 | 0003, 0005 | 002, 003 | draft |
+| 006-device-status | disable / enable idempotentes | FR3, FR4, NFR1, NFR4 | 0003, 0005 | 005 | draft |
+| 007-normalize | payload Traccar → evento de plataforma (dominio puro) | FR6 | 0004 | 001 | draft |
+| 008-webhook-ingest | endpoints webhook, token, raw body, orquestación | FR5, FR10 | 0004, 0005 | 007 | draft |
+| 009-jetstream-publish | streams, publish con dedup, publisher de eventos | FR9, NFR6 | 0004 | 008 | draft |
+| 010-deadletter-publish | publisher de dead-letter | FR10, NFR6 | 0004 | 009 | draft |
+| 011-reconciliation | polling de backfill a Traccar | NFR2 | 0005 | 009 | **diferido** |
 
-Preguntas abiertas del planning que afectan: Q1/NFR2 (reconciliación por polling) → decidir antes de cerrar 008; Q2 no aplica a este servicio.
+## Paralelismo
+- 007 es dominio puro: puede empezar ya, en paralelo con 001.
+- 002 y 003 son independientes entre sí.
+- 004 y 005 son independientes entre sí, una vez existan 002 y 003.
+
+## Preguntas del planning
+Q1/NFR2 → ADR-0005 §5 (riesgo aceptado, spec 011 diferido) · Q2 → no aplica a este servicio · Q3 → ADR-0005 §2 · Q4 → ADR-0005 §1.

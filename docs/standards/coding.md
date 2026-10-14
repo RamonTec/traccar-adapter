@@ -22,7 +22,7 @@
 
 ## Validación
 
-- Entrada HTTP: DTO validado en el borde (librería a definir en el primer spec con body de entrada, 003).
+- Entrada HTTP: DTO validado en el borde (librería a definir en el primer spec con body de entrada, 004).
 - Invariantes de negocio: en el constructor/factory de la entidad o VO (`Imei.create(raw)`), no en el controller.
 
 ## Logging (NFR4, Phase 3)
