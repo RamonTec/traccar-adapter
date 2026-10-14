@@ -22,7 +22,8 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
+    "check": "scripts/sync-agent-commands.sh --check && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "sdd:sync": "scripts/sync-agent-commands.sh"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
