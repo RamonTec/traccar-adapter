@@ -11,7 +11,7 @@ spec: 001-foundation
 | T03 | Add correlation ID resolver | — | done |
 | T04 | Add structured logging module (nestjs-pino) | T02, T03 | done |
 | T05 | Add global HTTP exception filter | T01, T04 | done |
-| T06 | Add health controller | — | todo |
+| T06 | Add health controller | — | done |
 | T07 | Wire AppModule and bootstrap, remove starter boilerplate | T02, T04, T05, T06 | todo |
 | T08 | Add foundation e2e suite | T07 | todo |
 

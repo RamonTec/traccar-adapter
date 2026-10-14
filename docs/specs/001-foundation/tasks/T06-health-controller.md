@@ -1,6 +1,6 @@
 ---
 id: 001-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-12]
 ---
@@ -23,12 +23,12 @@ export class HealthController {
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/http/health.controller.ts` (nuevo)
-- [ ] `src/shared/infrastructure/http/health.controller.spec.ts` (nuevo) — `Test.createTestingModule({ controllers: [HealthController] })` + supertest.
+- [x] `src/shared/infrastructure/http/health.controller.ts` (nuevo)
+- [x] `src/shared/infrastructure/http/health.controller.spec.ts` (nuevo) — `Test.createTestingModule({ controllers: [HealthController] })` + supertest.
 
 ## Criterios de aceptación
-- [ ] **AC-12a** — `GET /health` → `200`, body exactamente `{ "status": "ok" }`, `content-type` JSON.
-- [ ] **AC-12b** — El controller no tiene dependencias inyectadas (constructor vacío) ni guards.
+- [x] **AC-12a** — `GET /health` → `200`, body exactamente `{ "status": "ok" }`, `content-type` JSON.
+- [x] **AC-12b** — El controller no tiene dependencias inyectadas (constructor vacío) ni guards.
 
 ## Fuera de alcance
 - `/health/ready` (cuando existan Traccar/NATS). Registro en `AppModule` (T07).
@@ -40,3 +40,7 @@ pnpm check
 ```
 
 ## Handoff
+- `HealthController` implementado respondiendo `GET /health` con `{ status: 'ok' }`.
+- Sin dependencias ni guards.
+- Listo para montarse en `AppModule` durante T07.
+
