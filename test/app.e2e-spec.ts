@@ -1,30 +1,198 @@
+import { spawn, type ChildProcess } from 'node:child_process';
+import net from 'node:net';
 import { type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
+import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
 
-describe('App (e2e)', () => {
-  let app: INestApplication;
+async function resetLoggerState(): Promise<void> {
+  const url = new URL('./rootLogger.js', import.meta.resolve('nestjs-pino'));
+  const { resetRootLogger } = (await import(url.href)) as {
+    resetRootLogger: () => void;
+  };
+  resetRootLogger();
+}
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule.register({ port: 0, logLevel: 'error' })],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+async function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(0, () => {
+      const addr = server.address();
+      if (!addr || typeof addr === 'string') {
+        server.close(() => reject(new Error('Invalid address')));
+        return;
+      }
+      const port = addr.port;
+      server.close((err) => {
+        if (err) reject(err);
+        else resolve(port);
+      });
+    });
+    server.on('error', reject);
   });
+}
 
-  afterEach(async () => {
-    if (app) {
-      await app.close();
+function startApp(env: Record<string, string>): ChildProcess {
+  return spawn('node', ['dist/main.js'], {
+    env: {
+      ...process.env,
+      ...env,
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+}
+
+async function waitForHealth(
+  port: number,
+  timeoutMs = 5000,
+): Promise<Response> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch(`http://localhost:${port}/health`);
+      if (res.ok) {
+        return res;
+      }
+    } catch {
+      await new Promise((r) => setTimeout(r, 100));
     }
+  }
+  throw new Error(`Timed out waiting for health check on port ${port}`);
+}
+
+describe('Foundation (e2e)', () => {
+  describe('In-process', () => {
+    let app: INestApplication;
+
+    beforeEach(async () => {
+      await resetLoggerState();
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule.register({ port: 0, logLevel: 'error' })],
+      }).compile();
+
+      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app.useLogger(app.get(Logger));
+      await app.init();
+    });
+
+    afterEach(async () => {
+      if (app) {
+        await app.close();
+      }
+      await resetLoggerState();
+    });
+
+    it('AC-12: GET /health returns 200 { status: "ok" }', async () => {
+      const res = await request(app.getHttpServer()).get('/health').expect(200);
+
+      expect(res.body).toEqual({ status: 'ok' });
+    });
+
+    it('AC-14/11: GET / returns 404 with standard ErrorBody', async () => {
+      const res = await request(app.getHttpServer()).get('/').expect(404);
+
+      expect(res.body).toEqual({
+        code: 'NOT_FOUND',
+        message: 'Resource not found',
+        correlationId: expect.any(String),
+      });
+    });
+
+    it('AC-5: echoes x-correlation-id header and reflects in error body', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/')
+        .set('x-correlation-id', 'e2e-1')
+        .expect(404);
+
+      expect(res.headers['x-correlation-id']).toBe('e2e-1');
+      expect(res.body).toEqual({
+        code: 'NOT_FOUND',
+        message: 'Resource not found',
+        correlationId: 'e2e-1',
+      });
+    });
   });
 
-  it('GET /health returns 200 { status: "ok" }', () => {
-    return request(app.getHttpServer())
-      .get('/health')
-      .expect(200)
-      .expect({ status: 'ok' });
+  describe('Real process (dist/main.js)', () => {
+    const spawnedProcesses: ChildProcess[] = [];
+
+    afterEach(() => {
+      for (const child of spawnedProcesses) {
+        if (child.exitCode === null && child.signalCode === null) {
+          child.kill('SIGKILL');
+        }
+      }
+      spawnedProcesses.length = 0;
+    });
+
+    it('AC-1: with PORT=<libre>, responds 200 on /health in < 5s', async () => {
+      const port = await freePort();
+      const child = startApp({ PORT: String(port), LOG_LEVEL: 'error' });
+      spawnedProcesses.push(child);
+
+      const res = await waitForHealth(port, 5000);
+      expect(res.status).toBe(200);
+      const json = (await res.json()) as { status: string };
+      expect(json).toEqual({ status: 'ok' });
+      expect(res.headers.get('x-correlation-id')).toBeTruthy();
+    });
+
+    it('AC-2: with invalid env variables, exits with code 1 in < 5s and logs stderr JSON with invalidVariables', async () => {
+      const child = startApp({ PORT: 'abc', LOG_LEVEL: 'verbose' });
+      spawnedProcesses.push(child);
+
+      let stderr = '';
+      child.stderr?.on('data', (chunk) => {
+        stderr += chunk.toString();
+      });
+
+      const exitCode = await new Promise<number | null>((resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error('Process did not exit within 5s')),
+          5000,
+        );
+        child.on('exit', (code) => {
+          clearTimeout(timer);
+          resolve(code);
+        });
+      });
+
+      expect(exitCode).toBe(1);
+      const parsed = JSON.parse(stderr.trim()) as {
+        level: string;
+        msg: string;
+        invalidVariables: string[];
+      };
+      expect(parsed.level).toBe('error');
+      expect(parsed.invalidVariables).toContain('PORT');
+      expect(parsed.invalidVariables).toContain('LOG_LEVEL');
+      expect(stderr).not.toContain('abc');
+      expect(stderr).not.toContain('verbose');
+    });
+
+    it('AC-13: after /health OK, child.kill("SIGTERM") exits with code 0 in < 5s', async () => {
+      const port = await freePort();
+      const child = startApp({ PORT: String(port), LOG_LEVEL: 'error' });
+      spawnedProcesses.push(child);
+
+      await waitForHealth(port, 5000);
+
+      const exitPromise = new Promise<number | null>((resolve, reject) => {
+        const timer = setTimeout(
+          () =>
+            reject(new Error('Process did not exit within 5s after SIGTERM')),
+          5000,
+        );
+        child.on('exit', (code) => {
+          clearTimeout(timer);
+          resolve(code);
+        });
+      });
+
+      child.kill('SIGTERM');
+      const exitCode = await exitPromise;
+      expect(exitCode).toBe(0);
+    });
   });
 });

@@ -1,6 +1,6 @@
 ---
 id: 001-foundation
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [NFR4]
 adrs: [ADR-0001, ADR-0002]
 ---
