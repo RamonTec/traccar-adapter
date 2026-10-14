@@ -1,0 +1,25 @@
+# ADR-0005 — Integración con Traccar: autenticación, idempotencia, reuso de IMEI y fiabilidad del reenvío
+
+- Estado: aceptado
+- Fecha: 2026-10-13
+- Alcance: traccar-adapter. Versión verificada: **Traccar 6.15.3**.
+
+## Contexto
+Hay que resolver las preguntas abiertas Q3 y Q4 del planning, el requisito NFR3 (idempotencia) y NFR2 (cola de reenvío en memoria). Además, Traccar exige que `uniqueId` sea único **también entre devices deshabilitados**, y eso choca con la regla "un IMEI reusado crea un device nuevo".
+
+## Decisión
+1. **Autenticación saliente (Q4)**: un usuario de servicio dedicado en Traccar con token de API y el header `Authorization: Bearer <TRACCAR_API_TOKEN>`. No se usa sesión ni contraseña. Los permisos del usuario se ajustan al mínimo que necesitan las operaciones. *(Validar en el spec del cliente Traccar que el token funciona en todos los endpoints usados.)*
+2. **Header del webhook (Q3, verificado)**: `forward.header` para el reenvío de posiciones y `event.forward.header` para el de eventos, con el valor `Authorization: Bearer <WEBHOOK_TOKEN>`. Cada tipo se reenvía a **una URL distinta**.
+3. **Idempotencia (NFR3) con claves naturales**, sin estado propio:
+   - group: `name` es una clave externa opaca que da core-service. Crear es *get-or-create* por nombre exacto.
+   - device: `uniqueId` (IMEI). Crear es *get-or-create*: si existe uno **habilitado en el mismo group**, se devuelve ese.
+   - enable/disable: llevar el device al estado que ya tiene no es un error.
+4. **Reuso de IMEI — retirar el device viejo**: si existe un device **deshabilitado** con ese `uniqueId`, antes de crear el nuevo se renombra su `uniqueId` a `<imei>:retired:<deviceId>`. Nunca se cambia su `groupId` (FR3). Un device retirado no se puede volver a habilitar.
+5. **Reenvío y fiabilidad (NFR2) — riesgo aceptado para el MVP**: se ajustan `forward.retry.*` en `traccar.xml` y se documenta cuánto tiempo puede estar caído traccar-adapter sin perder datos. El webhook responde **503** si no consigue publicar en JetStream, para que Traccar reintente. La reconciliación por polling queda en el roadmap (spec 011), sin implementar.
+6. **`database.registerUnknown` debe ser `false`** en todo entorno compartido: solo existen los devices que se crean a petición de core-service. Si llega una posición sin `groupId`, va al dead-letter con `MISSING_GROUP`.
+
+## Consecuencias
+- (+) Se cumple NFR3 sin base de datos. Los reintentos de core-service son seguros.
+- (+) El histórico del device viejo se conserva en Traccar y nunca cambia de group.
+- (−) El get-or-create de groups tiene una ventana de carrera si llegan dos creaciones concurrentes con el mismo nombre. Es aceptable porque FR1 crea el group una única vez, en el onboarding.
+- (−) Una caída de traccar-adapter más larga que la ventana de reintentos de Traccar pierde datos hasta que exista el spec 011.
