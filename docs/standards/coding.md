@@ -22,7 +22,7 @@
 
 ## Validación
 
-- Entrada HTTP: DTO validado en el borde (librería a definir en el primer spec con body de entrada, 004).
+- Entrada HTTP: DTO validado en el borde con **zod**; errores → `400 VALIDATION_ERROR` con `details` (ADR-0002 §3).
 - Invariantes de negocio: en el constructor/factory de la entidad o VO (`Imei.create(raw)`), no en el controller.
 
 ## Logging (NFR4, Phase 3)

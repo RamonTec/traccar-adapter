@@ -1,6 +1,6 @@
 ---
 id: 007-normalize
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [FR6]
 adrs: [ADR-0004]
 ---
@@ -37,4 +37,5 @@ Traccar reenvía posiciones y eventos en su propio formato JSON. Los consumidore
 Salida según ADR-0004 (`position.reported`, `device.event`; motivos de rechazo `MISSING_GROUP`, `SCHEMA_MISMATCH`).
 
 ## Preguntas abiertas
-1. ¿Hay que transformar algún atributo de `attributes` (p.ej. `ignition`, `batteryLevel`) en un campo de primer nivel? *Propuesta: no en v1; se copian sin transformar.*
+_Ninguna._ Resueltas 2026-10-14:
+1. `attributes` se copian sin transformar en v1; ningún atributo se promueve a campo de primer nivel.

@@ -1,6 +1,6 @@
 ---
 id: 005-device-register
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [FR2, FR3, NFR3, NFR4, NFR5]
 adrs: [ADR-0002, ADR-0003, ADR-0005]
 ---
@@ -39,4 +39,5 @@ POST /devices           Authorization: Bearer <jwt con devices:write>
 ```
 
 ## Preguntas abiertas
-1. ¿Todos los GPS del proyecto usan un IMEI de 15 dígitos como identificador en Traccar? Algunos protocolos usan otros ids. *Propuesta: solo 15 dígitos por ahora.*
+_Ninguna._ Resueltas 2026-10-14:
+1. `uniqueId` = IMEI de exactamente 15 dígitos en v1. Otros identificadores requerirán un spec nuevo.

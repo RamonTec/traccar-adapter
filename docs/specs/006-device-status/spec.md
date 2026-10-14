@@ -1,6 +1,6 @@
 ---
 id: 006-device-status
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [FR3, FR4, NFR1, NFR4]
 adrs: [ADR-0002, ADR-0003, ADR-0005]
 ---

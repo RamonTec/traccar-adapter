@@ -1,6 +1,6 @@
 # ADR-0004 — Contrato de eventos de telemetría en JetStream
 
-- Estado: propuesto
+- Estado: aceptado
 - Fecha: 2026-10-13
 - Alcance: **plataforma** — productor: traccar-adapter; consumidores: telemetry-service y otros futuros.
 

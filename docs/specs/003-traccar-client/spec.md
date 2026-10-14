@@ -1,6 +1,6 @@
 ---
 id: 003-traccar-client
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [NFR4]
 adrs: [ADR-0002, ADR-0005]
 ---
@@ -29,4 +29,4 @@ Las operaciones de groups y devices dependen de la API REST de Traccar 6.15.3. H
 - `GET /health/ready` (ADR-0002 §2).
 
 ## Preguntas abiertas
-1. Qué permisos mínimos necesita el usuario de servicio en Traccar (¿admin, o un manager con límite de devices?). *Se determina en la verificación de AC-8.*
+1. Permisos mínimos del usuario de servicio → se determinan empíricamente en el task que cubre AC-8 y se documentan en el skill `traccar-api`. No bloquea el spec.

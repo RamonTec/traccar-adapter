@@ -1,6 +1,6 @@
 ---
 id: 004-group-create
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [FR1, NFR3, NFR4]
 adrs: [ADR-0002, ADR-0003, ADR-0005]
 ---
@@ -33,4 +33,5 @@ POST /groups            Authorization: Bearer <jwt con groups:write>
 ```
 
 ## Preguntas abiertas
-1. Librería para validar DTOs (pendiente desde 001). *Propuesta: zod, que ya se usa para la config.*
+_Ninguna._ Resueltas 2026-10-14:
+1. Validación de DTOs → **zod** (misma librería que la config); ver estándar de código.

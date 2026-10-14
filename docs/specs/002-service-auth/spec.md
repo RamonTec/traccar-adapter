@@ -1,6 +1,6 @@
 ---
 id: 002-service-auth
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [NFR4]
 adrs: [ADR-0002, ADR-0003]
 ---
@@ -33,4 +33,5 @@ Los endpoints de comandos (groups, devices) solo deben poder invocarlos servicio
 - JWKS: `<issuer>/protocol/openid-connect/certs`.
 
 ## Preguntas abiertas
-1. ¿Se aceptan solo tokens `RS256`? *Propuesta: sí, con lista blanca de algoritmos.*
+_Ninguna._ Resueltas 2026-10-14:
+1. Algoritmos → solo `RS256` (lista blanca); cualquier otro `alg` → 401.

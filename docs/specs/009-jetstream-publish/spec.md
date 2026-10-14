@@ -1,6 +1,6 @@
 ---
 id: 009-jetstream-publish
-status: draft          # draft | approved | in-progress | done
+status: approved       # draft | approved | in-progress | done
 requirements: [FR9, NFR6]
 adrs: [ADR-0002, ADR-0004]
 ---
@@ -31,5 +31,6 @@ Los eventos normalizados tienen que llegar a JetStream de forma persistente (NFR
 Streams, subjects, headers y formato: ADR-0004. Env: `NATS_SERVERS` (obligatoria), `NATS_PUBLISH_TIMEOUT_MS` (opcional), retenciones (opcionales).
 
 ## Preguntas abiertas
-1. ¿Cómo se autentica NATS en la plataforma (usuario/contraseña, NKey o archivo `.creds`)? *Propuesta: archivo `.creds` (NKey/JWT) por servicio, en `NATS_CREDS_FILE`.*
-2. ¿Quién crea los streams? *Propuesta: traccar-adapter, por ser el productor; los consumidores solo crean sus propios consumers.*
+_Ninguna._ Resueltas 2026-10-14:
+1. Auth NATS → archivo `.creds` (NKey/JWT) por servicio en `NATS_CREDS_FILE` (opcional en local sin auth).
+2. Creación de streams → traccar-adapter (productor); los consumidores solo crean sus consumers.
