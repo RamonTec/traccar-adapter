@@ -12,7 +12,7 @@ spec: 005-device-register
 | T04 | Add TraccarDeviceHttpAdapter | T02, 003-T04 | done |
 | T05 | Add RegisterDevice DTO and DeviceController with audit log | T03, 004-T01, 002-T04 | done |
 | T06 | Wire DeviceModule into AppModule | T04, T05 | done |
-| T07 | Add route allowlist e2e test | T06, 004-T06 | todo |
+| T07 | Add route allowlist e2e test | T06, 004-T06 | done |
 | T08 | Add device-register e2e suite | T06, 004-T07 | todo |
 
 ## Cobertura AC → tasks
