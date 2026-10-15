@@ -11,7 +11,7 @@ spec: 003-traccar-client
 | T01 | Verify Traccar 6.15.3 API and write traccar-api skill | — | todo |
 | T02 | Add request context (AsyncLocalStorage) for correlation ID | — | done |
 | T03 | Add Traccar config section | 002-T01 | done |
-| T04 | Add TraccarHttpClient and UpstreamUnavailableError | T02, T03 | todo |
+| T04 | Add TraccarHttpClient and UpstreamUnavailableError | T02, T03 | done |
 | T05 | Add readiness registry, /health/ready and TraccarModule wiring | T04, 002-T04 | todo |
 
 Paralelizables: T01 y T02 (y T01 también con todo 002).
