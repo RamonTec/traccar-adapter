@@ -1,6 +1,6 @@
 ---
 id: 002-service-auth
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [NFR4]
 adrs: [ADR-0002, ADR-0003]
 ---
