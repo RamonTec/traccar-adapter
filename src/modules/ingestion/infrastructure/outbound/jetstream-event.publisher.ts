@@ -1,4 +1,4 @@
-import type { JetStreamPublisher } from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
+import type { ReliablePublisher } from '../../../../shared/infrastructure/outbox/reliable.publisher.js';
 import { SUBJECTS } from '../../../../shared/infrastructure/nats/stream-definitions.js';
 import type {
   Delivery,
@@ -7,7 +7,7 @@ import type {
 import type { TelemetryEvent } from '../../domain/telemetry-event.js';
 
 export class JetStreamEventPublisher implements EventPublisherPort {
-  constructor(private readonly publisher: JetStreamPublisher) {}
+  constructor(private readonly publisher: ReliablePublisher) {}
 
   async publish(event: TelemetryEvent): Promise<Delivery> {
     const subject =
@@ -15,10 +15,9 @@ export class JetStreamEventPublisher implements EventPublisherPort {
         ? SUBJECTS.position
         : SUBJECTS.deviceEvent;
     // event.id doubles as Nats-Msg-Id: Traccar retries collapse into one message (ADR-0004).
-    await this.publisher.publish(subject, event, {
+    return this.publisher.publish(subject, event, {
       msgId: event.id,
       correlationId: event.correlationId,
     });
-    return 'published';
   }
 }

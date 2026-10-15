@@ -1,6 +1,6 @@
 ---
 id: 013-T08
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T06, 013-T07]
 covers: [AC-1, AC-2]
 ---
@@ -49,3 +49,6 @@ pnpm check
 ```
 
 ## Handoff
+- `JetStreamEventPublisher` y `JetStreamDeadLetterPublisher` usan `ReliablePublisher` y devuelven su `Delivery`; el log del dead-letter incluye `delivery`.
+- `IngestionModule` inyecta `ReliablePublisher`.
+- Los e2e de NATS caído → 503 pasan a esperar 200 `buffered` en T09.
