@@ -1,6 +1,6 @@
 ---
 id: 010-deadletter-publish
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [FR10, NFR6]
 adrs: [ADR-0004]
 ---
