@@ -1,6 +1,6 @@
 ---
 id: 007-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-10]
 ---
@@ -32,16 +32,17 @@ Pasos:
    `test/fixtures/traccar/position.json`, `position-no-group.json`, `event-alarm.json`.
 
 ## Archivos a crear/modificar
-- [ ] `scripts/capture-traccar-forward.mjs` (nuevo)
-- [ ] `test/fixtures/traccar/position.json`, `position-no-group.json`, `event-alarm.json` (nuevos, anonimizados)
-- [ ] `test/fixtures/traccar/README.md` (nuevo): versión de Traccar, fecha, pasos y qué se anonimizó
-- [ ] `.gitignore`: añadir `test/fixtures/traccar/captured/`
+- [x] `scripts/capture-traccar-forward.mjs` (nuevo)
+- [x] `test/fixtures/traccar/position.json`, `position-no-group.json`, `event-alarm.json` (nuevos, anonimizados)
+- [x] `test/fixtures/traccar/README.md` (nuevo): versión de Traccar, fecha, pasos y qué se anonimizó
+- [x] `.gitignore`: añadir `test/fixtures/traccar/captured/`
+- [x] `docker-compose.yml`, `dev/traccar/traccar.xml`, `dev/traccar/README.md` (añadidos con aprobación del usuario 2026-10-15: Traccar 6.15.3 exclusivo del proyecto + profile `capture`)
 
 ## Criterios de aceptación
-- [ ] **AC-10a** — Los tres fixtures existen, son JSON válido y provienen de capturas reales: el README dice cuándo y con qué versión.
-- [ ] **AC-10b** — `position-no-group.json` muestra el valor real de `device.groupId` sin group (`0` o `null`; documentar cuál).
-- [ ] **AC-10c** — En los fixtures no aparecen el IMEI usado, el token del webhook ni nombres reales (`grep` del IMEI → vacío).
-- [ ] **AC-10d** — El README lista los campos observados en `position`, `device` y `event`, con sus tipos y el formato de fecha.
+- [x] **AC-10a** — Los tres fixtures existen, son JSON válido y provienen de capturas reales: el README dice cuándo y con qué versión.
+- [x] **AC-10b** — `position-no-group.json` muestra el valor real de `device.groupId` sin group (`0` o `null`; documentar cuál).
+- [x] **AC-10c** — En los fixtures no aparecen el IMEI usado, el token del webhook ni nombres reales (`grep` del IMEI → vacío).
+- [x] **AC-10d** — El README lista los campos observados en `position`, `device` y `event`, con sus tipos y el formato de fecha.
 
 ## Fuera de alcance
 - Código de normalización (T03, T04). Cambiar la configuración de Traccar.
@@ -53,3 +54,7 @@ pnpm check
 ```
 
 ## Handoff
+- Fixtures reales Traccar 6.15.3 (2026-10-15) anonimizados + README con campos/tipos; sin group → `groupId: 0`.
+- Entorno: `docker-compose.yml` (Traccar 6.15.3 en 18082/15055 + profile `capture`), `dev/traccar/`.
+- **Hallazgo**: `position.id` = 0 siempre en el forward de posiciones → Q1 en spec.md; T03 bloqueado hasta decidir el id.
+- La alarma SOS genera 2 POST (posición con `attributes.alarm` + evento `alarm`).

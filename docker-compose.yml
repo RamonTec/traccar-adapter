@@ -1,0 +1,34 @@
+# Local Traccar for traccar-adapter development (isolated from other projects).
+# Usage: see dev/traccar/README.md
+name: traccar-adapter
+
+services:
+  traccar:
+    image: traccar/traccar:6.15.3
+    ports:
+      - '${TRACCAR_WEB_PORT:-18082}:8082'
+      - '${TRACCAR_OSMAND_PORT:-15055}:5055'
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: 'true'
+      FORWARD_URL: ${TRACCAR_FORWARD_URL:-http://host.docker.internal:3123/api/gps/webhook}
+      EVENT_FORWARD_URL: ${TRACCAR_FORWARD_URL:-http://host.docker.internal:3123/api/gps/webhook}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - ./dev/traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro
+      - traccar-data:/opt/traccar/data
+
+  # Captures Traccar's forward payloads into test/fixtures/traccar/captured/.
+  # Start with: TRACCAR_FORWARD_URL=http://capture:3123/api/gps/webhook docker compose --profile capture up -d
+  capture:
+    profiles: [capture]
+    image: node:24-alpine
+    user: '${UID:-1000}:${GID:-1000}'
+    working_dir: /app
+    command: ['node', 'scripts/capture-traccar-forward.mjs']
+    volumes:
+      - ./scripts/capture-traccar-forward.mjs:/app/scripts/capture-traccar-forward.mjs:ro
+      - ./test/fixtures/traccar:/app/test/fixtures/traccar
+
+volumes:
+  traccar-data:

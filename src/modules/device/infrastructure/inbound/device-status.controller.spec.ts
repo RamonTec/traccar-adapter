@@ -132,17 +132,19 @@ describe('DeviceStatusController (integration)', () => {
     await post('/devices/18/enable', body).expect(200);
   });
 
-  it('AC-9b: both routes require devices:write', () => {
-    const reflector = new Reflector();
-    const proto = DeviceStatusController.prototype;
+  it.each(['disable', 'enable'])(
+    'AC-9b: %s route requires devices:write',
+    (method) => {
+      const handler = Object.getOwnPropertyDescriptor(
+        DeviceStatusController.prototype,
+        method,
+      )?.value as () => unknown;
 
-    expect(reflector.get(REQUIRED_ROLE_KEY, proto.disable)).toBe(
-      'devices:write',
-    );
-    expect(reflector.get(REQUIRED_ROLE_KEY, proto.enable)).toBe(
-      'devices:write',
-    );
-  });
+      expect(new Reflector().get<string>(REQUIRED_ROLE_KEY, handler)).toBe(
+        'devices:write',
+      );
+    },
+  );
 
   it.each([
     ['disable', true],

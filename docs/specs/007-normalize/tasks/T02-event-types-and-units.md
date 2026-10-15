@@ -1,6 +1,6 @@
 ---
 id: 007-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-2]
 ---
@@ -63,3 +63,5 @@ pnpm check
 ```
 
 ## Handoff
+- `ingestion/domain/telemetry-event.ts`: tipos del contrato ADR-0004 (envelope, PositionData, DeviceEventData, NormalizeResult, NormalizeContext).
+- `units.ts`: `knotsToKmh` redondea a 2 decimales.

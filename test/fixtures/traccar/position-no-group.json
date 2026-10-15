@@ -1,0 +1,42 @@
+{
+  "position": {
+    "id": 0,
+    "attributes": {
+      "distance": 0,
+      "totalDistance": 0,
+      "motion": true
+    },
+    "deviceId": 1,
+    "protocol": "osmand",
+    "serverTime": "2026-10-15T18:55:36.436+00:00",
+    "deviceTime": "2026-10-15T18:55:36.000+00:00",
+    "fixTime": "2026-10-15T18:55:36.000+00:00",
+    "valid": true,
+    "latitude": -16.5,
+    "longitude": -68.15,
+    "altitude": 0,
+    "speed": 10,
+    "course": 0,
+    "address": null,
+    "accuracy": 0,
+    "network": null,
+    "geofenceIds": null
+  },
+  "device": {
+    "id": 1,
+    "attributes": {},
+    "groupId": 0,
+    "calendarId": 0,
+    "name": "device-1",
+    "uniqueId": "000000000000001",
+    "status": "online",
+    "lastUpdate": "2026-10-15T18:55:36.460+00:00",
+    "positionId": 0,
+    "phone": null,
+    "model": null,
+    "contact": null,
+    "category": null,
+    "disabled": false,
+    "expirationTime": null
+  }
+}

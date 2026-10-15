@@ -37,7 +37,7 @@ export class JetStreamEventPublisher implements EventPublisherPort {
 
 ## Criterios de aceptación
 - [ ] **AC-2a** — Unit: `position.reported` → `telemetry.events.position`; `device.event` → `telemetry.events.device-event`; `msgId = event.id`.
-- [ ] **AC-2b** — E2E: `POST /webhooks/traccar/positions` con el fixture → 200, y `TELEMETRY_EVENTS` contiene el envelope ADR-0004 (`type`, `version: 1`, `data.speedKmh`) con `Nats-Msg-Id = traccar-position-<id>`.
+- [ ] **AC-2b** — E2E: `POST /webhooks/traccar/positions` con el fixture → 200, y `TELEMETRY_EVENTS` contiene el envelope ADR-0004 (`type`, `version: 1`, `data.speedKmh`) con `Nats-Msg-Id = traccar-position-<deviceId>-<fixTime epoch ms>`.
 - [ ] **AC-3** — E2E: el mismo POST dos veces (simula un reintento de Traccar) → las dos respuestas son 200 y el stream tiene **1** mensaje.
 - [ ] E2E: con NATS caído → el webhook responde 503 (Traccar reintentará).
 

@@ -1,6 +1,6 @@
 ---
 id: 007-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [007-T01, 007-T02]
 covers: [AC-1, AC-2, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10]
 ---
@@ -20,7 +20,7 @@ Convertir un payload de posición de Traccar (`unknown`) en un `position.reporte
 ```ts
 // src/modules/ingestion/domain/traccar-payload.schema.ts (zod; z.object sin strict: los campos desconocidos se ignoran)
 export const traccarDeviceSchema;    // id int>0, groupId int|null opcional, (resto se ignora)
-export const traccarPositionSchema;  // id int>0, deviceId int>0, fixTime/deviceTime/serverTime string (fecha parseable),
+export const traccarPositionSchema;  // id int>=0 (Traccar envía 0 en el forward de posiciones), deviceId int>0, fixTime/deviceTime/serverTime string (fecha parseable),
                                      // valid boolean, latitude [-90,90], longitude [-180,180], altitude/speed/course number,
                                      // accuracy number (default 0), attributes record (default {})
 export const traccarPositionPayloadSchema; // { position: traccarPositionSchema, device: traccarDeviceSchema }
@@ -34,9 +34,9 @@ Orden:
 2. `safeParse` → si falla, `SCHEMA_MISMATCH` con detail = issues `"<ruta.con.puntos>: <issue.code>"`, unidos con `"; "`, máximo 5.
 3. `position.deviceId !== device.id` → `SCHEMA_MISMATCH` con `"position.deviceId: mismatch"`.
 4. Envelope:
-   - `id = "traccar-position-" + position.id`, `type: 'position.reported'`, `version: 1`, `source: 'traccar'`;
+   - `id = "traccar-position-" + device.id + "-" + Date.parse(fixTime)` (ADR-0004, enmienda 2026-10-15), `type: 'position.reported'`, `version: 1`, `source: 'traccar'`;
    - `occurredAt = iso(fixTime)`, `receivedAt = ctx.receivedAt.toISOString()`, `correlationId = ctx.correlationId`;
-   - `data` según `PositionData`, con las fechas en ISO UTC y `speedKmh = knotsToKmh(speed)`.
+   - `data` según `PositionData`, con las fechas en ISO UTC, `speedKmh = knotsToKmh(speed)` y `positionId = position.id || null`.
 
 ## Archivos a crear/modificar
 - [ ] `src/modules/ingestion/domain/traccar-payload.schema.ts` (nuevo)
@@ -44,7 +44,7 @@ Orden:
 - [ ] `src/modules/ingestion/domain/normalize-position.spec.ts` (nuevo; carga los fixtures con `readFileSync`)
 
 ## Criterios de aceptación
-- [ ] **AC-1/AC-10** — `position.json` → `ok: true`, con `id`, `type`, `occurredAt`, `data.groupId` (de `device.groupId`) y `data.positionId` correctos según el fixture.
+- [ ] **AC-1/AC-10** — `position.json` → `ok: true`, con `id` (`traccar-position-<device.id>-<epoch ms de fixTime>`), `type`, `occurredAt`, `data.groupId` (de `device.groupId`) y `data.positionId === null` (el fixture trae `position.id: 0`).
 - [ ] **AC-2** — `data.speedKmh === knotsToKmh(fixture.position.speed)`.
 - [ ] **AC-4** — `position-no-group.json` → `MISSING_GROUP`; lo mismo con `groupId: null` y con `device` sin `groupId`.
 - [ ] **AC-5** — `latitude: "x"` → `SCHEMA_MISMATCH` con un detail que contiene `position.latitude` y **no** contiene `"x"`; si falta `position.id` → detail con `position.id`.
@@ -63,3 +63,6 @@ pnpm check
 ```
 
 ## Handoff
+- `traccar-payload.schema.ts` (zod, no strict): device, position (`id` ≥ 0 por Q1), payload de posición.
+- `normalize.ts`: orden MISSING_GROUP → schema → deviceId mismatch → envelope; id `traccar-position-<deviceId>-<fixTime ms>`, `positionId` 0 → null.
+- Helpers privados `groupIdOf`, `issuesDetail` (ruta: código, máx 5), `iso`, `reject` listos para reutilizar en T04.
