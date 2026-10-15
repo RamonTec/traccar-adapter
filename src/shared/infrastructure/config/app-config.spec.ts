@@ -36,6 +36,13 @@ describe('loadConfig', () => {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
       },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
+      },
     });
 
     expect(
@@ -61,6 +68,13 @@ describe('loadConfig', () => {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
       },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
+      },
     });
 
     expect(loadConfig({ ...TEST_ENV, PORT: '' })).toEqual({
@@ -78,6 +92,13 @@ describe('loadConfig', () => {
       webhook: {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
+      },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
       },
     });
   });
@@ -113,6 +134,13 @@ describe('loadConfig', () => {
       webhook: {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
+      },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
       },
     });
   });
@@ -267,6 +295,13 @@ describe('testConfig helper', () => {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
       },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
+      },
     });
   });
 
@@ -286,6 +321,13 @@ describe('testConfig helper', () => {
       webhook: {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
+      },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
       },
     });
   });
@@ -307,7 +349,68 @@ describe('testConfig helper', () => {
         token: 'test-webhook-token-0123456789',
         maxBodyBytes: 1048576,
       },
+      nats: {
+        servers: ['nats://127.0.0.1:4222'],
+        publishTimeoutMs: 2000,
+        eventsMaxAgeDays: 7,
+        deadLetterMaxAgeDays: 30,
+        duplicateWindowMinutes: 10,
+      },
     });
+  });
+});
+
+describe('loadConfig — nats', () => {
+  it('AC-1a: missing NATS_SERVERS → ConfigValidationError naming it', () => {
+    const { NATS_SERVERS: _omit, ...env } = TEST_ENV;
+
+    expect(captureError(() => loadConfig(env)).invalidVariables).toEqual([
+      'NATS_SERVERS',
+    ]);
+  });
+
+  it('AC-1a: splits and trims a comma-separated server list', () => {
+    expect(
+      loadConfig({ ...TEST_ENV, NATS_SERVERS: 'nats://a:4222, tls://b:4222' })
+        .nats.servers,
+    ).toEqual(['nats://a:4222', 'tls://b:4222']);
+  });
+
+  it.each(['http://x', 'nats://a:4222,', 'a:4222'])(
+    'AC-1a: NATS_SERVERS=%s is invalid',
+    (value) => {
+      expect(
+        captureError(() => loadConfig({ ...TEST_ENV, NATS_SERVERS: value }))
+          .invalidVariables,
+      ).toEqual(['NATS_SERVERS']);
+    },
+  );
+
+  it('AC-1b: defaults and optional creds file', () => {
+    expect(loadConfig({ ...TEST_ENV }).nats).toEqual({
+      servers: ['nats://127.0.0.1:4222'],
+      publishTimeoutMs: 2000,
+      eventsMaxAgeDays: 7,
+      deadLetterMaxAgeDays: 30,
+      duplicateWindowMinutes: 10,
+    });
+    expect(
+      loadConfig({ ...TEST_ENV, NATS_CREDS_FILE: '/run/secrets/nats.creds' })
+        .nats.credsFile,
+    ).toBe('/run/secrets/nats.creds');
+  });
+
+  it.each([
+    ['NATS_PUBLISH_TIMEOUT_MS', '99'],
+    ['NATS_PUBLISH_TIMEOUT_MS', '30001'],
+    ['NATS_EVENTS_MAX_AGE_DAYS', '0'],
+    ['NATS_DEADLETTER_MAX_AGE_DAYS', '366'],
+    ['NATS_DUPLICATE_WINDOW_MINUTES', '61'],
+  ])('AC-1b: %s=%s is out of range', (name, value) => {
+    expect(
+      captureError(() => loadConfig({ ...TEST_ENV, [name]: value }))
+        .invalidVariables,
+    ).toEqual([name]);
   });
 });
 

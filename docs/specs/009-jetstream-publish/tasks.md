@@ -8,7 +8,7 @@ spec: 009-jetstream-publish
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add NATS config section and stream definitions | 002-T01 | todo |
+| T01 | Add NATS config section and stream definitions | 002-T01 | done |
 | T02 | Add NATS test infrastructure and testing recipe | — | todo |
 | T03 | Add NatsConnectionManager | T01, T02, 003-T05 | todo |
 | T04 | Add JetStreamPublisher | T03, 003-T02 | todo |
