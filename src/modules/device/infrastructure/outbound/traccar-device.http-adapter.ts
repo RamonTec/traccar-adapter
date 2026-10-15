@@ -8,27 +8,10 @@ import {
   type TraccarDevicePort,
 } from '../../application/ports/traccar-device.port.js';
 import type { Device } from '../../domain/device.js';
-
-interface TraccarDeviceDto {
-  id: number;
-  uniqueId: string;
-  groupId: number;
-  name: string;
-  disabled?: boolean;
-}
+import { type TraccarDeviceDto, toDevice } from './traccar-device.mapper.js';
 
 interface TraccarGroupDto {
   id: number;
-}
-
-function toDevice(dto: TraccarDeviceDto): Device {
-  return {
-    id: dto.id,
-    uniqueId: dto.uniqueId,
-    groupId: dto.groupId,
-    name: dto.name,
-    disabled: dto.disabled ?? false,
-  };
 }
 
 export class TraccarDeviceHttpAdapter implements TraccarDevicePort {
