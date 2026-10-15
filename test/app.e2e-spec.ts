@@ -24,6 +24,7 @@ import {
   type AppConfig,
 } from './../src/shared/infrastructure/config/app-config.js';
 import { configureHttp } from './../src/shared/infrastructure/http/configure-http.js';
+import { NatsConnectionManager } from './../src/shared/infrastructure/nats/nats-connection.manager.js';
 import { createLogCapture, type LogCapture } from './support/log-capture.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
@@ -290,6 +291,11 @@ describe('Foundation (e2e)', () => {
       app.useLogger(app.get(Logger));
       configureHttp(app, app.get<AppConfig>(APP_CONFIG));
       await app.init();
+      // Readiness also includes NATS since 009: wait for it so only Traccar varies here.
+      const nats = app.get(NatsConnectionManager);
+      await vi.waitFor(() => expect(nats.isReady()).toBe(true), {
+        timeout: 5000,
+      });
     });
 
     afterEach(async () => {
@@ -309,7 +315,7 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'ok',
-        checks: { traccar: 'ok' },
+        checks: { traccar: 'ok', nats: 'ok' },
       });
     });
 
@@ -325,7 +331,7 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'error',
-        checks: { traccar: 'error' },
+        checks: { traccar: 'error', nats: 'ok' },
       });
     });
 
@@ -338,7 +344,7 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'error',
-        checks: { traccar: 'error' },
+        checks: { traccar: 'error', nats: 'ok' },
       });
     });
 

@@ -7,5 +7,7 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // Suites share one NATS server and the same JetStream streams (009).
+    fileParallelism: false,
   },
 });
