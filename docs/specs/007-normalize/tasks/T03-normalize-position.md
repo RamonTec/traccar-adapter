@@ -1,6 +1,6 @@
 ---
 id: 007-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [007-T01, 007-T02]
 covers: [AC-1, AC-2, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10]
 ---
@@ -63,3 +63,6 @@ pnpm check
 ```
 
 ## Handoff
+- `traccar-payload.schema.ts` (zod, no strict): device, position (`id` ≥ 0 por Q1), payload de posición.
+- `normalize.ts`: orden MISSING_GROUP → schema → deviceId mismatch → envelope; id `traccar-position-<deviceId>-<fixTime ms>`, `positionId` 0 → null.
+- Helpers privados `groupIdOf`, `issuesDetail` (ruta: código, máx 5), `iso`, `reject` listos para reutilizar en T04.

@@ -10,7 +10,7 @@ spec: 007-normalize
 |------|--------|-----------|--------|
 | T01 | Capture real Traccar forward fixtures | — | done |
 | T02 | Add telemetry event types and knots→km/h conversion | — | done |
-| T03 | Add normalizePosition | T01, T02 | todo |
+| T03 | Add normalizePosition | T01, T02 | done |
 | T04 | Add normalizeEvent | T03 | todo |
 
 Paralelizables: T01 y T02. Todo el spec es paralelizable con 002 y 003.
