@@ -1,6 +1,6 @@
 ---
 id: 012-audit-log-port
-status: draft          # draft | approved | in-progress | done
+status: approved          # draft | approved | in-progress | done
 requirements: [NFR4]
 adrs: [0002, 0006]
 ---
