@@ -1,6 +1,6 @@
 ---
 id: 005-device-register
-status: approved       # draft | approved | in-progress | done
+status: done       # draft | approved | in-progress | done
 requirements: [FR2, FR3, NFR3, NFR4, NFR5]
 adrs: [ADR-0002, ADR-0003, ADR-0005]
 ---
