@@ -23,7 +23,7 @@ spec: 004-group-create
 | AC-4 | T01, T05, T07 |
 | AC-5 | T03, T04, T07 |
 | AC-6 | T05, T07 |
-| AC-7 | T05 |
+| AC-7 | T05, T06 |
 | AC-8 | T05, T07 |
 
 ## Checklist de cierre del spec

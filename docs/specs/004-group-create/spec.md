@@ -21,7 +21,7 @@ core-service necesita un group de Traccar por cada cliente, creado en el onboard
 - **AC-4** — SI `name` falta, no es string, queda vacío tras `trim`, supera 128 caracteres o el body trae campos no declarados, ENTONCES `400 VALIDATION_ERROR` con `details`.
 - **AC-5** — SI Traccar no está disponible, ENTONCES `503 UPSTREAM_UNAVAILABLE`. Un reintento posterior con el mismo `N` es seguro (AC-2).
 - **AC-6** — El endpoint exige el rol `groups:write` (ADR-0003).
-- **AC-7** — Cada ejecución DEBE loguear `op: "group.create"`, `actor`, `name`, `groupId` (si lo hay), `result` (`created|existing|ambiguous|failed`) y `durationMs` (NFR4).
+- **AC-7** — Cada ejecución DEBE loguear `op: "group.create"`, `msg: "group.create"` (ADR-0002 §4), `actor`, `name`, `groupId` (si lo hay), `result` (`created|existing|ambiguous|failed`) y `durationMs` (NFR4).
 - **AC-8** — No existe ningún otro endpoint que modifique groups.
 
 ## Contratos externos

@@ -73,7 +73,7 @@ export type CreateGroupDto = z.infer<typeof createGroupSchema>;
    - 1 → `{created: false}` → `200`.
    - ≥2 → `GroupNameAmbiguousError` → filtro → `409`.
 4. Traccar caído/5xx/401 → `UpstreamUnavailableError` (ya lo lanza `TraccarHttpClient`) → `503`.
-5. El controller mide `durationMs` y en `finally` loguea `{op:'group.create', actor, name, groupId?, result, durationMs}`; `result` = `created|existing|ambiguous|failed`.
+5. El controller mide `durationMs` y en `finally` loguea `{msg:'group.create', op:'group.create', actor, name, groupId?, result, durationMs}`; `result` = `created|existing|ambiguous|failed`. Formato según `docs/standards/coding.md` › "Auditoría de operaciones".
 
 ## Decisiones
 - **`name` no se transforma**: `trim` solo valida (AC-4); se guarda y compara tal cual (clave opaca de core-service, ADR-0005 §3). Descartado: normalizar con `trim`, porque cambiaría la clave.
