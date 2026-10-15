@@ -28,6 +28,12 @@ pnpm check   # typecheck + lint + format + tests
 | `TRACCAR_TIMEOUT_MS` | Timeout en milisegundos para llamadas HTTP a Traccar (100–60000) | No | `5000` |
 | `WEBHOOK_TOKEN` | Token compartido que Traccar envía como `Authorization: Bearer …` en el reenvío (mín. 16 caracteres, secreto) | Sí | — |
 | `WEBHOOK_MAX_BODY_BYTES` | Tamaño máximo del body del webhook en bytes (1024–10485760); lo que exceda va al dead-letter | No | `1048576` |
+| `NATS_SERVERS` | Servidores NATS separados por comas (`nats://…` o `tls://…`) | Sí | — |
+| `NATS_CREDS_FILE` | Ruta a un archivo `.creds` de NATS | No | — |
+| `NATS_PUBLISH_TIMEOUT_MS` | Timeout de espera del PubAck de JetStream (100–30000) | No | `2000` |
+| `NATS_EVENTS_MAX_AGE_DAYS` | Retención del stream `TELEMETRY_EVENTS` en días (1–365) | No | `7` |
+| `NATS_DEADLETTER_MAX_AGE_DAYS` | Retención del stream `TELEMETRY_DEADLETTER` en días (1–365) | No | `30` |
+| `NATS_DUPLICATE_WINDOW_MINUTES` | Ventana de deduplicación por `Nats-Msg-Id` en minutos (1–60) | No | `10` |
 
 ## Integración con Traccar
 

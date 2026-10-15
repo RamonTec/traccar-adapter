@@ -19,12 +19,22 @@ export interface WebhookConfig {
   readonly maxBodyBytes: number;
 }
 
+export interface NatsConfig {
+  readonly servers: readonly string[];
+  readonly credsFile?: string;
+  readonly publishTimeoutMs: number;
+  readonly eventsMaxAgeDays: number;
+  readonly deadLetterMaxAgeDays: number;
+  readonly duplicateWindowMinutes: number;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly auth: AuthConfig;
   readonly traccar: TraccarConfig;
   readonly webhook: WebhookConfig;
+  readonly nats: NatsConfig;
 }
 
 export const APP_CONFIG = Symbol('AppConfig');
@@ -55,6 +65,11 @@ export function parseEnv<S extends z.ZodObject>(
   throw new ConfigValidationError([...new Set(names)]);
 }
 
+const natsServers = z
+  .string()
+  .transform((val) => val.split(',').map((server) => server.trim()))
+  .pipe(z.array(z.string().regex(/^(nats|tls):\/\/.+/)).min(1));
+
 const appEnvSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
@@ -70,6 +85,27 @@ const appEnvSchema = z.object({
     .min(1024)
     .max(10_485_760)
     .default(1_048_576),
+  NATS_SERVERS: natsServers,
+  NATS_CREDS_FILE: z.string().min(1).optional(),
+  NATS_PUBLISH_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(30000)
+    .default(2000),
+  NATS_EVENTS_MAX_AGE_DAYS: z.coerce.number().int().min(1).max(365).default(7),
+  NATS_DEADLETTER_MAX_AGE_DAYS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(365)
+    .default(30),
+  NATS_DUPLICATE_WINDOW_MINUTES: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(60)
+    .default(10),
 });
 
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
@@ -89,6 +125,16 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     webhook: {
       token: parsed.WEBHOOK_TOKEN,
       maxBodyBytes: parsed.WEBHOOK_MAX_BODY_BYTES,
+    },
+    nats: {
+      servers: parsed.NATS_SERVERS,
+      ...(parsed.NATS_CREDS_FILE !== undefined && {
+        credsFile: parsed.NATS_CREDS_FILE,
+      }),
+      publishTimeoutMs: parsed.NATS_PUBLISH_TIMEOUT_MS,
+      eventsMaxAgeDays: parsed.NATS_EVENTS_MAX_AGE_DAYS,
+      deadLetterMaxAgeDays: parsed.NATS_DEADLETTER_MAX_AGE_DAYS,
+      duplicateWindowMinutes: parsed.NATS_DUPLICATE_WINDOW_MINUTES,
     },
   };
 }

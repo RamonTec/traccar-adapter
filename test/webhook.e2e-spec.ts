@@ -153,8 +153,14 @@ describe('Traccar webhook (e2e)', () => {
     await post('positions', '{"position":').expect(503);
   });
 
-  it('without publisher overrides a valid payload → 503 (placeholders)', async () => {
-    await start(testConfig({ logLevel: 'info' }), false);
+  it('without publisher overrides and NATS unreachable, a valid payload → 503', async () => {
+    await start(
+      testConfig({
+        logLevel: 'info',
+        nats: { servers: ['nats://127.0.0.1:1'] },
+      }),
+      false,
+    );
 
     await post('positions', positionFixture).expect(503);
   });

@@ -1,6 +1,6 @@
 ---
 id: 009-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [009-T01, 009-T02, 003-T05]
 covers: [AC-1, AC-5, AC-6, AC-7]
 ---
@@ -62,3 +62,6 @@ pnpm check
 ```
 
 ## Handoff
+- `NatsConnectionManager`: primer connect con bucle propio cancelable (1 s→30 s), luego reconexión del cliente; `ensureStreams` (created/updated/unchanged); readiness 'nats'; drain al cerrar.
+- `MessagingModule` @Global importado en AppModule.
+- Desviaciones: los tests de readiness de 003 (`app.e2e-spec.ts`) esperan a NATS e incluyen `nats` en `checks`; `vitest.config.e2e.ts` con `fileParallelism: false` (las suites comparten streams).

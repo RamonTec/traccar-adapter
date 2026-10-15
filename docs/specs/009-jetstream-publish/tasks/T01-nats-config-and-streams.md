@@ -1,6 +1,6 @@
 ---
 id: 009-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [002-T01]
 covers: [AC-1]
 ---
@@ -62,3 +62,6 @@ pnpm check
 ```
 
 ## Handoff
+- `AppConfig.nats` (NATS_SERVERS obligatoria, lista nats://|tls://; timeouts/retenciones/ventana con defaults 2000ms/7d/30d/10min; creds opcional).
+- `stream-definitions.ts` puro: TELEMETRY_EVENTS (position, device-event) y TELEMETRY_DEADLETTER; nanos.
+- README y `TEST_ENV`/`testConfig({nats})` actualizados.

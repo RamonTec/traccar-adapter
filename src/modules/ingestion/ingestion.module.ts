@@ -1,4 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { JetStreamPublisher } from '../../shared/infrastructure/nats/jetstream.publisher.js';
 import {
   DEAD_LETTER_PUBLISHER_PORT,
   type DeadLetterPublisherPort,
@@ -10,6 +11,7 @@ import {
 import { IngestTraccarPayloadUseCase } from './application/use-cases/ingest-traccar-payload.use-case.js';
 import { TraccarWebhookController } from './infrastructure/inbound/traccar-webhook.controller.js';
 import { WebhookTokenGuard } from './infrastructure/inbound/webhook-token.guard.js';
+import { JetStreamEventPublisher } from './infrastructure/outbound/jetstream-event.publisher.js';
 import { UnconfiguredPublisher } from './infrastructure/outbound/unconfigured.publisher.js';
 
 export interface IngestionOverrides {
@@ -25,11 +27,17 @@ export class IngestionModule {
       controllers: [TraccarWebhookController],
       providers: [
         WebhookTokenGuard,
-        {
-          provide: EVENT_PUBLISHER_PORT,
-          // 009 replaces the default with the JetStream publisher.
-          useValue: overrides?.eventPublisher ?? new UnconfiguredPublisher(),
-        },
+        overrides?.eventPublisher
+          ? {
+              provide: EVENT_PUBLISHER_PORT,
+              useValue: overrides.eventPublisher,
+            }
+          : {
+              provide: EVENT_PUBLISHER_PORT,
+              useFactory: (p: JetStreamPublisher) =>
+                new JetStreamEventPublisher(p),
+              inject: [JetStreamPublisher],
+            },
         {
           provide: DEAD_LETTER_PUBLISHER_PORT,
           // 010 replaces the default with the JetStream dead-letter publisher.
