@@ -12,15 +12,19 @@
     <!-- Unknown devices are created on their first message (fixtures, manual tests). -->
     <entry key='database.registerUnknown'>true</entry>
 
-    <!-- Forward positions and events to traccar-adapter. The URLs can be overridden
-         with FORWARD_URL / EVENT_FORWARD_URL (see docker-compose.yml). -->
-    <entry key='forward.enable'>true</entry>
+    <!-- Forward positions and events to traccar-adapter (PORT 3000 on the host). The URLs
+         can be overridden with FORWARD_URL / EVENT_FORWARD_URL (see docker-compose.yml).
+         Forwarding is enabled by the presence of the URL: 6.15.3 has no forward.enable. -->
     <entry key='forward.type'>json</entry>
-    <entry key='forward.url'>http://host.docker.internal:3123/api/gps/webhook</entry>
-    <entry key='forward.header'>Authorization: Bearer dev-webhook-token</entry>
+    <entry key='forward.url'>http://host.docker.internal:3000/webhooks/traccar/positions</entry>
+    <entry key='forward.header'>Authorization: Bearer dev-webhook-token-0123456789</entry>
+    <!-- Positions only: events are never retried by Traccar 6.15.3. -->
+    <entry key='forward.retry.enable'>true</entry>
+    <entry key='forward.retry.delay'>1000</entry>
+    <entry key='forward.retry.count'>10</entry>
+    <entry key='forward.retry.limit'>10000</entry>
 
-    <entry key='event.forward.enable'>true</entry>
-    <entry key='event.forward.url'>http://host.docker.internal:3123/api/gps/webhook</entry>
-    <entry key='event.forward.header'>Authorization: Bearer dev-webhook-token</entry>
+    <entry key='event.forward.url'>http://host.docker.internal:3000/webhooks/traccar/events</entry>
+    <entry key='event.forward.header'>Authorization: Bearer dev-webhook-token-0123456789</entry>
 
 </properties>

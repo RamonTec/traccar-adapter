@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module.js';
 import {
   ConfigValidationError,
   loadConfig,
 } from './shared/infrastructure/config/app-config.js';
+import { configureHttp } from './shared/infrastructure/http/configure-http.js';
 import { SERVICE_NAME } from './shared/infrastructure/logging/pino-http-options.js';
 
 async function bootstrap(): Promise<void> {
@@ -28,10 +30,12 @@ async function bootstrap(): Promise<void> {
     throw error;
   }
 
-  const app = await NestFactory.create(AppModule.register(config), {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule.register(config),
+    { bufferLogs: true, bodyParser: false },
+  );
   app.useLogger(app.get(Logger));
+  configureHttp(app, config);
   app.enableShutdownHooks([], { useProcessExit: true });
   await app.listen(config.port);
 }

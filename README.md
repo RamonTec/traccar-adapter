@@ -26,6 +26,12 @@ pnpm check   # typecheck + lint + format + tests
 | `TRACCAR_BASE_URL` | URL base de la instancia de Traccar (ej. `http://localhost:8082`) | Sí | — |
 | `TRACCAR_API_TOKEN` | Token de API del usuario de servicio en Traccar | Sí | — |
 | `TRACCAR_TIMEOUT_MS` | Timeout en milisegundos para llamadas HTTP a Traccar (100–60000) | No | `5000` |
+| `WEBHOOK_TOKEN` | Token compartido que Traccar envía como `Authorization: Bearer …` en el reenvío (mín. 16 caracteres, secreto) | Sí | — |
+| `WEBHOOK_MAX_BODY_BYTES` | Tamaño máximo del body del webhook en bytes (1024–10485760); lo que exceda va al dead-letter | No | `1048576` |
+
+## Integración con Traccar
+
+Configuración requerida de Traccar (reenvío, reintentos, permisos) y caída máxima tolerable: [docs/ops/traccar-config.md](docs/ops/traccar-config.md). Traccar local para desarrollo: [dev/traccar/README.md](dev/traccar/README.md).
 
 ## Autenticación de servicios (S2S)
 

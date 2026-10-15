@@ -1,6 +1,6 @@
 ---
 id: 008-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [008-T01]
 covers: [AC-3, AC-5]
 ---
@@ -55,3 +55,6 @@ pnpm check
 ```
 
 ## Handoff
+- `rawBodyMiddleware(max)` en `/webhooks/traccar`: `req.rawWebhookBody = {body, oversized}` (guarda como mucho `max` bytes) y marca `_body` para que el parser JSON lo salte.
+- `configureHttp(app, config)` exige `bodyParser: false`; aplicado en `main.ts` y en las apps in-process de `test/app.e2e-spec.ts`.
+- Otras suites e2e (group/device) siguen con el bodyParser por defecto de Nest; T06 usa `configureHttp`.

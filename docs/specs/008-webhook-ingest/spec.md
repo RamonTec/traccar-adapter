@@ -1,6 +1,6 @@
 ---
 id: 008-webhook-ingest
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [FR5, FR10]
 adrs: [ADR-0002, ADR-0004, ADR-0005]
 ---

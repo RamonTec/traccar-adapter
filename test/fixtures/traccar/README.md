@@ -11,7 +11,7 @@ y el protocolo OsmAnd.
 | `event-alarm.json` | `&alarm=sos` por OsmAnd | `event.type = "alarm"`, `event.attributes.alarm = "sos"` |
 
 ## Cómo se capturaron
-1. `TRACCAR_FORWARD_URL=http://capture:3123/api/gps/webhook docker compose --profile capture up -d`
+1. `TRACCAR_FORWARD_URL=http://capture:3123/positions TRACCAR_EVENT_FORWARD_URL=http://capture:3123/events docker compose --profile capture up -d`
 2. Posición: `docker compose exec traccar wget -qO- "http://localhost:5055/?id=<uniqueId>&lat=..&lon=..&speed=..&timestamp=<epoch>"`
 3. Asignación del device a un group en la web de Traccar; repetir el paso 2 y añadir `&alarm=sos`.
 4. `scripts/capture-traccar-forward.mjs` guarda cada body en `captured/` (gitignored, nunca headers).

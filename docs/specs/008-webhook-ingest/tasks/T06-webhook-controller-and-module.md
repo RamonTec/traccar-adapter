@@ -1,6 +1,6 @@
 ---
 id: 008-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [008-T03, 008-T04, 008-T05, 002-T04]
 covers: [AC-1, AC-2, AC-3, AC-5, AC-6, AC-7, AC-9, AC-10]
 ---
@@ -69,3 +69,6 @@ pnpm check
 ```
 
 ## Handoff
+- `POST /webhooks/traccar/{positions,events}` (@Public + WebhookTokenGuard) → 200 `{outcome}`; `IngestionModule.register(overrides)` con `UnconfiguredPublisher` (503) por defecto.
+- `AppModule.register(..., { eventPublisher, deadLetterPublisher })`; correlationId vía `currentCorrelationId()`.
+- Desviaciones: allowlist de rutas ampliada (si no, el e2e fallaba) y log `warn outcome:'failed'` cuando el use case lanza.

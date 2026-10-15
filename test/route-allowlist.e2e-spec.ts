@@ -19,6 +19,8 @@ const ALLOWED_ROUTES = [
   'POST /devices',
   'POST /devices/:deviceId/disable',
   'POST /devices/:deviceId/enable',
+  'POST /webhooks/traccar/positions',
+  'POST /webhooks/traccar/events',
 ].sort();
 
 describe('Route allowlist (e2e)', () => {

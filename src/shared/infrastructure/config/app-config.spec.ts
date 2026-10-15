@@ -32,6 +32,10 @@ describe('loadConfig', () => {
         apiToken: 'test-token',
         timeoutMs: 5000,
       },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
+      },
     });
 
     expect(
@@ -53,6 +57,10 @@ describe('loadConfig', () => {
         apiToken: 'test-token',
         timeoutMs: 5000,
       },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
+      },
     });
 
     expect(loadConfig({ ...TEST_ENV, PORT: '' })).toEqual({
@@ -66,6 +74,10 @@ describe('loadConfig', () => {
         baseUrl: 'http://traccar.test',
         apiToken: 'test-token',
         timeoutMs: 5000,
+      },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
       },
     });
   });
@@ -97,6 +109,10 @@ describe('loadConfig', () => {
         baseUrl: 'http://traccar.test',
         apiToken: 'test-token',
         timeoutMs: 5000,
+      },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
       },
     });
   });
@@ -194,6 +210,45 @@ describe('loadConfig', () => {
   });
 });
 
+describe('loadConfig — webhook', () => {
+  it('AC-1a: missing WEBHOOK_TOKEN → ConfigValidationError naming it', () => {
+    const { WEBHOOK_TOKEN: _omit, ...env } = TEST_ENV;
+
+    expect(captureError(() => loadConfig(env)).invalidVariables).toEqual([
+      'WEBHOOK_TOKEN',
+    ]);
+  });
+
+  it('AC-1a: WEBHOOK_TOKEN shorter than 16 chars is rejected without leaking it', () => {
+    const shortToken = 'short-secret-15';
+    const error = captureError(() =>
+      loadConfig({ ...TEST_ENV, WEBHOOK_TOKEN: shortToken }),
+    );
+
+    expect(error.invalidVariables).toEqual(['WEBHOOK_TOKEN']);
+    expect(error.message).not.toContain(shortToken);
+  });
+
+  it('AC-5a: WEBHOOK_MAX_BODY_BYTES defaults to 1 MiB and accepts overrides', () => {
+    expect(loadConfig({ ...TEST_ENV }).webhook.maxBodyBytes).toBe(1_048_576);
+    expect(
+      loadConfig({ ...TEST_ENV, WEBHOOK_MAX_BODY_BYTES: '2048' }).webhook
+        .maxBodyBytes,
+    ).toBe(2048);
+  });
+
+  it.each(['512', '20000000', 'abc', '1024.5'])(
+    'AC-5a: WEBHOOK_MAX_BODY_BYTES=%s is invalid',
+    (value) => {
+      expect(
+        captureError(() =>
+          loadConfig({ ...TEST_ENV, WEBHOOK_MAX_BODY_BYTES: value }),
+        ).invalidVariables,
+      ).toEqual(['WEBHOOK_MAX_BODY_BYTES']);
+    },
+  );
+});
+
 describe('testConfig helper', () => {
   it('returns default test config when no overrides are given', () => {
     expect(testConfig()).toEqual({
@@ -207,6 +262,10 @@ describe('testConfig helper', () => {
         baseUrl: 'http://traccar.test',
         apiToken: 'test-token',
         timeoutMs: 5000,
+      },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
       },
     });
   });
@@ -224,6 +283,10 @@ describe('testConfig helper', () => {
         apiToken: 'test-token',
         timeoutMs: 5000,
       },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
+      },
     });
   });
 
@@ -240,6 +303,19 @@ describe('testConfig helper', () => {
         apiToken: 'test-token',
         timeoutMs: 10000,
       },
+      webhook: {
+        token: 'test-webhook-token-0123456789',
+        maxBodyBytes: 1048576,
+      },
+    });
+  });
+});
+
+describe('testConfig helper — webhook', () => {
+  it('supports partial webhook overrides with deep merge', () => {
+    expect(testConfig({ webhook: { maxBodyBytes: 1024 } }).webhook).toEqual({
+      token: 'test-webhook-token-0123456789',
+      maxBodyBytes: 1024,
     });
   });
 });

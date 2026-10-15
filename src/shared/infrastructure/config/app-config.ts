@@ -14,11 +14,17 @@ export interface TraccarConfig {
   readonly timeoutMs: number;
 }
 
+export interface WebhookConfig {
+  readonly token: string;
+  readonly maxBodyBytes: number;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly auth: AuthConfig;
   readonly traccar: TraccarConfig;
+  readonly webhook: WebhookConfig;
 }
 
 export const APP_CONFIG = Symbol('AppConfig');
@@ -57,6 +63,13 @@ const appEnvSchema = z.object({
   TRACCAR_BASE_URL: z.url().transform((val) => val.replace(/\/+$/, '')),
   TRACCAR_API_TOKEN: z.string().min(1),
   TRACCAR_TIMEOUT_MS: z.coerce.number().int().min(100).max(60000).default(5000),
+  WEBHOOK_TOKEN: z.string().min(16),
+  WEBHOOK_MAX_BODY_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1024)
+    .max(10_485_760)
+    .default(1_048_576),
 });
 
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
@@ -72,6 +85,10 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
       baseUrl: parsed.TRACCAR_BASE_URL,
       apiToken: parsed.TRACCAR_API_TOKEN,
       timeoutMs: parsed.TRACCAR_TIMEOUT_MS,
+    },
+    webhook: {
+      token: parsed.WEBHOOK_TOKEN,
+      maxBodyBytes: parsed.WEBHOOK_MAX_BODY_BYTES,
     },
   };
 }

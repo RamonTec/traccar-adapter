@@ -8,13 +8,13 @@ spec: 008-webhook-ingest
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add webhook config section | 002-T01 | todo |
-| T02 | Add ingestion publisher ports and fakes | 007-T02 | todo |
-| T03 | Add IngestTraccarPayloadUseCase | T02, 007-T04 | todo |
-| T04 | Add bounded raw body capture for webhook routes | T01 | todo |
-| T05 | Add WebhookTokenGuard | T01 | todo |
-| T06 | Add webhook controller and IngestionModule wiring | T03, T04, T05, 002-T04 | todo |
-| T07 | Document required Traccar configuration | T06 | todo |
+| T01 | Add webhook config section | 002-T01 | done |
+| T02 | Add ingestion publisher ports and fakes | 007-T02 | done |
+| T03 | Add IngestTraccarPayloadUseCase | T02, 007-T04 | done |
+| T04 | Add bounded raw body capture for webhook routes | T01 | done |
+| T05 | Add WebhookTokenGuard | T01 | done |
+| T06 | Add webhook controller and IngestionModule wiring | T03, T04, T05, 002-T04 | done |
+| T07 | Document required Traccar configuration | T06 | done |
 
 Paralelizables: T02 con T04 y T05.
 
@@ -34,11 +34,11 @@ Paralelizables: T02 con T04 y T05.
 | AC-11 | T07 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] `pnpm check` y `pnpm test:e2e` en verde
-- [ ] `WEBHOOK_TOKEN` y `WEBHOOK_MAX_BODY_BYTES` documentadas en el README y en `test/support/test-env.ts`
-- [ ] `docs/ops/traccar-config.md` revisado por una persona
-- [ ] Ningún log de test contiene el token del webhook ni el body
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] `pnpm check` y `pnpm test:e2e` en verde
+- [x] `WEBHOOK_TOKEN` y `WEBHOOK_MAX_BODY_BYTES` documentadas en el README y en `test/support/test-env.ts`
+- [ ] `docs/ops/traccar-config.md` revisado por una persona (pendiente: revisión en el PR)
+- [x] Ningún log de test contiene el token del webhook ni el body
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
 - [ ] PR abierto con la lista de tasks y la matriz AC → tasks
