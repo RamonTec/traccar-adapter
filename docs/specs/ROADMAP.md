@@ -16,7 +16,7 @@ Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS
 | 010-deadletter-publish | publisher de dead-letter | FR10, NFR6 | 0004 | 009 | tasks listos |
 | 011-reconciliation | polling de backfill a Traccar | NFR2 | 0005 | 009 | **diferido** |
 | 013-delivery-outbox | buffer local duradero si JetStream no está disponible + drenado | FR9, FR10, NFR2, NFR6 | 0004, 0005, 0007 | 009, 010 | spec draft · ADR-0007 aceptado, pendiente aprobar spec |
-| 012-audit-log-port | auditoría de operaciones en application (port), migra `group.create`, alinea 005/006 | NFR4 | 0002, 0006 | 004 | spec draft · antes de implementar 005/006 |
+| 012-audit-log-port | auditoría de operaciones en application (port) y migración de group.create, device.register y device.disable/enable | NFR4 | 0002, 0006 | 004, 005, 006 | spec draft (reescrito) · ADR-0006 aceptado |
 
 ## Por qué 004-006 esperan
 Su design depende del comportamiento real de la API de Traccar (detección de `uniqueId` duplicado, si `PUT` exige el objeto completo, filtros de `GET /api/groups`, permisos), que verifica 003-T01. Diseñarlos antes sería suponer.

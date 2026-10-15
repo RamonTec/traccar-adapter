@@ -1,6 +1,6 @@
 # ADR-0006 — Auditoría de operaciones en la capa de aplicación vía port
 
-- Estado: propuesto
+- Estado: aceptado (2026-10-15)
 - Fecha: 2026-10-15
 - Alcance: **servicio** (traccar-adapter). El formato de línea sigue ADR-0002 §4.
 
@@ -52,5 +52,5 @@ Se evaluaron dos alternativas:
 - (+) Toda operación queda auditada igual, entre por HTTP, webhook o NATS.
 - (+) La auditoría se prueba con tests unitarios, sin Nest, mediante un fake de `AuditLogPort` y un `ClockPort` controlado.
 - (−) Cada use case auditado recibe dos dependencias más (`AuditLogPort`, `ClockPort`) y `actor` en su input.
-- (−) Cambia trabajo ya hecho: 004 (`done`) audita en el controller. El spec **012-audit-log-port** implementa esta decisión, refactoriza `group.create` y ajusta los designs/tasks de 005, 006 y el log de 008 antes de que se implementen.
+- (−) Cambia trabajo ya hecho: 004, 005 y 006 (`done`) auditan en el controller. El spec **012-audit-log-port** implementa esta decisión y migra `group.create`, `device.register`, `device.disable` y `device.enable`, con un helper común. El log del webhook (008) es operativo, no de NFR4, y queda fuera.
 - La línea de auditoría sigue siendo distinta del log de request de pino-http y del log de cada comando a Traccar (`coding.md` › Logging).
