@@ -144,7 +144,12 @@ describe('DeviceController (integration)', () => {
       groupId: 5,
     });
     expect(useCase.calls).toEqual([
-      { uniqueId: '123456789012345', name: 'Truck 1', groupId: 5 },
+      {
+        uniqueId: '123456789012345',
+        name: 'Truck 1',
+        groupId: 5,
+        actor: 'svc-test',
+      },
     ]);
   });
 
@@ -208,142 +213,32 @@ describe('DeviceController (integration)', () => {
     expect(role).toBe('devices:write');
   });
 
-  describe('AC-10: audit logging', () => {
+  describe('error mapping and audit ownership', () => {
     const validBody = {
       uniqueId: '123456789012345',
       name: 'Truck 1',
       groupId: 5,
     };
 
-    it('logs info audit line for created', async () => {
-      useCase.result = {
-        device: {
-          id: 10,
-          uniqueId: '123456789012345',
-          name: 'Truck 1',
-          groupId: 5,
-          disabled: false,
-        },
-        result: 'created',
-      };
+    it.each([
+      ['conflict', new DeviceAlreadyRegisteredError('123456789012345', 9), 409],
+      ['group not found', new GroupNotFoundError(5), 404],
+      ['upstream', new UpstreamUnavailableError('traccar'), 503],
+    ] as const)(
+      'AC-8: %s keeps its HTTP status (%s)',
+      async (_, error, status) => {
+        useCase.result = error;
 
+        await postDevice(validBody).expect(status);
+      },
+    );
+
+    it('ADR-0006: the controller emits no audit line (the use case does)', async () => {
       await postDevice(validBody).expect(201);
-
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        deviceId: 10,
-        result: 'created',
-      });
-      expect(lines[0]!.retiredDeviceId).toBeUndefined();
-      expect(typeof lines[0]!.durationMs).toBe('number');
-    });
-
-    it('logs info audit line for existing', async () => {
-      useCase.result = {
-        device: {
-          id: 10,
-          uniqueId: '123456789012345',
-          name: 'Truck 1',
-          groupId: 5,
-          disabled: false,
-        },
-        result: 'existing',
-      };
-
-      await postDevice(validBody).expect(200);
-
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        deviceId: 10,
-        result: 'existing',
-      });
-    });
-
-    it('logs info audit line for retired-and-created with retiredDeviceId', async () => {
-      useCase.result = {
-        device: {
-          id: 20,
-          uniqueId: '123456789012345',
-          name: 'Truck 1',
-          groupId: 5,
-          disabled: false,
-        },
-        result: 'retired-and-created',
-        retiredDeviceId: 18,
-      };
-
-      await postDevice(validBody).expect(201);
-
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        deviceId: 20,
-        retiredDeviceId: 18,
-        result: 'retired-and-created',
-      });
-    });
-
-    it('logs warn audit line with result conflict for DeviceAlreadyRegisteredError', async () => {
-      useCase.result = new DeviceAlreadyRegisteredError('123456789012345', 9);
-
-      await postDevice(validBody).expect(409);
-
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        result: 'conflict',
-      });
-      expect(lines[0]!.deviceId).toBeUndefined();
-    });
-
-    it('logs warn audit line with result failed for GroupNotFoundError', async () => {
-      useCase.result = new GroupNotFoundError(5);
-
-      await postDevice(validBody).expect(404);
-
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        result: 'failed',
-      });
-    });
-
-    it('logs warn audit line with result failed for UpstreamUnavailableError', async () => {
       useCase.result = new UpstreamUnavailableError('traccar');
-
       await postDevice(validBody).expect(503);
 
-      const lines = auditLines();
-      expect(lines).toHaveLength(1);
-      expect(lines[0]).toMatchObject({
-        op: 'device.register',
-        actor: 'svc-test',
-        uniqueId: '123456789012345',
-        groupId: 5,
-        result: 'failed',
-      });
+      expect(auditLines()).toEqual([]);
     });
   });
 });

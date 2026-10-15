@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { AuditModule } from '../../shared/infrastructure/audit/audit.module.js';
 import { TraccarHttpClient } from '../../shared/infrastructure/traccar/traccar-http-client.js';
 import {
   TRACCAR_DEVICE_PORT,
@@ -32,7 +33,7 @@ class FakeTraccarModule {}
 describe('DeviceModule (wiring)', () => {
   it('wires providers and controllers resolving RegisterDeviceUseCase, DeviceController and TraccarDevicePort', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [FakeTraccarModule, DeviceModule],
+      imports: [FakeTraccarModule, AuditModule, DeviceModule],
     }).compile();
 
     const useCase = moduleRef.get<RegisterDeviceUseCase>(RegisterDeviceUseCase);
@@ -46,7 +47,7 @@ describe('DeviceModule (wiring)', () => {
 
   it('wires SetDeviceStatusUseCase, DeviceStatusController and TraccarDeviceStatusPort', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [FakeTraccarModule, DeviceModule],
+      imports: [FakeTraccarModule, AuditModule, DeviceModule],
     }).compile();
 
     expect(moduleRef.get(SetDeviceStatusUseCase)).toBeInstanceOf(

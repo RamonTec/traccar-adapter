@@ -1,6 +1,6 @@
 ---
 id: 012-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T03]
 covers: [AC-1, AC-3, AC-8, AC-10]
 ---
@@ -72,3 +72,6 @@ pnpm check
 ```
 
 ## Handoff
+- `RegisterDeviceUseCase(traccar, audit, clock)` + `actor`; result = `output.result` (+deviceId, retiredDeviceId si aplica); `DeviceAlreadyRegisteredError` → conflict, resto → failed.
+- `DeviceController` sin auditoría ni errores de dominio; su spec cubre 409/404/503 y que no audita.
+- e2e 68/68 sin cambios en `test/`.
