@@ -20,9 +20,14 @@ import { LoggingModule } from './shared/infrastructure/logging/logging.module.js
 import { TraccarModule } from './shared/infrastructure/traccar/traccar.module.js';
 import { GroupModule } from './modules/group/group.module.js';
 import { DeviceModule } from './modules/device/device.module.js';
+import type { DeadLetterPublisherPort } from './modules/ingestion/application/ports/dead-letter-publisher.port.js';
+import type { EventPublisherPort } from './modules/ingestion/application/ports/event-publisher.port.js';
+import { IngestionModule } from './modules/ingestion/ingestion.module.js';
 
 export interface AppModuleOverrides {
   readonly jwtVerifier?: Pick<JwtVerifier, 'verify'>;
+  readonly eventPublisher?: EventPublisherPort;
+  readonly deadLetterPublisher?: DeadLetterPublisherPort;
 }
 
 @Module({})
@@ -60,6 +65,10 @@ export class AppModule implements NestModule {
         LoggingModule.forRoot(config, logStream),
         GroupModule,
         DeviceModule,
+        IngestionModule.register({
+          eventPublisher: overrides?.eventPublisher,
+          deadLetterPublisher: overrides?.deadLetterPublisher,
+        }),
       ],
       controllers: [HealthController],
       providers: [
