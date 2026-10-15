@@ -1,6 +1,6 @@
 ---
 id: 012-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T02]
 covers: [AC-1]
 ---
@@ -49,3 +49,5 @@ pnpm check
 ```
 
 ## Handoff
+- `AuditModule` @Global: `AUDIT_LOG_PORT` → `PinoAuditLogAdapter`, `CLOCK_PORT` → `SystemClock`; importado en AppModule.
+- Spec verifica inyección global en un módulo que no lo importa; e2e 68/68.

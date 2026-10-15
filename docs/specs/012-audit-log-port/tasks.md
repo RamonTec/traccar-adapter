@@ -8,7 +8,7 @@ spec: 012-audit-log-port
 |------|--------|-----------|--------|
 | T01 | Add AuditLogPort, ClockPort and runAudited helper | — | done |
 | T02 | Add PinoAuditLogAdapter and SystemClock | T01 | done |
-| T03 | Add AuditModule and import it in AppModule | T02 | todo |
+| T03 | Add AuditModule and import it in AppModule | T02 | done |
 | T04 | Move group.create audit into CreateGroupUseCase | T03 | todo |
 | T05 | Move device.register audit into RegisterDeviceUseCase | T03 | todo |
 | T06 | Move device.disable/enable audit into SetDeviceStatusUseCase | T05 | todo |
