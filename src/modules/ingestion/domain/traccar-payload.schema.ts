@@ -37,3 +37,19 @@ export const traccarPositionPayloadSchema = z.object({
   position: traccarPositionSchema,
   device: traccarDeviceSchema,
 });
+
+export const traccarEventSchema = z.object({
+  id: z.number().int().positive(),
+  type: z.string().min(1),
+  eventTime: traccarDate,
+  deviceId: z.number().int().positive(),
+  positionId: z.number().int().nonnegative().nullable().optional(),
+  attributes,
+});
+
+export const traccarEventPayloadSchema = z.object({
+  event: traccarEventSchema,
+  device: traccarDeviceSchema,
+  // Forwarded alongside the event but not part of device.event.
+  position: z.unknown().optional(),
+});

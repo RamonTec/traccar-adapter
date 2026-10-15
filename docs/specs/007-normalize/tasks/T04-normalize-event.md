@@ -1,6 +1,6 @@
 ---
 id: 007-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [007-T03]
 covers: [AC-3, AC-4, AC-5, AC-7, AC-8, AC-9, AC-10]
 ---
@@ -60,3 +60,6 @@ pnpm check
 ```
 
 ## Handoff
+- `normalizeEvent` + `traccarEventSchema`/`traccarEventPayloadSchema` (`position` del payload se ignora).
+- Refactor: `envelope`, `accept`, `reject`, `groupIdOf`, `issuesDetail` compartidos; tests de T03 en verde.
+- Spec 007 cerrado (spec.md done, ROADMAP).

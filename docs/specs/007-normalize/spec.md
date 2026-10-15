@@ -1,6 +1,6 @@
 ---
 id: 007-normalize
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [FR6]
 adrs: [ADR-0004]
 ---

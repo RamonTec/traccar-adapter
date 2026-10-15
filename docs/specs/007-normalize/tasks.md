@@ -11,7 +11,7 @@ spec: 007-normalize
 | T01 | Capture real Traccar forward fixtures | — | done |
 | T02 | Add telemetry event types and knots→km/h conversion | — | done |
 | T03 | Add normalizePosition | T01, T02 | done |
-| T04 | Add normalizeEvent | T03 | todo |
+| T04 | Add normalizeEvent | T03 | done |
 
 Paralelizables: T01 y T02. Todo el spec es paralelizable con 002 y 003.
 
@@ -30,10 +30,10 @@ Paralelizables: T01 y T02. Todo el spec es paralelizable con 002 y 003.
 | AC-10 | T01, T03, T04 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] Los tests usan los fixtures reales de `test/fixtures/traccar/` (no payloads inventados en el happy path)
-- [ ] Ningún IMEI, nombre real ni token en los fixtures
-- [ ] `pnpm check` en verde (el lint confirma que `ingestion/domain` no importa Nest ni infraestructura)
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] Los tests usan los fixtures reales de `test/fixtures/traccar/` (no payloads inventados en el happy path)
+- [x] Ningún IMEI, nombre real ni token en los fixtures
+- [x] `pnpm check` en verde (el lint confirma que `ingestion/domain` no importa Nest ni infraestructura)
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
 - [ ] PR abierto con la lista de tasks y la matriz AC → tasks
