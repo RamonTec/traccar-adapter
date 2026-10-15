@@ -1,6 +1,6 @@
 ---
 id: 015-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-3]
 ---
@@ -11,7 +11,7 @@ covers: [AC-3]
 - `docs/specs/015-ci-pipeline/design.md`
 
 ## Archivos a crear/modificar
-- [ ] `.node-version` (nuevo), `Dockerfile` (comentario), `test/image/container.image-spec.ts` (AC-1 de 014 lee `.node-version`)
+- [x] `.node-version` (nuevo), `Dockerfile` (comentario), `test/image/container.image-spec.ts` (AC-1 de 014 lee `.node-version`)
 
 ## Verificación
 ```bash
@@ -19,3 +19,4 @@ pnpm check
 ```
 
 ## Handoff
+- `.node-version` = 24.22.0; el test AC-1 de 014 compara la imagen con ese archivo (si se desalinean, `test:image` falla).

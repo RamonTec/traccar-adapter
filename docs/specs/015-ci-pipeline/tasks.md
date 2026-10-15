@@ -6,7 +6,7 @@ spec: 015-ci-pipeline
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | `.node-version` como fuente única de la versión de Node | — | todo |
+| T01 | `.node-version` como fuente única de la versión de Node | — | done |
 | T02 | Workflow `ci.yml` con jobs `check`, `e2e`, `image` | T01 | todo |
 | T03 | README: integración continua y checks obligatorios | T02 | todo |
 

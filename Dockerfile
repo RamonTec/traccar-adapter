@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 # Runtime image for traccar-adapter (spec 014). Same image for every environment:
 # all configuration comes from environment variables at run time.
+# Keep the Node version in sync with .node-version (CI uses it; test:image checks both match).
 ARG NODE_IMAGE=node:24.22.0-alpine3.24
 
 FROM ${NODE_IMAGE} AS base
