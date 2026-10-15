@@ -1,6 +1,6 @@
 ---
 id: 005-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [005-T04, 005-T05]
 covers: []
 ---
@@ -30,12 +30,12 @@ export class DeviceModule {}
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/device/device.module.ts` (nuevo) + `device.module.spec.ts`
-- [ ] `src/app.module.ts` (modificado)
+- [x] `src/modules/device/device.module.ts` (nuevo) + `device.module.spec.ts`
+- [x] `src/app.module.ts` (modificado)
 
 ## Criterios de aceptación
-- [ ] `device.module.spec.ts` resuelve `RegisterDeviceUseCase` y `DeviceController`, y `TRACCAR_DEVICE_PORT` es `instanceof TraccarDeviceHttpAdapter`.
-- [ ] `pnpm test` y `pnpm test:e2e` existentes siguen en verde.
+- [x] `device.module.spec.ts` resuelve `RegisterDeviceUseCase` y `DeviceController`, y `TRACCAR_DEVICE_PORT` es `instanceof TraccarDeviceHttpAdapter`.
+- [x] `pnpm test` y `pnpm test:e2e` existentes siguen en verde.
 
 ## Fuera de alcance
 - Escenarios HTTP completos (T08).
@@ -48,3 +48,7 @@ pnpm test:e2e
 ```
 
 ## Handoff
+- Creado `DeviceModule` inyectando `TraccarHttpClient` en `TraccarDeviceHttpAdapter` y este en `RegisterDeviceUseCase`.
+- Registrado `DeviceModule` en los `imports` dinámicos de `AppModule`.
+- Tests de wiring y suites e2e existentes en verde.
+- Desbloquea T07 (route allowlist e2e) y T08 (device-register e2e suite).
