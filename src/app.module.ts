@@ -14,8 +14,10 @@ import {
 } from './shared/infrastructure/config/app-config.js';
 import { RequestContextMiddleware } from './shared/infrastructure/context/request-context.middleware.js';
 import { HealthController } from './shared/infrastructure/http/health.controller.js';
+import { HealthModule } from './shared/infrastructure/health/health.module.js';
 import { HttpExceptionFilter } from './shared/infrastructure/http/http-exception.filter.js';
 import { LoggingModule } from './shared/infrastructure/logging/logging.module.js';
+import { TraccarModule } from './shared/infrastructure/traccar/traccar.module.js';
 
 export interface AppModuleOverrides {
   readonly jwtVerifier?: Pick<JwtVerifier, 'verify'>;
@@ -40,12 +42,23 @@ export class AppModule implements NestModule {
           inject: [APP_CONFIG],
         };
 
+    const configModule: DynamicModule = {
+      module: class ConfigModule {},
+      global: true,
+      providers: [{ provide: APP_CONFIG, useValue: config }],
+      exports: [APP_CONFIG],
+    };
+
     return {
       module: AppModule,
-      imports: [LoggingModule.forRoot(config, logStream)],
+      imports: [
+        configModule,
+        HealthModule,
+        TraccarModule,
+        LoggingModule.forRoot(config, logStream),
+      ],
       controllers: [HealthController],
       providers: [
-        { provide: APP_CONFIG, useValue: config },
         { provide: APP_FILTER, useClass: HttpExceptionFilter },
         jwtVerifierProvider,
         { provide: APP_GUARD, useClass: ServiceAuthGuard },

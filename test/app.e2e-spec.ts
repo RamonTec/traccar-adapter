@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import net from 'node:net';
+import { createServer, type IncomingMessage } from 'node:http';
+import net, { type AddressInfo } from 'node:net';
 import { Controller, Get, type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
@@ -42,6 +43,87 @@ async function freePort(): Promise<number> {
     });
     server.on('error', reject);
   });
+}
+
+interface FakeTraccarServer {
+  readonly url: string;
+  readonly close: () => Promise<void>;
+  readonly requests: Array<{
+    method?: string;
+    url?: string;
+    headers: Record<string, string | string[] | undefined>;
+    body: string;
+  }>;
+  setHandler: (
+    handler: (
+      req: IncomingMessage,
+      body: string,
+    ) => { status: number; json?: unknown },
+  ) => void;
+}
+
+async function createFakeTraccar(
+  initialHandler?: (
+    req: IncomingMessage,
+    body: string,
+  ) => { status: number; json?: unknown },
+): Promise<FakeTraccarServer> {
+  const requests: Array<{
+    method?: string;
+    url?: string;
+    headers: Record<string, string | string[] | undefined>;
+    body: string;
+  }> = [];
+
+  let handler =
+    initialHandler ??
+    (() => ({ status: 200, json: { id: 1, version: '6.15' } }));
+
+  const server = createServer((req, res) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      requests.push({
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body,
+      });
+      const response = handler(req, body);
+      res.writeHead(response.status, { 'Content-Type': 'application/json' });
+      res.end(response.json !== undefined ? JSON.stringify(response.json) : '');
+    });
+  });
+
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const address = server.address() as AddressInfo;
+
+  return {
+    url: `http://127.0.0.1:${address.port}`,
+    close: () =>
+      new Promise<void>((resolve, reject) => {
+        if (!server.listening) {
+          resolve();
+          return;
+        }
+        server.close((err) => {
+          if (
+            err &&
+            (err as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING'
+          ) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      }),
+    requests,
+    setHandler: (newHandler) => {
+      handler = newHandler;
+    },
+  };
 }
 
 function startApp(env: Record<string, string>): ChildProcess {
@@ -243,6 +325,102 @@ describe('Foundation (e2e)', () => {
       for (const line of lines) {
         expect(JSON.stringify(line)).not.toContain(TOKEN);
       }
+    });
+  });
+
+  describe('Readiness and Traccar (in-process)', () => {
+    let app: INestApplication;
+    let traccar: FakeTraccarServer;
+
+    beforeEach(async () => {
+      await resetLoggerState();
+      traccar = await createFakeTraccar();
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [
+          AppModule.register(
+            testConfig({
+              port: 0,
+              logLevel: 'error',
+              traccar: { baseUrl: traccar.url },
+            }),
+          ),
+        ],
+      }).compile();
+
+      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app.useLogger(app.get(Logger));
+      await app.init();
+    });
+
+    afterEach(async () => {
+      if (app) {
+        await app.close();
+      }
+      if (traccar) {
+        await traccar.close();
+      }
+      await resetLoggerState();
+    });
+
+    it('AC-7b: GET /health/ready returns 200 { status: "ok", checks: { traccar: "ok" } } without token when Traccar responds 200', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/health/ready')
+        .expect(200);
+
+      expect(res.body).toEqual({
+        status: 'ok',
+        checks: { traccar: 'ok' },
+      });
+    });
+
+    it('AC-7c: GET /health/ready returns 503 { status: "error", checks: { traccar: "error" } } when Traccar returns 500', async () => {
+      traccar.setHandler(() => ({
+        status: 500,
+        json: { message: 'Internal Server Error' },
+      }));
+
+      const res = await request(app.getHttpServer())
+        .get('/health/ready')
+        .expect(503);
+
+      expect(res.body).toEqual({
+        status: 'error',
+        checks: { traccar: 'error' },
+      });
+    });
+
+    it('AC-7c: GET /health/ready returns 503 { status: "error", checks: { traccar: "error" } } when Traccar is down', async () => {
+      await traccar.close();
+
+      const res = await request(app.getHttpServer())
+        .get('/health/ready')
+        .expect(503);
+
+      expect(res.body).toEqual({
+        status: 'error',
+        checks: { traccar: 'error' },
+      });
+    });
+
+    it('AC-6: GET /health/ready propagates x-correlation-id to Traccar upstream request', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/health/ready')
+        .set('x-correlation-id', 'ready-1')
+        .expect(200);
+
+      expect(res.headers['x-correlation-id']).toBe('ready-1');
+      const traccarReq = traccar.requests.find((r) => r.url === '/api/server');
+      expect(traccarReq).toBeDefined();
+      expect(traccarReq?.headers['x-correlation-id']).toBe('ready-1');
+    });
+
+    it('GET /health returns 200 without querying Traccar', async () => {
+      await traccar.close();
+
+      const res = await request(app.getHttpServer()).get('/health').expect(200);
+
+      expect(res.body).toEqual({ status: 'ok' });
+      expect(traccar.requests).toHaveLength(0);
     });
   });
 

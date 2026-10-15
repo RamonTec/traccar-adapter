@@ -1,6 +1,6 @@
 ---
 id: 003-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [003-T04, 002-T04]
 covers: [AC-6, AC-7]
 ---
@@ -35,17 +35,17 @@ export class TraccarModule implements OnModuleInit { /* registry.register('tracc
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/health/readiness.registry.ts` + `readiness.controller.ts` + `health.module.ts` (nuevos) + `readiness.registry.spec.ts`
-- [ ] `src/shared/infrastructure/traccar/traccar.module.ts` (nuevo)
-- [ ] `src/app.module.ts` (importar `HealthModule` y `TraccarModule`)
-- [ ] `test/app.e2e-spec.ts` (ampliar: Traccar falso en el puerto 0, con `TRACCAR_BASE_URL` apuntando a él)
+- [x] `src/shared/infrastructure/health/readiness.registry.ts` + `readiness.controller.ts` + `health.module.ts` (nuevos) + `readiness.registry.spec.ts`
+- [x] `src/shared/infrastructure/traccar/traccar.module.ts` (nuevo)
+- [x] `src/app.module.ts` (importar `HealthModule` y `TraccarModule`)
+- [x] `test/app.e2e-spec.ts` (ampliar: Traccar falso en el puerto 0, con `TRACCAR_BASE_URL` apuntando a él)
 
 ## Criterios de aceptación
-- [ ] **AC-7a** — Unit: un registry con un check `true` y otro que lanza → `{ ok: false, checks: { a: 'ok', b: 'error' } }`; registrar un nombre duplicado lanza.
-- [ ] **AC-7b** — E2E: con un Traccar falso que responde 200 a `/api/server` → `GET /health/ready` = `200 {"status":"ok","checks":{"traccar":"ok"}}` sin token.
-- [ ] **AC-7c** — E2E: con el Traccar falso respondiendo 500 (o caído) → `503 {"status":"error","checks":{"traccar":"error"}}`.
-- [ ] **AC-6** — E2E: con `x-correlation-id: ready-1`, el Traccar falso recibe `x-correlation-id: ready-1`.
-- [ ] `GET /health` sigue respondiendo 200 sin consultar Traccar.
+- [x] **AC-7a** — Unit: un registry con un check `true` y otro que lanza → `{ ok: false, checks: { a: 'ok', b: 'error' } }`; registrar un nombre duplicado lanza.
+- [x] **AC-7b** — E2E: con un Traccar falso que responde 200 a `/api/server` → `GET /health/ready` = `200 {"status":"ok","checks":{"traccar":"ok"}}` sin token.
+- [x] **AC-7c** — E2E: con el Traccar falso respondiendo 500 (o caído) → `503 {"status":"error","checks":{"traccar":"error"}}`.
+- [x] **AC-6** — E2E: con `x-correlation-id: ready-1`, el Traccar falso recibe `x-correlation-id: ready-1`.
+- [x] `GET /health` sigue respondiendo 200 sin consultar Traccar.
 
 ## Fuera de alcance
 - Check de NATS (009).
@@ -57,3 +57,6 @@ pnpm check
 ```
 
 ## Handoff
+Implementado ReadinessRegistry, ReadinessController (GET /health/ready) y TraccarModule que registra el check de Traccar (/api/server).
+Soporta propagación de correlation ID upstream hacia Traccar.
+GET /health permanece desacoplado de dependencias externas.
