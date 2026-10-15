@@ -1,6 +1,6 @@
 ---
 id: 006-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T02]
 covers: [AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-8]
 ---
@@ -59,3 +59,5 @@ pnpm check
 ```
 
 ## Handoff
+- `SetDeviceStatusUseCase.execute({deviceId, disabled})` → `{device, changed}`; orden: not-found → idempotencia → retired → write.
+- Fake en memoria dentro del spec; errores del port se propagan sin envolver.
