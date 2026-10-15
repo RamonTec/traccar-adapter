@@ -11,7 +11,7 @@ spec: 004-group-create
 | T03 | Add TraccarGroupPort and CreateGroupUseCase | T02 | done |
 | T04 | Add TraccarGroupHttpAdapter | T03, 003-T04 | done |
 | T05 | Add CreateGroup DTO and GroupController with audit log | T01, T03, 002-T04 | done |
-| T06 | Wire GroupModule into AppModule | T04, T05 | todo |
+| T06 | Wire GroupModule into AppModule | T04, T05 | done |
 | T07 | Add group-create e2e suite | T06 | todo |
 
 ## Cobertura AC → tasks

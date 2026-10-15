@@ -45,6 +45,7 @@ export class GroupController {
       throw err;
     } finally {
       const audit = {
+        msg: 'group.create',
         op: 'group.create',
         actor,
         name: dto.name,

@@ -154,7 +154,7 @@ describe('GroupController (integration)', () => {
       groupId: undefined,
     },
   ])(
-    'AC-7: logs exactly one audit line with result $result',
+    'AC-7/AC-7b: logs exactly one audit line with result $result and msg',
     async ({ result, outcome, status, level, groupId }) => {
       useCase.result = outcome;
 
@@ -163,6 +163,7 @@ describe('GroupController (integration)', () => {
       await vi.waitFor(() => expect(auditLines()).toHaveLength(1));
       const [line] = auditLines();
       expect(line).toMatchObject({
+        msg: 'group.create',
         op: 'group.create',
         actor: 'svc-test',
         name: 'acme',

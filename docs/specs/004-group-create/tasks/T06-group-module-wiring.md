@@ -1,6 +1,6 @@
 ---
 id: 004-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [004-T04, 004-T05]
 covers: [AC-7]
 ---
@@ -54,3 +54,6 @@ pnpm test:e2e
 ```
 
 ## Handoff
+- GroupModule implementado y cableado en AppModule con GroupController, TraccarGroupHttpAdapter y CreateGroupUseCase.
+- Añadido `msg: 'group.create'` a la línea de auditoría y tests actualizados para AC-7b.
+- Todos los checks y e2e en verde. Queda desbloqueado 004-T07 (group-create e2e suite).
