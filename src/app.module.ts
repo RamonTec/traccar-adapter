@@ -1,4 +1,9 @@
-import { type DynamicModule, Module } from '@nestjs/common';
+import {
+  type DynamicModule,
+  type MiddlewareConsumer,
+  Module,
+  type NestModule,
+} from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
 import { JwtVerifier } from './shared/infrastructure/auth/jwt-verifier.js';
@@ -7,6 +12,7 @@ import {
   APP_CONFIG,
   type AppConfig,
 } from './shared/infrastructure/config/app-config.js';
+import { RequestContextMiddleware } from './shared/infrastructure/context/request-context.middleware.js';
 import { HealthController } from './shared/infrastructure/http/health.controller.js';
 import { HttpExceptionFilter } from './shared/infrastructure/http/http-exception.filter.js';
 import { LoggingModule } from './shared/infrastructure/logging/logging.module.js';
@@ -16,7 +22,11 @@ export interface AppModuleOverrides {
 }
 
 @Module({})
-export class AppModule {
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+
   static register(
     config: AppConfig,
     logStream?: DestinationStream,
