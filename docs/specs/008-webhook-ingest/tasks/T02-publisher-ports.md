@@ -1,6 +1,6 @@
 ---
 id: 008-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [007-T02]
 covers: []
 ---
@@ -58,3 +58,5 @@ pnpm check
 ```
 
 ## Handoff
+- Ports `EventPublisherPort` / `DeadLetterPublisherPort` (+ símbolos, `DeadLetterReason`, `PayloadKind`, `DeadLetterRequest`).
+- Fakes en `ports/__fakes__/`: registran en orden; con `failWith` rechazan sin registrar.

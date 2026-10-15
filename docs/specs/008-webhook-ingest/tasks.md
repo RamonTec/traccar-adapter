@@ -9,7 +9,7 @@ spec: 008-webhook-ingest
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
 | T01 | Add webhook config section | 002-T01 | done |
-| T02 | Add ingestion publisher ports and fakes | 007-T02 | todo |
+| T02 | Add ingestion publisher ports and fakes | 007-T02 | done |
 | T03 | Add IngestTraccarPayloadUseCase | T02, 007-T04 | todo |
 | T04 | Add bounded raw body capture for webhook routes | T01 | todo |
 | T05 | Add WebhookTokenGuard | T01 | todo |
