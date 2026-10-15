@@ -68,23 +68,17 @@ export class TraccarWebhookController {
       throw err;
     }
 
-    if (result.outcome === 'published') {
-      this.logger.log({
-        msg: 'webhook.ingest',
-        kind,
-        eventId: result.eventId,
-        outcome: result.outcome,
-        durationMs: durationMs(),
-      });
-    } else {
-      this.logger.warn({
-        msg: 'webhook.ingest',
-        kind,
-        outcome: result.outcome,
-        reason: result.reason,
-        durationMs: durationMs(),
-      });
-    }
+    const line = {
+      msg: 'webhook.ingest',
+      kind,
+      outcome: result.outcome,
+      ...('eventId' in result && { eventId: result.eventId }),
+      ...('reason' in result && { reason: result.reason }),
+      durationMs: durationMs(),
+    };
+    // dead-lettered and buffered (JetStream down, kept in the outbox) are worth a warning.
+    if (result.outcome === 'published') this.logger.log(line);
+    else this.logger.warn(line);
     return { outcome: result.outcome };
   }
 }

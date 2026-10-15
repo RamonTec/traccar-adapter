@@ -14,7 +14,7 @@ spec: 013-delivery-outbox
 | T06 | Add OutboxModule, readiness wiring and non-critical NATS | T03, T04, T05 | done |
 | T07 | Return Delivery from ingestion ports and add buffered outcome | — | done |
 | T08 | Publish ingestion events and dead-letters through ReliablePublisher | T06, T07 | done |
-| T09 | Add outbox e2e suite and webhook buffered logging | T08 | todo |
+| T09 | Add outbox e2e suite and webhook buffered logging | T08 | done |
 
 ## Cobertura AC → tasks
 | AC | Tasks |

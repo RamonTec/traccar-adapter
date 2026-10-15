@@ -123,9 +123,9 @@ describe('Traccar webhook → JetStream (e2e)', () => {
     expect((await jsm.streams.info(EVENTS_STREAM)).state.messages).toBe(1);
   });
 
-  it('NATS down → the webhook answers 503 so Traccar retries', async () => {
+  it('NATS down → 200 buffered: kept in the outbox until JetStream is back (013)', async () => {
     await start(['nats://127.0.0.1:1'], false);
 
-    await postPosition().expect(503);
+    await postPosition().expect(200, { outcome: 'buffered' });
   });
 });

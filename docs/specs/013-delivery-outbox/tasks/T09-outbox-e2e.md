@@ -1,6 +1,6 @@
 ---
 id: 013-T09
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T08]
 covers: [AC-1, AC-2, AC-3, AC-5, AC-8, AC-9, AC-12]
 ---
@@ -44,3 +44,6 @@ pnpm check
 ```
 
 ## Handoff
+- Webhook: outcome `buffered` → log warn con eventId/reason según el caso.
+- `test/outbox.e2e-spec.ts`: NATS caído → 200 buffered + readiness ready con `nats: down` y `outbox.pending`; reinicio con NATS → entregado una vez y en orden (eventos y dead-letter); dedup al reenviar; outbox lleno → 503.
+- e2e de 008/009/010 de 'NATS caído → 503' pasan a 200 `buffered` (cambio de contrato de 013). e2e 74/74 ×2.
