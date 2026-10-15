@@ -10,8 +10,11 @@ services:
       - '${TRACCAR_OSMAND_PORT:-15055}:5055'
     environment:
       CONFIG_USE_ENVIRONMENT_VARIABLES: 'true'
-      FORWARD_URL: ${TRACCAR_FORWARD_URL:-http://host.docker.internal:3123/api/gps/webhook}
-      EVENT_FORWARD_URL: ${TRACCAR_FORWARD_URL:-http://host.docker.internal:3123/api/gps/webhook}
+      FORWARD_URL: ${TRACCAR_FORWARD_URL:-http://host.docker.internal:3000/webhooks/traccar/positions}
+      EVENT_FORWARD_URL: ${TRACCAR_EVENT_FORWARD_URL:-http://host.docker.internal:3000/webhooks/traccar/events}
+      # Retry tuning for experiments (docs/ops/traccar-config.md); defaults match traccar.xml.
+      FORWARD_RETRY_DELAY: ${TRACCAR_FORWARD_RETRY_DELAY:-1000}
+      FORWARD_RETRY_COUNT: ${TRACCAR_FORWARD_RETRY_COUNT:-10}
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
@@ -19,7 +22,8 @@ services:
       - traccar-data:/opt/traccar/data
 
   # Captures Traccar's forward payloads into test/fixtures/traccar/captured/.
-  # Start with: TRACCAR_FORWARD_URL=http://capture:3123/api/gps/webhook docker compose --profile capture up -d
+  # Start with: TRACCAR_FORWARD_URL=http://capture:3123/positions TRACCAR_EVENT_FORWARD_URL=http://capture:3123/events \
+  #   docker compose --profile capture up -d
   capture:
     profiles: [capture]
     image: node:24-alpine

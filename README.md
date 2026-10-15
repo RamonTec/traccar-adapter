@@ -29,6 +29,10 @@ pnpm check   # typecheck + lint + format + tests
 | `WEBHOOK_TOKEN` | Token compartido que Traccar envía como `Authorization: Bearer …` en el reenvío (mín. 16 caracteres, secreto) | Sí | — |
 | `WEBHOOK_MAX_BODY_BYTES` | Tamaño máximo del body del webhook en bytes (1024–10485760); lo que exceda va al dead-letter | No | `1048576` |
 
+## Integración con Traccar
+
+Configuración requerida de Traccar (reenvío, reintentos, permisos) y caída máxima tolerable: [docs/ops/traccar-config.md](docs/ops/traccar-config.md). Traccar local para desarrollo: [dev/traccar/README.md](dev/traccar/README.md).
+
 ## Autenticación de servicios (S2S)
 
 Las llamadas REST a endpoints protegidos de este servicio requieren un token Bearer emitido por Keycloak ([ADR-0003](docs/decisions/0003-service-to-service-auth.md)):
