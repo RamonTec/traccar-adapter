@@ -1,6 +1,6 @@
 ---
 id: 004-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [004-T01, 004-T03, 002-T04]
 covers: [AC-4, AC-6, AC-7, AC-8]
 ---
@@ -47,16 +47,16 @@ Reglas:
 - El controller expone **solo** `POST /groups`: no hay GET, PUT, PATCH ni DELETE.
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/group/infrastructure/inbound/dto/create-group.dto.ts` (nuevo) + `.spec.ts`
-- [ ] `src/modules/group/infrastructure/inbound/group.controller.ts` (nuevo)
-- [ ] `src/modules/group/infrastructure/inbound/group.controller.spec.ts` (nuevo: `Test.createTestingModule` con un `CreateGroupUseCase` falso vía `useValue`, `HttpExceptionFilter` como `APP_FILTER` y supertest)
+- [x] `src/modules/group/infrastructure/inbound/dto/create-group.dto.ts` (nuevo) + `.spec.ts`
+- [x] `src/modules/group/infrastructure/inbound/group.controller.ts` (nuevo)
+- [x] `src/modules/group/infrastructure/inbound/group.controller.spec.ts` (nuevo: `Test.createTestingModule` con un `CreateGroupUseCase` falso vía `useValue`, `HttpExceptionFilter` como `APP_FILTER` y supertest)
 
 ## Criterios de aceptación
-- [ ] **AC-4** — El schema rechaza `{}`, `{name:1}`, `{name:'   '}`, `{name:'a'.repeat(129)}` y `{name:'a', extra:true}`; acepta `'a'.repeat(128)` y `' acme '` sin transformarlo. Vía HTTP: 400 `VALIDATION_ERROR` con `details` no vacío, sin llamar al use case.
-- [ ] **AC-1/2 (HTTP)** — Use case falso `created:true` → 201 `{groupId, name}`; `created:false` → 200.
-- [ ] **AC-6** — Metadatos de la ruta: `Reflector` devuelve `'groups:write'` para `REQUIRED_ROLE_KEY` en el handler `create`.
-- [ ] **AC-7** — Con log-capture: tras cada uno de `created`, `existing`, `GroupNameAmbiguousError` (→ 409) y `UpstreamUnavailableError` (→ 503) hay exactamente una línea con `op:'group.create'`, `actor`, `name`, `result` correcto y `durationMs` numérico; `groupId` presente solo si hay group.
-- [ ] **AC-8** — Los métodos de `GroupController.prototype` decorados con ruta son solo `create` (POST). Se comprueba con `Reflect.getMetadata('method', ...)` sobre cada método.
+- [x] **AC-4** — El schema rechaza `{}`, `{name:1}`, `{name:'   '}`, `{name:'a'.repeat(129)}` y `{name:'a', extra:true}`; acepta `'a'.repeat(128)` y `' acme '` sin transformarlo. Vía HTTP: 400 `VALIDATION_ERROR` con `details` no vacío, sin llamar al use case.
+- [x] **AC-1/2 (HTTP)** — Use case falso `created:true` → 201 `{groupId, name}`; `created:false` → 200.
+- [x] **AC-6** — Metadatos de la ruta: `Reflector` devuelve `'groups:write'` para `REQUIRED_ROLE_KEY` en el handler `create`.
+- [x] **AC-7** — Con log-capture: tras cada uno de `created`, `existing`, `GroupNameAmbiguousError` (→ 409) y `UpstreamUnavailableError` (→ 503) hay exactamente una línea con `op:'group.create'`, `actor`, `name`, `result` correcto y `durationMs` numérico; `groupId` presente solo si hay group.
+- [x] **AC-8** — Los métodos de `GroupController.prototype` decorados con ruta son solo `create` (POST). Se comprueba con `Reflect.getMetadata('method', ...)` sobre cada método.
 
 ## Fuera de alcance
 - Registro en `GroupModule`/`AppModule` (T06). Guard JWT real (ya existe; e2e en T07).
@@ -68,3 +68,6 @@ pnpm check
 ```
 
 ## Handoff
+- `GroupController` inyecta `CreateGroupUseCase` por clase; T06 debe proveer ese token (`useFactory` con `TRACCAR_GROUP_PORT`).
+- Auditoría con el `Logger` de Nest: `log` → `level: 'info'`, `warn` → `level: 'warn'` (labels, no números). `groupId` solo aparece si hay group; `durationMs` se redondea a ms.
+- En el spec, el actor lo pone un middleware de test (`req.actor = 'svc-test'`) en lugar del guard JWT; el actor real se prueba en T07.

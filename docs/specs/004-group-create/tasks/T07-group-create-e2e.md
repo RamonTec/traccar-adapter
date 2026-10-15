@@ -1,6 +1,6 @@
 ---
 id: 004-T07
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [004-T06]
 covers: [AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-8]
 ---
@@ -25,18 +25,18 @@ Una suite e2e en proceso (`AppModule.register` + Traccar falso + verifier JWT fa
 - Verifier falso, como en `app.e2e-spec.ts`. Un token devuelve `{ actor:'core-service', roles:['groups:write'] }` y otro `roles: []`.
 
 ## Archivos a crear/modificar
-- [ ] `test/support/fake-traccar.ts` (nuevo, extraído)
-- [ ] `test/app.e2e-spec.ts` (modificado: import)
-- [ ] `test/group-create.e2e-spec.ts` (nuevo)
+- [x] `test/support/fake-traccar.ts` (nuevo, extraído)
+- [x] `test/app.e2e-spec.ts` (modificado: import)
+- [x] `test/group-create.e2e-spec.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-1** — Traccar vacío → 201 `{groupId, name:'acme'}`; el fake recibió un POST con body `{"name":"acme"}`.
-- [ ] **AC-2** — Repetir la petición → 200 con el mismo `groupId`; el fake tiene un solo group.
-- [ ] **AC-3** — Fake con dos `'dup'` → 409 `GROUP_NAME_AMBIGUOUS`; no se hizo ningún POST.
-- [ ] **AC-4** — `{name:''}` y `{name:'a', x:1}` → 400 `VALIDATION_ERROR` con `details`.
-- [ ] **AC-5** — `down=true` → 503 `UPSTREAM_UNAVAILABLE`; tras `down=false` el mismo nombre → 201, y un tercer intento → 200.
-- [ ] **AC-6** — Sin token → 401; token sin `groups:write` → 403.
-- [ ] **AC-8** — `GET`, `PUT`, `PATCH` y `DELETE` sobre `/groups` y `/groups/1` → 404.
+- [x] **AC-1** — Traccar vacío → 201 `{groupId, name:'acme'}`; el fake recibió un POST con body `{"name":"acme"}`.
+- [x] **AC-2** — Repetir la petición → 200 con el mismo `groupId`; el fake tiene un solo group.
+- [x] **AC-3** — Fake con dos `'dup'` → 409 `GROUP_NAME_AMBIGUOUS`; no se hizo ningún POST.
+- [x] **AC-4** — `{name:''}` y `{name:'a', x:1}` → 400 `VALIDATION_ERROR` con `details`.
+- [x] **AC-5** — `down=true` → 503 `UPSTREAM_UNAVAILABLE`; tras `down=false` el mismo nombre → 201, y un tercer intento → 200.
+- [x] **AC-6** — Sin token → 401; token sin `groups:write` → 403.
+- [x] **AC-8** — `GET`, `PUT`, `PATCH` y `DELETE` sobre `/groups` y `/groups/1` → 404.
 
 ## Fuera de alcance
 - AC-7 (logs), cubierto en T05.
@@ -48,3 +48,7 @@ pnpm check
 ```
 
 ## Handoff
+Extraído `createFakeTraccar` a `test/support/fake-traccar.ts` con estado en memoria de groups e interruptor `down`.
+Actualizado `test/app.e2e-spec.ts` para reutilizar el fake.
+Implementada suite `test/group-create.e2e-spec.ts` validando AC-1 a AC-6 y AC-8 de punta a punta.
+Spec 004 completo: todos los tests e2e y unitarios en verde.
