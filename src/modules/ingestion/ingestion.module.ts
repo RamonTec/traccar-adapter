@@ -1,5 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
-import { JetStreamPublisher } from '../../shared/infrastructure/nats/jetstream.publisher.js';
+import { ReliablePublisher } from '../../shared/infrastructure/outbox/reliable.publisher.js';
 import {
   DEAD_LETTER_PUBLISHER_PORT,
   type DeadLetterPublisherPort,
@@ -34,9 +34,9 @@ export class IngestionModule {
             }
           : {
               provide: EVENT_PUBLISHER_PORT,
-              useFactory: (p: JetStreamPublisher) =>
+              useFactory: (p: ReliablePublisher) =>
                 new JetStreamEventPublisher(p),
-              inject: [JetStreamPublisher],
+              inject: [ReliablePublisher],
             },
         overrides?.deadLetterPublisher
           ? {
@@ -45,9 +45,9 @@ export class IngestionModule {
             }
           : {
               provide: DEAD_LETTER_PUBLISHER_PORT,
-              useFactory: (p: JetStreamPublisher) =>
+              useFactory: (p: ReliablePublisher) =>
                 new JetStreamDeadLetterPublisher(p),
-              inject: [JetStreamPublisher],
+              inject: [ReliablePublisher],
             },
         {
           provide: IngestTraccarPayloadUseCase,

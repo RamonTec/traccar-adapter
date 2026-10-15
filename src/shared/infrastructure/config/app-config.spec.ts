@@ -43,6 +43,10 @@ describe('loadConfig', () => {
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
       },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
+      },
     });
 
     expect(
@@ -75,6 +79,10 @@ describe('loadConfig', () => {
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
       },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
+      },
     });
 
     expect(loadConfig({ ...TEST_ENV, PORT: '' })).toEqual({
@@ -99,6 +107,10 @@ describe('loadConfig', () => {
         eventsMaxAgeDays: 7,
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
+      },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
       },
     });
   });
@@ -141,6 +153,10 @@ describe('loadConfig', () => {
         eventsMaxAgeDays: 7,
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
+      },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
       },
     });
   });
@@ -302,6 +318,10 @@ describe('testConfig helper', () => {
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
       },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
+      },
     });
   });
 
@@ -329,6 +349,10 @@ describe('testConfig helper', () => {
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
       },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
+      },
     });
   });
 
@@ -355,6 +379,10 @@ describe('testConfig helper', () => {
         eventsMaxAgeDays: 7,
         deadLetterMaxAgeDays: 30,
         duplicateWindowMinutes: 10,
+      },
+      outbox: {
+        path: ':memory:',
+        maxBytes: 536870912,
       },
     });
   });
@@ -412,6 +440,40 @@ describe('loadConfig — nats', () => {
         .invalidVariables,
     ).toEqual([name]);
   });
+});
+
+describe('loadConfig — outbox', () => {
+  it('AC-10a: defaults to data/outbox.db and 512 MiB', () => {
+    const { OUTBOX_PATH: _omit, ...env } = TEST_ENV;
+
+    expect(loadConfig(env).outbox).toEqual({
+      path: 'data/outbox.db',
+      maxBytes: 536_870_912,
+    });
+  });
+
+  it('AC-10a: accepts a custom path and size', () => {
+    expect(
+      loadConfig({
+        ...TEST_ENV,
+        OUTBOX_PATH: '/var/lib/traccar-adapter/outbox.db',
+        OUTBOX_MAX_BYTES: '2097152',
+      }).outbox,
+    ).toEqual({
+      path: '/var/lib/traccar-adapter/outbox.db',
+      maxBytes: 2_097_152,
+    });
+  });
+
+  it.each(['1000', '1000000000000', 'abc'])(
+    'AC-10b: OUTBOX_MAX_BYTES=%s is invalid',
+    (value) => {
+      expect(
+        captureError(() => loadConfig({ ...TEST_ENV, OUTBOX_MAX_BYTES: value }))
+          .invalidVariables,
+      ).toEqual(['OUTBOX_MAX_BYTES']);
+    },
+  );
 });
 
 describe('testConfig helper — webhook', () => {

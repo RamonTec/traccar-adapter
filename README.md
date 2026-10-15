@@ -34,6 +34,10 @@ pnpm check   # typecheck + lint + format + tests
 | `NATS_EVENTS_MAX_AGE_DAYS` | Retención del stream `TELEMETRY_EVENTS` en días (1–365) | No | `7` |
 | `NATS_DEADLETTER_MAX_AGE_DAYS` | Retención del stream `TELEMETRY_DEADLETTER` en días (1–365) | No | `30` |
 | `NATS_DUPLICATE_WINDOW_MINUTES` | Ventana de deduplicación por `Nats-Msg-Id` en minutos (1–60) | No | `10` |
+| `OUTBOX_PATH` | Archivo SQLite del outbox de entrega ([ADR-0007](docs/decisions/0007-local-delivery-outbox.md)): guarda los mensajes solo mientras JetStream no está disponible | No | `data/outbox.db` |
+| `OUTBOX_MAX_BYTES` | Tamaño máximo de los mensajes pendientes en el outbox (1 MiB–64 GiB); lleno → el webhook responde 503 | No | `536870912` (512 MiB) |
+
+> **Despliegue:** `OUTBOX_PATH` debe estar en un **volumen persistente por réplica** (Compose: volumen con nombre; Kubernetes: StatefulSet con un PVC por réplica). Sin él, un reinicio con NATS caído pierde los mensajes pendientes.
 
 ## Integración con Traccar
 

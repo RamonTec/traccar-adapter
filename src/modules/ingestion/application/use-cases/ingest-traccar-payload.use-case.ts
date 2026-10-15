@@ -20,7 +20,9 @@ export interface IngestCommand {
 
 export type IngestOutcome =
   | { outcome: 'published'; eventId: string }
-  | { outcome: 'deadlettered'; reason: DeadLetterReason };
+  | { outcome: 'deadlettered'; reason: DeadLetterReason }
+  /** Accepted into the local outbox; JetStream gets it when it is back (ADR-0007). */
+  | { outcome: 'buffered'; eventId?: string; reason?: DeadLetterReason };
 
 interface Rejection {
   readonly reason: DeadLetterReason;
@@ -46,8 +48,8 @@ export class IngestTraccarPayloadUseCase {
     if (!result.ok) return this.deadLetter(cmd, result.rejection);
 
     // Publisher errors propagate so the webhook answers 5xx and Traccar retries.
-    await this.events.publish(result.event);
-    return { outcome: 'published', eventId: result.event.id };
+    const delivery = await this.events.publish(result.event);
+    return { outcome: delivery, eventId: result.event.id };
   }
 
   private normalize(cmd: IngestCommand): NormalizeResult | Rejection {
@@ -86,7 +88,7 @@ export class IngestTraccarPayloadUseCase {
     cmd: IngestCommand,
     { reason, detail }: Rejection | NormalizationRejection,
   ): Promise<IngestOutcome> {
-    await this.deadLetters.publish({
+    const delivery = await this.deadLetters.publish({
       kind: cmd.kind,
       reason,
       detail,
@@ -94,6 +96,8 @@ export class IngestTraccarPayloadUseCase {
       receivedAt: cmd.receivedAt,
       correlationId: cmd.correlationId,
     });
-    return { outcome: 'deadlettered', reason };
+    return delivery === 'buffered'
+      ? { outcome: 'buffered', reason }
+      : { outcome: 'deadlettered', reason };
   }
 }

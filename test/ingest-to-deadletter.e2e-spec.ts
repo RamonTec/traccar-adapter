@@ -135,9 +135,9 @@ describe('Traccar webhook → dead-letter (e2e)', () => {
     });
   });
 
-  it('AC-5: NATS down → invalid body answers 503 (nothing lost silently)', async () => {
+  it('AC-5 (+013): NATS down → invalid body is buffered in the outbox (nothing lost silently)', async () => {
     await start(['nats://127.0.0.1:1'], false);
 
-    await post(INVALID).expect(503);
+    await post(INVALID).expect(200, { outcome: 'buffered' });
   });
 });

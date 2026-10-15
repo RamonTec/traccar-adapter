@@ -1,14 +1,16 @@
 import { readFileSync } from 'node:fs';
+import type { PublishOptions } from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
 import type {
-  JetStreamPublisher,
-  PublishOptions,
-} from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
+  Delivery,
+  ReliablePublisher,
+} from '../../../../shared/infrastructure/outbox/reliable.publisher.js';
 import { SUBJECTS } from '../../../../shared/infrastructure/nats/stream-definitions.js';
 import { normalizeEvent, normalizePosition } from '../../domain/normalize.js';
 import type { TelemetryEvent } from '../../domain/telemetry-event.js';
 import { JetStreamEventPublisher } from './jetstream-event.publisher.js';
 
-class FakeJetStreamPublisher {
+class FakeReliablePublisher {
+  delivery: Delivery = 'published';
   readonly calls: {
     subject: string;
     payload: unknown;
@@ -17,7 +19,7 @@ class FakeJetStreamPublisher {
 
   publish(subject: string, payload: unknown, opts: PublishOptions) {
     this.calls.push({ subject, payload, opts });
-    return Promise.resolve({ stream: 'S', seq: 1, duplicate: false });
+    return Promise.resolve(this.delivery);
   }
 }
 
@@ -41,13 +43,13 @@ function event(name: 'position' | 'event-alarm'): TelemetryEvent {
 }
 
 describe('JetStreamEventPublisher', () => {
-  let fake: FakeJetStreamPublisher;
+  let fake: FakeReliablePublisher;
   let publisher: JetStreamEventPublisher;
 
   beforeEach(() => {
-    fake = new FakeJetStreamPublisher();
+    fake = new FakeReliablePublisher();
     publisher = new JetStreamEventPublisher(
-      fake as unknown as JetStreamPublisher,
+      fake as unknown as ReliablePublisher,
     );
   });
 
@@ -67,4 +69,15 @@ describe('JetStreamEventPublisher', () => {
       },
     ]);
   });
+
+  it.each(['published', 'buffered'] as const)(
+    'returns the delivery of the reliable publisher (%s)',
+    async (delivery) => {
+      fake.delivery = delivery;
+
+      await expect(publisher.publish(event('position'))).resolves.toBe(
+        delivery,
+      );
+    },
+  );
 });

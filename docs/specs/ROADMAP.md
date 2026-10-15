@@ -15,7 +15,7 @@ Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS
 | 009-jetstream-publish | streams, publish con dedup, publisher de eventos | FR9, NFR6 | 0004 | 008 | done |
 | 010-deadletter-publish | publisher de dead-letter | FR10, NFR6 | 0004 | 009 | done |
 | 011-reconciliation | polling de backfill a Traccar | NFR2 | 0005 | 009 | **diferido** |
-| 013-delivery-outbox | buffer local duradero si JetStream no está disponible + drenado | FR9, FR10, NFR2, NFR6 | 0004, 0005, 0007 | 009, 010 | spec draft · ADR-0007 aceptado, pendiente aprobar spec |
+| 013-delivery-outbox | buffer local duradero si JetStream no está disponible + drenado | FR9, FR10, NFR2, NFR6 | 0004, 0005, 0007 | 009, 010 | done |
 | 012-audit-log-port | auditoría de operaciones en application (port) y migración de group.create, device.register y device.disable/enable | NFR4 | 0002, 0006 | 004, 005, 006 | done |
 
 ## Por qué 004-006 esperan

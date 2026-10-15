@@ -28,6 +28,12 @@ export interface NatsConfig {
   readonly duplicateWindowMinutes: number;
 }
 
+export interface OutboxConfig {
+  /** SQLite file of the delivery outbox (ADR-0007); ':memory:' for tests. */
+  readonly path: string;
+  readonly maxBytes: number;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
@@ -35,6 +41,7 @@ export interface AppConfig {
   readonly traccar: TraccarConfig;
   readonly webhook: WebhookConfig;
   readonly nats: NatsConfig;
+  readonly outbox: OutboxConfig;
 }
 
 export const APP_CONFIG = Symbol('AppConfig');
@@ -106,6 +113,13 @@ const appEnvSchema = z.object({
     .min(1)
     .max(60)
     .default(10),
+  OUTBOX_PATH: z.string().min(1).default('data/outbox.db'),
+  OUTBOX_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .min(1_048_576)
+    .max(68_719_476_736)
+    .default(536_870_912),
 });
 
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
@@ -135,6 +149,10 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
       eventsMaxAgeDays: parsed.NATS_EVENTS_MAX_AGE_DAYS,
       deadLetterMaxAgeDays: parsed.NATS_DEADLETTER_MAX_AGE_DAYS,
       duplicateWindowMinutes: parsed.NATS_DUPLICATE_WINDOW_MINUTES,
+    },
+    outbox: {
+      path: parsed.OUTBOX_PATH,
+      maxBytes: parsed.OUTBOX_MAX_BYTES,
     },
   };
 }

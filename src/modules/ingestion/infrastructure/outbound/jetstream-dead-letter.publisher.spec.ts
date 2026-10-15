@@ -1,14 +1,16 @@
 import { Logger } from '@nestjs/common';
+import type { PublishOptions } from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
 import type {
-  JetStreamPublisher,
-  PublishOptions,
-} from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
+  Delivery,
+  ReliablePublisher,
+} from '../../../../shared/infrastructure/outbox/reliable.publisher.js';
 import { SUBJECTS } from '../../../../shared/infrastructure/nats/stream-definitions.js';
 import type { DeadLetterRequest } from '../../application/ports/dead-letter-publisher.port.js';
 import { buildDeadLetterMessage } from './dead-letter-message.js';
 import { JetStreamDeadLetterPublisher } from './jetstream-dead-letter.publisher.js';
 
-class FakeJetStreamPublisher {
+class FakeReliablePublisher {
+  delivery: Delivery = 'published';
   readonly calls: {
     subject: string;
     payload: unknown;
@@ -19,7 +21,7 @@ class FakeJetStreamPublisher {
   publish(subject: string, payload: unknown, opts: PublishOptions) {
     if (this.failWith) return Promise.reject(this.failWith);
     this.calls.push({ subject, payload, opts });
-    return Promise.resolve({ stream: 'S', seq: 1, duplicate: false });
+    return Promise.resolve(this.delivery);
   }
 }
 
@@ -33,15 +35,15 @@ const req: DeadLetterRequest = {
 };
 
 describe('JetStreamDeadLetterPublisher', () => {
-  let fake: FakeJetStreamPublisher;
+  let fake: FakeReliablePublisher;
   let publisher: JetStreamDeadLetterPublisher;
   let errorLog: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     errorLog = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-    fake = new FakeJetStreamPublisher();
+    fake = new FakeReliablePublisher();
     publisher = new JetStreamDeadLetterPublisher(
-      fake as unknown as JetStreamPublisher,
+      fake as unknown as ReliablePublisher,
     );
   });
 
@@ -67,7 +69,12 @@ describe('JetStreamDeadLetterPublisher', () => {
 
     const msg = buildDeadLetterMessage(req);
     expect(errorLog).toHaveBeenCalledWith(
-      { reason: 'INVALID_JSON', kind: 'position', id: msg.id },
+      {
+        reason: 'INVALID_JSON',
+        kind: 'position',
+        id: msg.id,
+        delivery: 'published',
+      },
       'Payload dead-lettered',
     );
     expect(JSON.stringify(errorLog.mock.calls)).not.toContain(
@@ -80,5 +87,15 @@ describe('JetStreamDeadLetterPublisher', () => {
     fake.failWith = error;
 
     await expect(publisher.publish(req)).rejects.toBe(error);
+  });
+
+  it('AC-2 (013): returns buffered and logs it when the outbox keeps the message', async () => {
+    fake.delivery = 'buffered';
+
+    await expect(publisher.publish(req)).resolves.toBe('buffered');
+    expect(errorLog).toHaveBeenCalledWith(
+      expect.objectContaining({ delivery: 'buffered' }),
+      'Payload dead-lettered',
+    );
   });
 });

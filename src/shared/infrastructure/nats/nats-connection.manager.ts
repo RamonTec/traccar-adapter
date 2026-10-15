@@ -53,7 +53,10 @@ export class NatsConnectionManager
   ) {}
 
   onApplicationBootstrap(): void {
-    this.readiness.register('nats', () => Promise.resolve(this.isReady()));
+    // Not critical since 013: with NATS down the outbox keeps the service ready.
+    this.readiness.register('nats', () => Promise.resolve(this.isReady()), {
+      critical: false,
+    });
     void this.start();
   }
 

@@ -128,17 +128,18 @@ describe('NatsConnectionManager (e2e)', () => {
     );
   });
 
-  it('AC-5: NATS unreachable → app starts, /health 200, /health/ready 503 with nats error', async () => {
+  it('AC-5 (+013 AC-12): NATS unreachable → app starts and stays ready with nats down while the outbox accepts writes', async () => {
     await start([CLOSED_PORT]);
 
     await request(app!.getHttpServer()).get('/health').expect(200);
     const res = await request(app!.getHttpServer())
       .get('/health/ready')
-      .expect(503);
+      .expect(200);
 
-    expect(res.body).toMatchObject({
-      status: 'error',
-      checks: { nats: 'error', traccar: 'ok' },
+    expect(res.body).toEqual({
+      status: 'ok',
+      checks: { nats: 'down', traccar: 'ok', outbox: 'ok' },
+      outbox: { pending: 0, oldestAgeMs: null },
     });
   });
 
@@ -149,7 +150,11 @@ describe('NatsConnectionManager (e2e)', () => {
       async () => {
         const res = await request(app!.getHttpServer()).get('/health/ready');
         expect(res.status).toBe(200);
-        expect(res.body.checks).toEqual({ traccar: 'ok', nats: 'ok' });
+        expect(res.body.checks).toEqual({
+          traccar: 'ok',
+          nats: 'ok',
+          outbox: 'ok',
+        });
       },
       { timeout: 5000, interval: 100 },
     );

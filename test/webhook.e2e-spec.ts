@@ -153,7 +153,7 @@ describe('Traccar webhook (e2e)', () => {
     await post('positions', '{"position":').expect(503);
   });
 
-  it('without publisher overrides and NATS unreachable, a valid payload → 503', async () => {
+  it('without publisher overrides and NATS unreachable, a valid payload → 200 buffered (013)', async () => {
     await start(
       testConfig({
         logLevel: 'info',
@@ -162,7 +162,9 @@ describe('Traccar webhook (e2e)', () => {
       false,
     );
 
-    await post('positions', positionFixture).expect(503);
+    await post('positions', positionFixture).expect(200, {
+      outcome: 'buffered',
+    });
   });
 
   it('AC-10: logs kind, outcome and durationMs; never the token or the body', async () => {
