@@ -1,3 +1,6 @@
+import type { AuditLogPort } from '../../../../shared/application/ports/audit-log.port.js';
+import type { ClockPort } from '../../../../shared/application/ports/clock.port.js';
+import { runAudited } from '../../../../shared/application/run-audited.js';
 import { UpstreamUnavailableError } from '../../../../shared/domain/upstream-unavailable.error.js';
 import { type Device, retiredUniqueId } from '../../domain/device.js';
 import {
@@ -13,6 +16,7 @@ export interface RegisterDeviceInput {
   uniqueId: string;
   name: string;
   groupId: number;
+  actor: string | undefined;
 }
 
 export type RegisterResult = 'created' | 'existing' | 'retired-and-created';
@@ -24,9 +28,36 @@ export interface RegisterDeviceOutput {
 }
 
 export class RegisterDeviceUseCase {
-  constructor(private readonly traccar: TraccarDevicePort) {}
+  constructor(
+    private readonly traccar: TraccarDevicePort,
+    private readonly audit: AuditLogPort,
+    private readonly clock: ClockPort,
+  ) {}
 
-  async execute(input: RegisterDeviceInput): Promise<RegisterDeviceOutput> {
+  execute(input: RegisterDeviceInput): Promise<RegisterDeviceOutput> {
+    return runAudited(
+      { audit: this.audit, clock: this.clock },
+      {
+        op: 'device.register',
+        actor: input.actor,
+        fields: { uniqueId: input.uniqueId, groupId: input.groupId },
+        success: (output) => ({
+          result: output.result,
+          fields: {
+            deviceId: output.device.id,
+            retiredDeviceId: output.retiredDeviceId,
+          },
+        }),
+        failure: (err) => ({
+          result:
+            err instanceof DeviceAlreadyRegisteredError ? 'conflict' : 'failed',
+        }),
+      },
+      () => this.run(input),
+    );
+  }
+
+  private async run(input: RegisterDeviceInput): Promise<RegisterDeviceOutput> {
     const groupExists = await this.traccar.groupExists(input.groupId);
     if (!groupExists) {
       throw new GroupNotFoundError(input.groupId);

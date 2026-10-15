@@ -1,3 +1,5 @@
+import { FakeAuditLog } from '../../../../shared/application/ports/__fakes__/audit-log.fake.js';
+import { FakeClock } from '../../../../shared/application/ports/__fakes__/clock.fake.js';
 import { UpstreamUnavailableError } from '../../../../shared/domain/upstream-unavailable.error.js';
 import type { Device } from '../../domain/device.js';
 import {
@@ -65,11 +67,13 @@ class FakeTraccarDevicePort implements TraccarDevicePort {
 
 describe('RegisterDeviceUseCase', () => {
   let port: FakeTraccarDevicePort;
+  let audit: FakeAuditLog;
   let useCase: RegisterDeviceUseCase;
 
   beforeEach(() => {
     port = new FakeTraccarDevicePort();
-    useCase = new RegisterDeviceUseCase(port);
+    audit = new FakeAuditLog();
+    useCase = new RegisterDeviceUseCase(port, audit, new FakeClock());
   });
 
   it('AC-1: creates a new device when group exists and no device with uniqueId exists', async () => {
@@ -79,6 +83,7 @@ describe('RegisterDeviceUseCase', () => {
       uniqueId: '123456789012345',
       name: 'Truck 1',
       groupId: 5,
+      actor: 'svc',
     });
 
     expect(output.result).toBe('created');
@@ -106,6 +111,7 @@ describe('RegisterDeviceUseCase', () => {
       uniqueId: '123456789012345',
       name: 'New Name',
       groupId: 5,
+      actor: 'svc',
     });
 
     expect(output.result).toBe('existing');
@@ -135,6 +141,7 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'Truck 1',
         groupId: 5,
+        actor: 'svc',
       }),
     ).rejects.toSatisfy((err) => {
       expect(err).toBeInstanceOf(DeviceAlreadyRegisteredError);
@@ -165,6 +172,7 @@ describe('RegisterDeviceUseCase', () => {
       uniqueId: '123456789012345',
       name: 'New Device',
       groupId: 5,
+      actor: 'svc',
     });
 
     expect(output.result).toBe('retired-and-created');
@@ -206,6 +214,7 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'New Device',
         groupId: 5,
+        actor: 'svc',
       }),
     ).rejects.toBeInstanceOf(UpstreamUnavailableError);
 
@@ -218,6 +227,7 @@ describe('RegisterDeviceUseCase', () => {
       uniqueId: '123456789012345',
       name: 'New Device',
       groupId: 5,
+      actor: 'svc',
     });
     expect(retryOutput.result).toBe('created');
     expect(retryOutput.device.groupId).toBe(5);
@@ -229,6 +239,7 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'Truck 1',
         groupId: 99,
+        actor: 'svc',
       }),
     ).rejects.toSatisfy((err) => {
       expect(err).toBeInstanceOf(GroupNotFoundError);
@@ -247,6 +258,7 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'Truck 1',
         groupId: 5,
+        actor: 'svc',
       }),
     ).rejects.toBeInstanceOf(UpstreamUnavailableError);
   });
@@ -268,6 +280,7 @@ describe('RegisterDeviceUseCase', () => {
       uniqueId: '123456789012345',
       name: 'My Truck',
       groupId: 5,
+      actor: 'svc',
     });
 
     expect(output.result).toBe('existing');
@@ -292,6 +305,7 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'My Truck',
         groupId: 5,
+        actor: 'svc',
       }),
     ).rejects.toBeInstanceOf(DeviceAlreadyRegisteredError);
   });
@@ -305,7 +319,116 @@ describe('RegisterDeviceUseCase', () => {
         uniqueId: '123456789012345',
         name: 'My Truck',
         groupId: 5,
+        actor: 'svc',
       }),
     ).rejects.toBeInstanceOf(UpstreamUnavailableError);
+  });
+
+  describe('audit (ADR-0006)', () => {
+    const input = {
+      uniqueId: '123456789012345',
+      name: 'Truck 1',
+      groupId: 5,
+      actor: 'svc',
+    };
+
+    it('AC-3: created → succeeded event with uniqueId, groupId and deviceId', async () => {
+      port.groups.add(5);
+
+      const output = await useCase.execute(input);
+
+      expect(audit.events).toEqual([
+        {
+          op: 'device.register',
+          actor: 'svc',
+          result: 'created',
+          succeeded: true,
+          durationMs: 5,
+          fields: {
+            uniqueId: '123456789012345',
+            groupId: 5,
+            deviceId: output.device.id,
+          },
+        },
+      ]);
+    });
+
+    it('AC-3: existing → succeeded event without retiredDeviceId', async () => {
+      port.groups.add(5);
+      await useCase.execute(input);
+
+      await useCase.execute(input);
+
+      expect(audit.events[1]).toMatchObject({
+        result: 'existing',
+        succeeded: true,
+      });
+      expect(audit.events[1]!.fields).not.toHaveProperty('retiredDeviceId');
+    });
+
+    it('AC-3: retired-and-created → succeeded event with retiredDeviceId', async () => {
+      port.groups.add(5);
+      port.devices.push({
+        id: 9,
+        uniqueId: '123456789012345',
+        name: 'Old',
+        groupId: 5,
+        disabled: true,
+      });
+
+      const output = await useCase.execute(input);
+
+      expect(audit.events[0]).toMatchObject({
+        result: 'retired-and-created',
+        succeeded: true,
+        fields: {
+          uniqueId: '123456789012345',
+          groupId: 5,
+          deviceId: output.device.id,
+          retiredDeviceId: 9,
+        },
+      });
+    });
+
+    it('AC-3/AC-8: conflict → failed event without deviceId, same error', async () => {
+      port.groups.add(5);
+      port.groups.add(6);
+      port.devices.push({
+        id: 9,
+        uniqueId: '123456789012345',
+        name: 'Other',
+        groupId: 6,
+        disabled: false,
+      });
+
+      await expect(useCase.execute(input)).rejects.toBeInstanceOf(
+        DeviceAlreadyRegisteredError,
+      );
+      expect(audit.events).toEqual([
+        expect.objectContaining({
+          result: 'conflict',
+          succeeded: false,
+          fields: { uniqueId: '123456789012345', groupId: 5 },
+        }),
+      ]);
+    });
+
+    it.each([
+      ['group not found', () => undefined],
+      [
+        'upstream unavailable',
+        () => {
+          port.groups.add(5);
+          port.failGroupExists = new UpstreamUnavailableError('traccar');
+        },
+      ],
+    ])('AC-3: %s → result failed', async (_, arrange) => {
+      arrange();
+
+      await expect(useCase.execute(input)).rejects.toThrow();
+      expect(audit.events).toEqual([
+        expect.objectContaining({ result: 'failed', succeeded: false }),
+      ]);
+    });
   });
 });

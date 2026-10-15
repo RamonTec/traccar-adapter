@@ -1,4 +1,12 @@
 import { Module } from '@nestjs/common';
+import {
+  AUDIT_LOG_PORT,
+  type AuditLogPort,
+} from '../../shared/application/ports/audit-log.port.js';
+import {
+  CLOCK_PORT,
+  type ClockPort,
+} from '../../shared/application/ports/clock.port.js';
 import { TraccarHttpClient } from '../../shared/infrastructure/traccar/traccar-http-client.js';
 import {
   TRACCAR_DEVICE_STATUS_PORT,
@@ -25,8 +33,9 @@ import { TraccarDeviceHttpAdapter } from './infrastructure/outbound/traccar-devi
     },
     {
       provide: RegisterDeviceUseCase,
-      useFactory: (p: TraccarDevicePort) => new RegisterDeviceUseCase(p),
-      inject: [TRACCAR_DEVICE_PORT],
+      useFactory: (p: TraccarDevicePort, a: AuditLogPort, c: ClockPort) =>
+        new RegisterDeviceUseCase(p, a, c),
+      inject: [TRACCAR_DEVICE_PORT, AUDIT_LOG_PORT, CLOCK_PORT],
     },
     {
       provide: TRACCAR_DEVICE_STATUS_PORT,
@@ -36,8 +45,9 @@ import { TraccarDeviceHttpAdapter } from './infrastructure/outbound/traccar-devi
     },
     {
       provide: SetDeviceStatusUseCase,
-      useFactory: (p: TraccarDeviceStatusPort) => new SetDeviceStatusUseCase(p),
-      inject: [TRACCAR_DEVICE_STATUS_PORT],
+      useFactory: (p: TraccarDeviceStatusPort, a: AuditLogPort, c: ClockPort) =>
+        new SetDeviceStatusUseCase(p, a, c),
+      inject: [TRACCAR_DEVICE_STATUS_PORT, AUDIT_LOG_PORT, CLOCK_PORT],
     },
   ],
 })

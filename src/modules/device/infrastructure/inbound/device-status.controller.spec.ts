@@ -158,8 +158,8 @@ describe('DeviceStatusController (integration)', () => {
         expect(res.body).toEqual({ deviceId: 18, disabled });
       }
       expect(useCase.calls).toEqual([
-        { deviceId: 18, disabled },
-        { deviceId: 18, disabled },
+        { deviceId: 18, disabled, actor: 'svc-test' },
+        { deviceId: 18, disabled, actor: 'svc-test' },
       ]);
     },
   );
@@ -180,51 +180,24 @@ describe('DeviceStatusController (integration)', () => {
     expect(res.body).toMatchObject({ code: 'DEVICE_RETIRED' });
   });
 
-  describe('AC-10: audit log', () => {
-    it.each([
-      ['disable', 'device.disable', 'changed', true],
-      ['enable', 'device.enable', 'unchanged', false],
-    ] as const)(
-      '%s → one info %s line with result %s',
-      async (route, op, result, changed) => {
-        useCase.changed = changed;
+  it.each([
+    ['retired', new DeviceRetiredError(18), 409],
+    ['not-found', new DeviceNotFoundError(18), 404],
+    ['failed', new UpstreamUnavailableError('traccar'), 503],
+  ] as const)(
+    'AC-8: %s keeps its HTTP status (%s)',
+    async (_, error, status) => {
+      useCase.error = error;
 
-        await post(`/devices/18/${route}`).expect(200);
+      await post('/devices/18/enable').expect(status);
+    },
+  );
 
-        const lines = auditLines();
-        expect(lines).toHaveLength(1);
-        expect(lines[0]).toMatchObject({
-          op,
-          actor: 'svc-test',
-          deviceId: 18,
-          result,
-          level: 'info',
-        });
-        expect(typeof lines[0]!.durationMs).toBe('number');
-      },
-    );
+  it('ADR-0006: the controller emits no audit line (the use case does)', async () => {
+    await post('/devices/18/disable').expect(200);
+    useCase.error = new DeviceRetiredError(18);
+    await post('/devices/18/enable').expect(409);
 
-    it.each([
-      ['retired', new DeviceRetiredError(18), 409],
-      ['not-found', new DeviceNotFoundError(18), 404],
-      ['failed', new UpstreamUnavailableError('traccar'), 503],
-    ] as const)(
-      'one warn line with result %s',
-      async (result, error, status) => {
-        useCase.error = error;
-
-        await post('/devices/18/enable').expect(status);
-
-        const lines = auditLines();
-        expect(lines).toHaveLength(1);
-        expect(lines[0]).toMatchObject({
-          op: 'device.enable',
-          actor: 'svc-test',
-          deviceId: 18,
-          result,
-          level: 'warn',
-        });
-      },
-    );
+    expect(auditLines()).toEqual([]);
   });
 });

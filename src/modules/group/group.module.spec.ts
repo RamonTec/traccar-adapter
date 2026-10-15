@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { AuditModule } from '../../shared/infrastructure/audit/audit.module.js';
 import { TraccarHttpClient } from '../../shared/infrastructure/traccar/traccar-http-client.js';
 import {
   TRACCAR_GROUP_PORT,
@@ -25,7 +26,7 @@ class FakeTraccarModule {}
 describe('GroupModule (wiring)', () => {
   it('wires providers and controllers resolving CreateGroupUseCase, GroupController and TraccarGroupPort', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [FakeTraccarModule, GroupModule],
+      imports: [FakeTraccarModule, AuditModule, GroupModule],
     }).compile();
 
     const useCase = moduleRef.get<CreateGroupUseCase>(CreateGroupUseCase);

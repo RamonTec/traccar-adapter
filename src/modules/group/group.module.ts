@@ -1,4 +1,12 @@
 import { Module } from '@nestjs/common';
+import {
+  AUDIT_LOG_PORT,
+  type AuditLogPort,
+} from '../../shared/application/ports/audit-log.port.js';
+import {
+  CLOCK_PORT,
+  type ClockPort,
+} from '../../shared/application/ports/clock.port.js';
 import { TraccarHttpClient } from '../../shared/infrastructure/traccar/traccar-http-client.js';
 import {
   TRACCAR_GROUP_PORT,
@@ -18,8 +26,9 @@ import { TraccarGroupHttpAdapter } from './infrastructure/outbound/traccar-group
     },
     {
       provide: CreateGroupUseCase,
-      useFactory: (p: TraccarGroupPort) => new CreateGroupUseCase(p),
-      inject: [TRACCAR_GROUP_PORT],
+      useFactory: (p: TraccarGroupPort, a: AuditLogPort, c: ClockPort) =>
+        new CreateGroupUseCase(p, a, c),
+      inject: [TRACCAR_GROUP_PORT, AUDIT_LOG_PORT, CLOCK_PORT],
     },
   ],
 })
