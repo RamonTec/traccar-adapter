@@ -1,6 +1,6 @@
 ---
 id: 003-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [002-T01]
 covers: [AC-1]
 ---
@@ -26,15 +26,15 @@ export interface TraccarConfig { readonly baseUrl: string; readonly apiToken: st
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/config/app-config.ts` (modificar)
-- [ ] `src/shared/infrastructure/config/app-config.spec.ts` (ampliar)
-- [ ] `test/support/test-env.ts` (ampliar)
+- [x] `src/shared/infrastructure/config/app-config.ts` (modificar)
+- [x] `src/shared/infrastructure/config/app-config.spec.ts` (ampliar)
+- [x] `test/support/test-env.ts` (ampliar)
 
 ## Criterios de aceptación
-- [ ] **AC-1a** — Sin `TRACCAR_BASE_URL` ni `TRACCAR_API_TOKEN` → `ConfigValidationError` que nombra ambas.
-- [ ] **AC-1b** — `TRACCAR_BASE_URL: 'http://t:8082/'` → `baseUrl: 'http://t:8082'`; timeout por defecto 5000; `'50'` y `'abc'` son inválidos.
-- [ ] **AC-1c** — El `message` del error nunca contiene el valor del token.
-- [ ] Los e2e de proceso real siguen en verde (usan `TEST_ENV`).
+- [x] **AC-1a** — Sin `TRACCAR_BASE_URL` ni `TRACCAR_API_TOKEN` → `ConfigValidationError` que nombra ambas.
+- [x] **AC-1b** — `TRACCAR_BASE_URL: 'http://t:8082/'` → `baseUrl: 'http://t:8082'`; timeout por defecto 5000; `'50'` y `'abc'` son inválidos.
+- [x] **AC-1c** — El `message` del error nunca contiene el valor del token.
+- [x] Los e2e de proceso real siguen en verde (usan `TEST_ENV`).
 
 ## Fuera de alcance
 - Usar la config (T04).
@@ -47,3 +47,7 @@ pnpm check
 ```
 
 ## Handoff
+- Agregada sección `traccar` (`TraccarConfig`) a `AppConfig` y validada en `loadConfig` con Zod.
+- `TRACCAR_BASE_URL` se normaliza sin slash final y `TRACCAR_API_TOKEN` es obligatorio; timeout por defecto es 5000 ms.
+- Actualizado `test/support/test-env.ts` con defaults y soporte de override en `testConfig`.
+- Listo para 003-T04 (`TraccarHttpClient`).
