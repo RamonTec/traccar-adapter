@@ -1,6 +1,6 @@
 ---
 id: 015-ci-pipeline
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: []
 adrs: []
 ---
