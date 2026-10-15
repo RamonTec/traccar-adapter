@@ -8,7 +8,7 @@ spec: 005-device-register
 |------|--------|-----------|--------|
 | T01 | Add Device domain, retiredUniqueId and device errors (409/404) | 004-T02 | done |
 | T02 | Add TraccarDevicePort with structural type test | T01 | done |
-| T03 | Add RegisterDeviceUseCase | T02 | todo |
+| T03 | Add RegisterDeviceUseCase | T02 | done |
 | T04 | Add TraccarDeviceHttpAdapter | T02, 003-T04 | todo |
 | T05 | Add RegisterDevice DTO and DeviceController with audit log | T03, 004-T01, 002-T04 | todo |
 | T06 | Wire DeviceModule into AppModule | T04, T05 | todo |
