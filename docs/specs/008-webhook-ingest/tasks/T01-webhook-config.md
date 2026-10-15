@@ -1,6 +1,6 @@
 ---
 id: 008-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [002-T01]
 covers: [AC-1, AC-5]
 ---
@@ -45,3 +45,5 @@ pnpm check
 ```
 
 ## Handoff
+- `AppConfig.webhook` = { token (WEBHOOK_TOKEN ≥16), maxBodyBytes (1024..10MiB, default 1MiB) }.
+- `TEST_ENV.WEBHOOK_TOKEN` y `testConfig({ webhook })` con deep merge; README documenta ambas variables.

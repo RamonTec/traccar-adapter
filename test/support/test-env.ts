@@ -2,6 +2,7 @@ import {
   type AppConfig,
   type AuthConfig,
   type TraccarConfig,
+  type WebhookConfig,
   loadConfig,
 } from '../../src/shared/infrastructure/config/app-config.js';
 
@@ -11,13 +12,15 @@ export const TEST_ENV: Readonly<Record<string, string>> = Object.freeze({
   TRACCAR_BASE_URL: 'http://traccar.test',
   TRACCAR_API_TOKEN: 'test-token',
   TRACCAR_TIMEOUT_MS: '5000',
+  WEBHOOK_TOKEN: 'test-webhook-token-0123456789',
 });
 
 export type TestConfigOverrides = Partial<
-  Omit<AppConfig, 'auth' | 'traccar'>
+  Omit<AppConfig, 'auth' | 'traccar' | 'webhook'>
 > & {
   readonly auth?: Partial<AuthConfig>;
   readonly traccar?: Partial<TraccarConfig>;
+  readonly webhook?: Partial<WebhookConfig>;
 };
 
 export function testConfig(overrides?: TestConfigOverrides): AppConfig {
@@ -35,6 +38,10 @@ export function testConfig(overrides?: TestConfigOverrides): AppConfig {
     traccar: {
       ...base.traccar,
       ...overrides.traccar,
+    },
+    webhook: {
+      ...base.webhook,
+      ...overrides.webhook,
     },
   };
 }
