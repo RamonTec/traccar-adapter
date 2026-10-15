@@ -1,6 +1,6 @@
 ---
 id: 012-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-5, AC-6, AC-7, AC-8, AC-9]
 ---
@@ -78,3 +78,5 @@ pnpm check
 ```
 
 ## Handoff
+- Ports `AuditLogPort`/`ClockPort` en `shared/application/ports` (ADR-0006).
+- `runAudited(deps, operation, run)`: un único `record` por ejecución (éxito o error), campos sin undefined, `durationMs` entero ≥ 0, relanza el error original; un fallo de auditoría se ignora.

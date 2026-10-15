@@ -6,7 +6,7 @@ spec: 012-audit-log-port
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add AuditLogPort, ClockPort and runAudited helper | — | todo |
+| T01 | Add AuditLogPort, ClockPort and runAudited helper | — | done |
 | T02 | Add PinoAuditLogAdapter and SystemClock | T01 | todo |
 | T03 | Add AuditModule and import it in AppModule | T02 | todo |
 | T04 | Move group.create audit into CreateGroupUseCase | T03 | todo |
