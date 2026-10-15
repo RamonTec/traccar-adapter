@@ -1,6 +1,6 @@
 ---
 id: 005-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [005-T02, 003-T04]
 covers: [AC-1, AC-4, AC-6, AC-8, AC-11]
 ---
@@ -43,16 +43,16 @@ Datos de Traccar ya verificados:
 - **Un PUT sin `groupId` lo pone a 0**: por eso se hace GET y se reenvía el objeto completo.
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/device/infrastructure/outbound/traccar-device.http-adapter.ts` (nuevo)
-- [ ] `src/modules/device/infrastructure/outbound/traccar-device.http-adapter.spec.ts` (nuevo, `TraccarHttpClient` real contra un servidor `node:http` en el puerto 0)
+- [x] `src/modules/device/infrastructure/outbound/traccar-device.http-adapter.ts` (nuevo)
+- [x] `src/modules/device/infrastructure/outbound/traccar-device.http-adapter.spec.ts` (nuevo, `TraccarHttpClient` real contra un servidor `node:http` en el puerto 0)
 
 ## Criterios de aceptación
-- [ ] **AC-1** — `create` envía `POST /api/devices` con `{name, uniqueId, groupId}` y mapea la respuesta 200 a `Device`.
-- [ ] **AC-1b** — `findByUniqueId` envía la query `uniqueId=<x>`. Con `[]` devuelve `undefined`; con un elemento `disabled:true` devuelve `Device` con `disabled:true`.
-- [ ] **AC-4 / AC-11** — `retire(18, 'x:retired:18')`: el servidor recibe `GET /api/devices/18` y luego `PUT /api/devices/18`. El body del PUT es igual al del GET (incluidos `groupId`, `disabled`, `name`, `attributes`, `calendarId`), salvo `uniqueId`.
-- [ ] **AC-6** — `groupExists(2)` → `true` si `/api/groups` contiene `{id:2}`; `groupExists(3)` → `false`.
-- [ ] **Carrera** — POST con 400 y body que contiene `Unique index or primary key violation ... TC_DEVICES(UNIQUEID` → `DeviceUniqueIdTakenError`. Otro 400 → `TraccarRequestError` sin traducir.
-- [ ] **AC-8** — Respuesta 500 en cualquier operación → `UpstreamUnavailableError`.
+- [x] **AC-1** — `create` envía `POST /api/devices` con `{name, uniqueId, groupId}` y mapea la respuesta 200 a `Device`.
+- [x] **AC-1b** — `findByUniqueId` envía la query `uniqueId=<x>`. Con `[]` devuelve `undefined`; con un elemento `disabled:true` devuelve `Device` con `disabled:true`.
+- [x] **AC-4 / AC-11** — `retire(18, 'x:retired:18')`: el servidor recibe `GET /api/devices/18` y luego `PUT /api/devices/18`. El body del PUT es igual al del GET (incluidos `groupId`, `disabled`, `name`, `attributes`, `calendarId`), salvo `uniqueId`.
+- [x] **AC-6** — `groupExists(2)` → `true` si `/api/groups` contiene `{id:2}`; `groupExists(3)` → `false`.
+- [x] **Carrera** — POST con 400 y body que contiene `Unique index or primary key violation ... TC_DEVICES(UNIQUEID` → `DeviceUniqueIdTakenError`. Otro 400 → `TraccarRequestError` sin traducir.
+- [x] **AC-8** — Respuesta 500 en cualquier operación → `UpstreamUnavailableError`.
 
 ## Fuera de alcance
 - Lógica de decisión (T03). Wiring (T06).
@@ -64,3 +64,7 @@ pnpm check
 ```
 
 ## Handoff
+- Implementado `TraccarDeviceHttpAdapter` implementando `TraccarDevicePort` contra endpoints de Traccar 6.15.3.
+- `retire` preserva la totalidad de los atributos del device recuperado por GET al realizar el PUT (FR3/NFR5).
+- Mapeado 400 de violación de índice único a `DeviceUniqueIdTakenError`.
+- Desbloquea T06 (wiring en DeviceModule).

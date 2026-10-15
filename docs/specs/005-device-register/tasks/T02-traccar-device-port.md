@@ -1,6 +1,6 @@
 ---
 id: 005-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [005-T01]
 covers: [AC-11]
 ---
@@ -42,13 +42,13 @@ export interface TraccarDevicePort {
 Sin imports de `@nestjs/*`: el lint los prohíbe en `application`.
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/device/application/ports/traccar-device.port.ts` (nuevo)
-- [ ] `src/modules/device/application/ports/traccar-device.port.spec.ts` (nuevo, `expectTypeOf` de vitest)
+- [x] `src/modules/device/application/ports/traccar-device.port.ts` (nuevo)
+- [x] `src/modules/device/application/ports/traccar-device.port.spec.ts` (nuevo, `expectTypeOf` de vitest)
 
 ## Criterios de aceptación
-- [ ] **AC-11a** — `expectTypeOf<keyof TraccarDevicePort>().toEqualTypeOf<'groupExists' | 'findByUniqueId' | 'create' | 'retire'>()`. Añadir un método rompe el test a propósito.
-- [ ] **AC-11b** — `expectTypeOf<Parameters<TraccarDevicePort['retire']>>().toEqualTypeOf<[number, string]>()`. Ninguna operación que reciba un id de device existente acepta `groupId`.
-- [ ] `new DeviceUniqueIdTakenError('x')` expone `uniqueId` y `name === 'DeviceUniqueIdTakenError'`.
+- [x] **AC-11a** — `expectTypeOf<keyof TraccarDevicePort>().toEqualTypeOf<'groupExists' | 'findByUniqueId' | 'create' | 'retire'>()`. Añadir un método rompe el test a propósito.
+- [x] **AC-11b** — `expectTypeOf<Parameters<TraccarDevicePort['retire']>>().toEqualTypeOf<[number, string]>()`. Ninguna operación que reciba un id de device existente acepta `groupId`.
+- [x] `new DeviceUniqueIdTakenError('x')` expone `uniqueId` y `name === 'DeviceUniqueIdTakenError'`.
 
 ## Fuera de alcance
 - Implementación (T04). Lista permitida de rutas (T07).
@@ -60,3 +60,7 @@ pnpm check
 ```
 
 ## Handoff
+- Definido `TraccarDevicePort` con `groupExists`, `findByUniqueId`, `create` y `retire`.
+- Creado `DeviceUniqueIdTakenError` para colisiones concurrentes de `uniqueId`.
+- Verificada mediante test de tipos estructurales la imposibilidad de pasar `groupId` en `retire` (FR3/NFR5).
+- Desbloquea T03 (RegisterDeviceUseCase) y T04 (TraccarDeviceHttpAdapter).

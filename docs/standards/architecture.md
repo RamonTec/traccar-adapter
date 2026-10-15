@@ -10,10 +10,11 @@ src/
   app.module.ts
   shared/                         # transversal, sin lógica de negocio
     domain/                       # errores base, tipos puros compartidos
-    application/ports/            # puertos transversales (p.ej. LoggerPort, ClockPort)
+    application/ports/            # puertos transversales: AuditLogPort, ClockPort (ADR-0006)
     infrastructure/
       config/                     # carga y validación de env
       logging/                    # logger estructurado, correlation-id
+      audit/                      # PinoAuditLogAdapter, SystemClock, AuditModule (@Global)
       traccar/                    # cliente HTTP de bajo nivel hacia Traccar (auth, base URL)
       nats/                       # conexión JetStream compartida
   modules/
@@ -39,7 +40,8 @@ test/                             # e2e
 
 - Un módulo **no** importa internals de otro módulo. Lo compartido sube a `shared/`.
 - Los use cases son clases TS planas (sin decoradores). Se registran en `<feature>.module.ts` con `useFactory` + tokens de inyección.
-- Los ports se definen en el módulo que los **consume**, con nombre `<Algo>Port` y un token `export const <ALGO>_PORT = Symbol('<Algo>Port')` en el mismo archivo.
+- Los ports se definen en el módulo que los **consume**, con nombre `<Algo>Port` y un token `export const <ALGO>_PORT = Symbol('<Algo>Port')` en el mismo archivo. Excepción: los ports que consumen varios módulos (auditoría, reloj) viven en `shared/application/ports/` y sus adapters se proveen desde un módulo `@Global()`.
+- Los adaptadores de entrada (controllers, consumers) solo traducen transporte ↔ use case: validan, extraen `actor`/ids, invocan y mapean el resultado a la respuesta. No contienen reglas de negocio ni auditoría (ADR-0006).
 
 ## Convenciones de archivos
 
