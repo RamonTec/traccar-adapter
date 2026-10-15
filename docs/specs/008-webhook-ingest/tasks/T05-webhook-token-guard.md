@@ -1,6 +1,6 @@
 ---
 id: 008-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [008-T01]
 covers: [AC-1]
 ---
@@ -46,3 +46,5 @@ pnpm check
 ```
 
 ## Handoff
+- `WebhookTokenGuard`: `Authorization: Bearer <token>`; compara `timingSafeEqual` sobre sha256 (longitudes iguales siempre).
+- Fallo → `warn({reason: 'missing'|'mismatch'}, 'Rejected webhook token')` + 401; nunca loguea tokens.
