@@ -1,6 +1,6 @@
 ---
 id: 013-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T02]
 covers: [AC-5, AC-6, AC-8, AC-9, AC-11]
 ---
@@ -51,3 +51,5 @@ pnpm check
 ```
 
 ## Handoff
+- `OutboxDrainer`: drena en orden (oldest → publish con msgId/correlationId originales → delete), backoff 1 s→30 s, single-flight (no arranca si hay drenado o retry programado), drena al bootstrap, sin timers tras shutdown.
+- Implementado antes que T04 (T04 inyecta la clase `OutboxDrainer`).
