@@ -45,8 +45,9 @@ import { TraccarDeviceHttpAdapter } from './infrastructure/outbound/traccar-devi
     },
     {
       provide: SetDeviceStatusUseCase,
-      useFactory: (p: TraccarDeviceStatusPort) => new SetDeviceStatusUseCase(p),
-      inject: [TRACCAR_DEVICE_STATUS_PORT],
+      useFactory: (p: TraccarDeviceStatusPort, a: AuditLogPort, c: ClockPort) =>
+        new SetDeviceStatusUseCase(p, a, c),
+      inject: [TRACCAR_DEVICE_STATUS_PORT, AUDIT_LOG_PORT, CLOCK_PORT],
     },
   ],
 })

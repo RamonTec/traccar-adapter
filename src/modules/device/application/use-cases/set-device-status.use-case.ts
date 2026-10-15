@@ -1,3 +1,6 @@
+import type { AuditLogPort } from '../../../../shared/application/ports/audit-log.port.js';
+import type { ClockPort } from '../../../../shared/application/ports/clock.port.js';
+import { runAudited } from '../../../../shared/application/run-audited.js';
 import { type Device, isRetired } from '../../domain/device.js';
 import {
   DeviceNotFoundError,
@@ -8,6 +11,7 @@ import type { TraccarDeviceStatusPort } from '../ports/traccar-device-status.por
 export interface SetDeviceStatusInput {
   deviceId: number;
   disabled: boolean;
+  actor: string | undefined;
 }
 
 export interface SetDeviceStatusOutput {
@@ -16,9 +20,38 @@ export interface SetDeviceStatusOutput {
 }
 
 export class SetDeviceStatusUseCase {
-  constructor(private readonly traccar: TraccarDeviceStatusPort) {}
+  constructor(
+    private readonly traccar: TraccarDeviceStatusPort,
+    private readonly audit: AuditLogPort,
+    private readonly clock: ClockPort,
+  ) {}
 
-  async execute(input: SetDeviceStatusInput): Promise<SetDeviceStatusOutput> {
+  execute(input: SetDeviceStatusInput): Promise<SetDeviceStatusOutput> {
+    return runAudited(
+      { audit: this.audit, clock: this.clock },
+      {
+        op: input.disabled ? 'device.disable' : 'device.enable',
+        actor: input.actor,
+        fields: { deviceId: input.deviceId },
+        success: ({ changed }) => ({
+          result: changed ? 'changed' : 'unchanged',
+        }),
+        failure: (err) => ({
+          result:
+            err instanceof DeviceRetiredError
+              ? 'retired'
+              : err instanceof DeviceNotFoundError
+                ? 'not-found'
+                : 'failed',
+        }),
+      },
+      () => this.run(input),
+    );
+  }
+
+  private async run(
+    input: SetDeviceStatusInput,
+  ): Promise<SetDeviceStatusOutput> {
     const device = await this.traccar.get(input.deviceId);
     if (device === undefined) {
       throw new DeviceNotFoundError(input.deviceId);

@@ -11,7 +11,7 @@ spec: 012-audit-log-port
 | T03 | Add AuditModule and import it in AppModule | T02 | done |
 | T04 | Move group.create audit into CreateGroupUseCase | T03 | done |
 | T05 | Move device.register audit into RegisterDeviceUseCase | T03 | done |
-| T06 | Move device.disable/enable audit into SetDeviceStatusUseCase | T05 | todo |
+| T06 | Move device.disable/enable audit into SetDeviceStatusUseCase | T05 | done |
 | T07 | Add audit e2e suite across the four operations | T04, T05, T06 | todo |
 
 ## Cobertura AC → tasks

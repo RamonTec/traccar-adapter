@@ -1,6 +1,6 @@
 ---
 id: 012-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T05]
 covers: [AC-1, AC-4, AC-8, AC-10]
 ---
@@ -73,3 +73,6 @@ pnpm check
 ```
 
 ## Handoff
+- `SetDeviceStatusUseCase(traccar, audit, clock)` + `actor`; op según `disabled`; changed/unchanged · retired/not-found/failed; siempre `deviceId`.
+- `DeviceStatusController`: el helper privado `run(deviceId, disabled, actor)` solo llama al use case y mapea la respuesta.
+- Ningún controller de group/device importa ya `Logger` (solo queda el del webhook, fuera de alcance).
