@@ -1,0 +1,55 @@
+{
+  "event": {
+    "id": 4,
+    "attributes": {
+      "alarm": "sos"
+    },
+    "deviceId": 4,
+    "type": "alarm",
+    "eventTime": "2026-10-15T19:20:24.000+00:00",
+    "positionId": 7,
+    "geofenceId": 0,
+    "maintenanceId": 0
+  },
+  "position": {
+    "id": 7,
+    "attributes": {
+      "alarm": "sos",
+      "distance": 1113.1949079325143,
+      "totalDistance": 1113.1949079325143,
+      "motion": false
+    },
+    "deviceId": 4,
+    "protocol": "osmand",
+    "serverTime": "2026-10-15T19:20:22.255+00:00",
+    "deviceTime": "2026-10-15T19:20:24.000+00:00",
+    "fixTime": "2026-10-15T19:20:24.000+00:00",
+    "valid": true,
+    "latitude": -16.54,
+    "longitude": -68.16,
+    "altitude": 0,
+    "speed": 0,
+    "course": 0,
+    "address": null,
+    "accuracy": 0,
+    "network": null,
+    "geofenceIds": null
+  },
+  "device": {
+    "id": 4,
+    "attributes": {},
+    "groupId": 1,
+    "calendarId": 0,
+    "name": "device-1",
+    "uniqueId": "000000000000001",
+    "status": "online",
+    "lastUpdate": "2026-10-15T19:20:22.256+00:00",
+    "positionId": 0,
+    "phone": "+000000000",
+    "model": "model-1",
+    "contact": "contact-1",
+    "category": null,
+    "disabled": false,
+    "expirationTime": null
+  }
+}

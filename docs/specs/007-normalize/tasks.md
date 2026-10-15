@@ -8,7 +8,7 @@ spec: 007-normalize
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Capture real Traccar forward fixtures | — | todo |
+| T01 | Capture real Traccar forward fixtures | — | done |
 | T02 | Add telemetry event types and knots→km/h conversion | — | done |
 | T03 | Add normalizePosition | T01, T02 | todo |
 | T04 | Add normalizeEvent | T03 | todo |

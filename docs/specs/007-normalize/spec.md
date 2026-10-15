@@ -37,5 +37,8 @@ Traccar reenvía posiciones y eventos en su propio formato JSON. Los consumidore
 Salida según ADR-0004 (`position.reported`, `device.event`; motivos de rechazo `MISSING_GROUP`, `SCHEMA_MISMATCH`).
 
 ## Preguntas abiertas
-_Ninguna._ Resueltas 2026-10-14:
+**Q1 (2026-10-15, abierta, bloquea 007-T03)** — En las capturas reales de Traccar 6.15.3 (007-T01), el forward de **posiciones** llega con `position.id = 0` siempre: se reenvía antes de persistir. Los eventos sí traen `event.id` y `positionId` reales. Con AC-1 (`id = traccar-position-<position.id>`) todas las posiciones tendrían el `id` `traccar-position-0`. Como ADR-0004 usa ese `id` como `Nats-Msg-Id`, JetStream descartaría como duplicada cada posición tras la primera, dentro de su ventana de deduplicación.
+Propuesta: `id = traccar-position-<deviceId>-<fixTime en epoch ms>` (clave natural; un reintento del mismo fix sigue deduplicándose) y `data.positionId: number | null` (`0` → `null`). Requiere enmendar ADR-0004 y AC-1, y ajustar 007-T02 (tipo) y 007-T03.
+
+Resueltas 2026-10-14:
 1. `attributes` se copian sin transformar en v1; ningún atributo se promueve a campo de primer nivel.
