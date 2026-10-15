@@ -11,7 +11,7 @@ spec: 008-webhook-ingest
 | T01 | Add webhook config section | 002-T01 | done |
 | T02 | Add ingestion publisher ports and fakes | 007-T02 | done |
 | T03 | Add IngestTraccarPayloadUseCase | T02, 007-T04 | done |
-| T04 | Add bounded raw body capture for webhook routes | T01 | todo |
+| T04 | Add bounded raw body capture for webhook routes | T01 | done |
 | T05 | Add WebhookTokenGuard | T01 | todo |
 | T06 | Add webhook controller and IngestionModule wiring | T03, T04, T05, 002-T04 | todo |
 | T07 | Document required Traccar configuration | T06 | todo |

@@ -4,8 +4,9 @@ import {
   createFakeTraccar,
   type FakeTraccarServer,
 } from './support/fake-traccar.js';
-import { Controller, Get, type INestApplication } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
@@ -18,6 +19,11 @@ import {
   type JwtVerifier,
   type VerifiedPrincipal,
 } from './../src/shared/infrastructure/auth/jwt-verifier.js';
+import {
+  APP_CONFIG,
+  type AppConfig,
+} from './../src/shared/infrastructure/config/app-config.js';
+import { configureHttp } from './../src/shared/infrastructure/http/configure-http.js';
 import { createLogCapture, type LogCapture } from './support/log-capture.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
@@ -79,7 +85,7 @@ async function waitForHealth(
 
 describe('Foundation (e2e)', () => {
   describe('In-process', () => {
-    let app: INestApplication;
+    let app: NestExpressApplication;
 
     beforeEach(async () => {
       await resetLoggerState();
@@ -89,8 +95,12 @@ describe('Foundation (e2e)', () => {
         ],
       }).compile();
 
-      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app = moduleFixture.createNestApplication<NestExpressApplication>({
+        bufferLogs: true,
+        bodyParser: false,
+      });
       app.useLogger(app.get(Logger));
+      configureHttp(app, app.get<AppConfig>(APP_CONFIG));
       await app.init();
     });
 
@@ -134,7 +144,7 @@ describe('Foundation (e2e)', () => {
 
   describe('Service auth (in-process)', () => {
     const TOKEN = 'e2e-secret-token-value';
-    let app: INestApplication;
+    let app: NestExpressApplication;
     let capture: LogCapture;
 
     @Controller('protected-test')
@@ -167,8 +177,12 @@ describe('Foundation (e2e)', () => {
         controllers: [ProtectedTestController],
       }).compile();
 
-      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app = moduleFixture.createNestApplication<NestExpressApplication>({
+        bufferLogs: true,
+        bodyParser: false,
+      });
       app.useLogger(app.get(Logger));
+      configureHttp(app, app.get<AppConfig>(APP_CONFIG));
       await app.init();
     });
 
@@ -251,7 +265,7 @@ describe('Foundation (e2e)', () => {
   });
 
   describe('Readiness and Traccar (in-process)', () => {
-    let app: INestApplication;
+    let app: NestExpressApplication;
     let traccar: FakeTraccarServer;
 
     beforeEach(async () => {
@@ -269,8 +283,12 @@ describe('Foundation (e2e)', () => {
         ],
       }).compile();
 
-      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app = moduleFixture.createNestApplication<NestExpressApplication>({
+        bufferLogs: true,
+        bodyParser: false,
+      });
       app.useLogger(app.get(Logger));
+      configureHttp(app, app.get<AppConfig>(APP_CONFIG));
       await app.init();
     });
 
