@@ -1,6 +1,6 @@
 ---
 id: 004-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [004-T03, 003-T04]
 covers: [AC-1, AC-5]
 ---
@@ -33,13 +33,13 @@ Datos de Traccar ya verificados:
 - El body de `create` es solo `{ name }`, sin `groupId`, para que el group no tenga padre (Traccar lo deja en `0`).
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/group/infrastructure/outbound/traccar-group.http-adapter.ts` (nuevo)
-- [ ] `src/modules/group/infrastructure/outbound/traccar-group.http-adapter.spec.ts` (nuevo, `TraccarHttpClient` real contra un servidor `node:http` en el puerto 0)
+- [x] `src/modules/group/infrastructure/outbound/traccar-group.http-adapter.ts` (nuevo)
+- [x] `src/modules/group/infrastructure/outbound/traccar-group.http-adapter.spec.ts` (nuevo, `TraccarHttpClient` real contra un servidor `node:http` en el puerto 0)
 
 ## Criterios de aceptación
-- [ ] **AC-1** — `create('acme')` → el servidor falso recibe `POST /api/groups` con body exactamente `{"name":"acme"}`; ante una respuesta 200 `{id:3,attributes:{},groupId:0,name:'acme'}` el adapter devuelve `{id:3,name:'acme'}`.
-- [ ] **AC-1b** — `list()` ante `[{id:1,name:'a',groupId:0,attributes:{}}]` devuelve `[{id:1,name:'a'}]`.
-- [ ] **AC-5** — El servidor responde 500 → `list()` rechaza con `UpstreamUnavailableError`.
+- [x] **AC-1** — `create('acme')` → el servidor falso recibe `POST /api/groups` con body exactamente `{"name":"acme"}`; ante una respuesta 200 `{id:3,attributes:{},groupId:0,name:'acme'}` el adapter devuelve `{id:3,name:'acme'}`.
+- [x] **AC-1b** — `list()` ante `[{id:1,name:'a',groupId:0,attributes:{}}]` devuelve `[{id:1,name:'a'}]`.
+- [x] **AC-5** — El servidor responde 500 → `list()` rechaza con `UpstreamUnavailableError`.
 
 ## Fuera de alcance
 - Wiring DI (T06). Lógica de get-or-create (T03).
@@ -51,3 +51,6 @@ pnpm check
 ```
 
 ## Handoff
+- `TraccarGroupHttpAdapter(client: TraccarHttpClient)` es una clase plana: T06 la registra con `useFactory` e `inject: [TraccarHttpClient]` bajo `TRACCAR_GROUP_PORT`.
+- Los errores (5xx/timeout → `UpstreamUnavailableError`, 4xx → `TraccarRequestError`) los produce el client; el adapter no los traduce.
+- El helper `fakeTraccar` está dentro del spec (copiado de recipes §5); se puede extraer a `test/support/` si otro adapter lo necesita.
