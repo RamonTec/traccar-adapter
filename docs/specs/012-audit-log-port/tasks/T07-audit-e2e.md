@@ -1,6 +1,6 @@
 ---
 id: 012-T07
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T04, 012-T05, 012-T06]
 covers: [AC-1, AC-5, AC-9, AC-10]
 ---
@@ -39,3 +39,5 @@ pnpm check
 ```
 
 ## Handoff
+- `test/audit.e2e-spec.ts`: group.create → device.register → disable → enable por HTTP dejan exactamente una línea `context: 'Audit'` cada una (actor, ids, durationMs entero ≥0) y ninguna desde los controllers; un 404 deja una línea warn `not-found`.
+- Sin token, `authorization` ni body en las líneas Audit. e2e 70/70.
