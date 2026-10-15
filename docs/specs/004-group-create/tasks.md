@@ -8,7 +8,7 @@ spec: 004-group-create
 |------|--------|-----------|--------|
 | T01 | Add ValidationError, ZodValidationPipe and error details in filter | 001 | done |
 | T02 | Add Group domain type and GroupNameAmbiguousError (409) | 001 | done |
-| T03 | Add TraccarGroupPort and CreateGroupUseCase | T02 | todo |
+| T03 | Add TraccarGroupPort and CreateGroupUseCase | T02 | done |
 | T04 | Add TraccarGroupHttpAdapter | T03, 003-T04 | todo |
 | T05 | Add CreateGroup DTO and GroupController with audit log | T01, T03, 002-T04 | todo |
 | T06 | Wire GroupModule into AppModule | T04, T05 | todo |
