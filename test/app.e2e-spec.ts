@@ -1,6 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { createServer, type IncomingMessage } from 'node:http';
-import net, { type AddressInfo } from 'node:net';
+import net from 'node:net';
+import {
+  createFakeTraccar,
+  type FakeTraccarServer,
+} from './support/fake-traccar.js';
 import { Controller, Get, type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
@@ -43,87 +46,6 @@ async function freePort(): Promise<number> {
     });
     server.on('error', reject);
   });
-}
-
-interface FakeTraccarServer {
-  readonly url: string;
-  readonly close: () => Promise<void>;
-  readonly requests: Array<{
-    method?: string;
-    url?: string;
-    headers: Record<string, string | string[] | undefined>;
-    body: string;
-  }>;
-  setHandler: (
-    handler: (
-      req: IncomingMessage,
-      body: string,
-    ) => { status: number; json?: unknown },
-  ) => void;
-}
-
-async function createFakeTraccar(
-  initialHandler?: (
-    req: IncomingMessage,
-    body: string,
-  ) => { status: number; json?: unknown },
-): Promise<FakeTraccarServer> {
-  const requests: Array<{
-    method?: string;
-    url?: string;
-    headers: Record<string, string | string[] | undefined>;
-    body: string;
-  }> = [];
-
-  let handler =
-    initialHandler ??
-    (() => ({ status: 200, json: { id: 1, version: '6.15' } }));
-
-  const server = createServer((req, res) => {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk;
-    });
-    req.on('end', () => {
-      requests.push({
-        method: req.method,
-        url: req.url,
-        headers: req.headers,
-        body,
-      });
-      const response = handler(req, body);
-      res.writeHead(response.status, { 'Content-Type': 'application/json' });
-      res.end(response.json !== undefined ? JSON.stringify(response.json) : '');
-    });
-  });
-
-  await new Promise<void>((resolve) => server.listen(0, resolve));
-  const address = server.address() as AddressInfo;
-
-  return {
-    url: `http://127.0.0.1:${address.port}`,
-    close: () =>
-      new Promise<void>((resolve, reject) => {
-        if (!server.listening) {
-          resolve();
-          return;
-        }
-        server.close((err) => {
-          if (
-            err &&
-            (err as NodeJS.ErrnoException).code !== 'ERR_SERVER_NOT_RUNNING'
-          ) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      }),
-    requests,
-    setHandler: (newHandler) => {
-      handler = newHandler;
-    },
-  };
 }
 
 function startApp(env: Record<string, string>): ChildProcess {

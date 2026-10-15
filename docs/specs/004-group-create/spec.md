@@ -1,6 +1,6 @@
 ---
 id: 004-group-create
-status: approved       # draft | approved | in-progress | done
+status: done       # draft | approved | in-progress | done
 requirements: [FR1, NFR3, NFR4]
 adrs: [ADR-0002, ADR-0003, ADR-0005]
 ---
