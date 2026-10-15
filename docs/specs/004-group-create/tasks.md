@@ -6,7 +6,7 @@ spec: 004-group-create
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add ValidationError, ZodValidationPipe and error details in filter | 001 | todo |
+| T01 | Add ValidationError, ZodValidationPipe and error details in filter | 001 | done |
 | T02 | Add Group domain type and GroupNameAmbiguousError (409) | 001 | todo |
 | T03 | Add TraccarGroupPort and CreateGroupUseCase | T02 | todo |
 | T04 | Add TraccarGroupHttpAdapter | T03, 003-T04 | todo |

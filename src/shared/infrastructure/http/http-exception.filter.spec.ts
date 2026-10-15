@@ -10,6 +10,8 @@ import { Test } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { DomainError } from '../../domain/domain-error.js';
+import { UpstreamUnavailableError } from '../../domain/upstream-unavailable.error.js';
+import { ValidationError } from '../../domain/validation.error.js';
 import { LoggingModule } from '../logging/logging.module.js';
 import {
   createLogCapture,
@@ -50,6 +52,16 @@ class TestController {
   @Get('nest-conflict')
   nestConflict() {
     throw new ConflictException('Nest conflict detail');
+  }
+
+  @Get('validation-error')
+  validationError() {
+    throw new ValidationError([{ path: 'name', message: 'Required' }]);
+  }
+
+  @Get('upstream-unavailable')
+  upstreamUnavailable() {
+    throw new UpstreamUnavailableError('traccar');
   }
 
   @Get('method-not-allowed')
@@ -208,5 +220,33 @@ describe('HttpExceptionFilter (integration)', () => {
       message: 'Bad request',
       correlationId: 'cid-1',
     });
+  });
+
+  it('AC-4c: maps ValidationError to 400 with details', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/validation-error')
+      .set('x-correlation-id', 'cid-1')
+      .expect(400);
+
+    expect(res.body).toEqual({
+      code: 'VALIDATION_ERROR',
+      message: 'Validation failed',
+      correlationId: 'cid-1',
+      details: [{ path: 'name', message: 'Required' }],
+    });
+  });
+
+  it('AC-4c: DomainError without details omits the details key', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/upstream-unavailable')
+      .set('x-correlation-id', 'cid-1')
+      .expect(503);
+
+    expect(res.body).toEqual({
+      code: 'UPSTREAM_UNAVAILABLE',
+      message: 'traccar is unavailable',
+      correlationId: 'cid-1',
+    });
+    expect(res.body).not.toHaveProperty('details');
   });
 });

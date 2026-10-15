@@ -48,6 +48,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let status: number;
     let code: string;
     let message: string;
+    let details: unknown[] | undefined;
 
     if (exception instanceof DomainError) {
       const mappedStatus = httpStatusForCode(exception.code);
@@ -55,6 +56,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         status = mappedStatus;
         code = exception.code;
         message = exception.message;
+        details = detailsOf(exception);
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
         code = 'INTERNAL_ERROR';
@@ -89,8 +91,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       code,
       message,
       correlationId,
+      ...(details !== undefined && { details }),
     };
 
     response.status(status).json(body);
   }
+}
+
+function detailsOf(error: DomainError): unknown[] | undefined {
+  const details: unknown = (error as { details?: unknown }).details;
+  return Array.isArray(details) ? details : undefined;
 }
