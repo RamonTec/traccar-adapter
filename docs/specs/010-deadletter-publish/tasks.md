@@ -6,8 +6,8 @@ spec: 010-deadletter-publish
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add buildDeadLetterMessage | 008-T02 | todo |
-| T02 | Add JetStreamDeadLetterPublisher and bind it in IngestionModule | T01, 009-T04, 008-T06 | todo |
+| T01 | Add buildDeadLetterMessage | 008-T02 | done |
+| T02 | Add JetStreamDeadLetterPublisher and bind it in IngestionModule | T01, 009-T04, 008-T06 | done |
 
 T01 es paralelizable con todo 009.
 
@@ -22,10 +22,10 @@ T01 es paralelizable con todo 009.
 | AC-6 | T02 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
-- [ ] Ya no queda `UnconfiguredPublisher` como binding por defecto (se puede borrar si nada lo usa)
-- [ ] Prueba manual: un body inválido en el webhook aparece en `TELEMETRY_DEADLETTER` con los bytes originales
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
+- [x] Ya no queda `UnconfiguredPublisher` como binding por defecto (se puede borrar si nada lo usa)
+- [x] Prueba manual: un body inválido en el webhook aparece en `TELEMETRY_DEADLETTER` con los bytes originales
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
 - [ ] PR abierto con la lista de tasks y la matriz AC → tasks

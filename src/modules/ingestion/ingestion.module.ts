@@ -11,8 +11,8 @@ import {
 import { IngestTraccarPayloadUseCase } from './application/use-cases/ingest-traccar-payload.use-case.js';
 import { TraccarWebhookController } from './infrastructure/inbound/traccar-webhook.controller.js';
 import { WebhookTokenGuard } from './infrastructure/inbound/webhook-token.guard.js';
+import { JetStreamDeadLetterPublisher } from './infrastructure/outbound/jetstream-dead-letter.publisher.js';
 import { JetStreamEventPublisher } from './infrastructure/outbound/jetstream-event.publisher.js';
-import { UnconfiguredPublisher } from './infrastructure/outbound/unconfigured.publisher.js';
 
 export interface IngestionOverrides {
   eventPublisher?: EventPublisherPort;
@@ -38,12 +38,17 @@ export class IngestionModule {
                 new JetStreamEventPublisher(p),
               inject: [JetStreamPublisher],
             },
-        {
-          provide: DEAD_LETTER_PUBLISHER_PORT,
-          // 010 replaces the default with the JetStream dead-letter publisher.
-          useValue:
-            overrides?.deadLetterPublisher ?? new UnconfiguredPublisher(),
-        },
+        overrides?.deadLetterPublisher
+          ? {
+              provide: DEAD_LETTER_PUBLISHER_PORT,
+              useValue: overrides.deadLetterPublisher,
+            }
+          : {
+              provide: DEAD_LETTER_PUBLISHER_PORT,
+              useFactory: (p: JetStreamPublisher) =>
+                new JetStreamDeadLetterPublisher(p),
+              inject: [JetStreamPublisher],
+            },
         {
           provide: IngestTraccarPayloadUseCase,
           useFactory: (

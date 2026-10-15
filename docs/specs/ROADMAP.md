@@ -13,7 +13,7 @@ Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS
 | 007-normalize | payload Traccar → evento de plataforma (dominio puro) | FR6 | 0004 | 001 | done |
 | 008-webhook-ingest | endpoints webhook, token, raw body, orquestación | FR5, FR10 | 0004, 0005 | 007 | done |
 | 009-jetstream-publish | streams, publish con dedup, publisher de eventos | FR9, NFR6 | 0004 | 008 | done |
-| 010-deadletter-publish | publisher de dead-letter | FR10, NFR6 | 0004 | 009 | tasks listos |
+| 010-deadletter-publish | publisher de dead-letter | FR10, NFR6 | 0004 | 009 | done |
 | 011-reconciliation | polling de backfill a Traccar | NFR2 | 0005 | 009 | **diferido** |
 | 013-delivery-outbox | buffer local duradero si JetStream no está disponible + drenado | FR9, FR10, NFR2, NFR6 | 0004, 0005, 0007 | 009, 010 | spec draft · ADR-0007 aceptado, pendiente aprobar spec |
 | 012-audit-log-port | auditoría de operaciones en application (port), migra `group.create`, alinea 005/006 | NFR4 | 0002, 0006 | 004 | spec draft · antes de implementar 005/006 |

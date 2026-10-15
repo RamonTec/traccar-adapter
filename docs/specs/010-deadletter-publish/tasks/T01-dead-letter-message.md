@@ -1,6 +1,6 @@
 ---
 id: 010-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [008-T02]
 covers: [AC-2, AC-3, AC-4]
 ---
@@ -54,3 +54,5 @@ pnpm check
 ```
 
 ## Handoff
+- `buildDeadLetterMessage(req)`: id = sha256 del body completo; `rawPayload` = primeros 64 KiB en utf8 o base64 (si no son UTF-8 válido); `truncated`; detail con Bearer redactado y máx. 500.
+- Nota: si el corte de 64 KiB parte un carácter multibyte, el decode estricto falla y se guarda en base64 (correcto byte a byte).
