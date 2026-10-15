@@ -20,3 +20,19 @@ export class GroupNotFoundError extends DomainError {
     super(`Group ${groupId} not found`);
   }
 }
+
+export class DeviceNotFoundError extends DomainError {
+  readonly code = 'DEVICE_NOT_FOUND';
+
+  constructor(readonly deviceId: number) {
+    super(`Device ${deviceId} not found`);
+  }
+}
+
+export class DeviceRetiredError extends DomainError {
+  readonly code = 'DEVICE_RETIRED';
+
+  constructor(readonly deviceId: number) {
+    super(`Device ${deviceId} is retired and cannot be enabled`);
+  }
+}

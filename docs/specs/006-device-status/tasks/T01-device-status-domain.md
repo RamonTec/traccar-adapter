@@ -1,6 +1,6 @@
 ---
 id: 006-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [005-T01]
 covers: [AC-5, AC-6]
 ---
@@ -58,3 +58,5 @@ pnpm check
 ```
 
 ## Handoff
+- `isRetired(uniqueId)` en `device.ts`; `DeviceNotFoundError` (404) y `DeviceRetiredError` (409) en `errors.ts`.
+- Códigos añadidos solo a `ERROR_HTTP_STATUS`; el mapeo inverso sigue siendo genérico (404→NOT_FOUND, 409→CONFLICT).

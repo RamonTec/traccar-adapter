@@ -1,6 +1,6 @@
 ---
 id: 006-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T01]
 covers: [AC-7]
 ---
@@ -50,3 +50,5 @@ pnpm check
 ```
 
 ## Handoff
+- Port nuevo `traccar-device-status.port.ts` (get / setDisabled) + token `TRACCAR_DEVICE_STATUS_PORT`.
+- Test de tipos fija las 2 claves y los params `[number, boolean]`; `TraccarDevicePort` sin cambios.

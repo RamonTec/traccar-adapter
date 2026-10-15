@@ -17,6 +17,8 @@ const ALLOWED_ROUTES = [
   'GET /health/ready',
   'POST /groups',
   'POST /devices',
+  'POST /devices/:deviceId/disable',
+  'POST /devices/:deviceId/enable',
 ].sort();
 
 describe('Route allowlist (e2e)', () => {

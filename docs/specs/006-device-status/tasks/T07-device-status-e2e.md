@@ -1,6 +1,6 @@
 ---
 id: 006-T07
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T06, 005-T08]
 covers: [AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9]
 ---
@@ -43,3 +43,5 @@ pnpm check
 ```
 
 ## Handoff
+- `test/device-status.e2e-spec.ts`: AC-1..AC-9 de punta a punta contra `fake-traccar` (sin cambios en el fake).
+- Spec 006 cerrado: `spec.md` done, ROADMAP actualizado.

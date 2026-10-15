@@ -1,6 +1,6 @@
 ---
 id: 006-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T02, 005-T04]
 covers: [AC-1, AC-3, AC-6, AC-7, AC-8]
 ---
@@ -61,3 +61,6 @@ pnpm check
 ```
 
 ## Handoff
+- `traccar-device.mapper.ts` (DTO + `toDevice`) compartido; el adapter de 005 lo importa sin cambio de comportamiento.
+- Desviación menor: `TraccarDeviceDto.disabled` sigue opcional (`?? false`) para no alterar 005.
+- `TraccarDeviceStatusHttpAdapter`: 400 'access denied' → undefined; setDisabled = GET raw + PUT {...raw, disabled}.
