@@ -1,6 +1,6 @@
 ---
 id: 013-delivery-outbox
-status: approved          # draft | approved | in-progress | done
+status: done              # draft | approved | in-progress | done
 requirements: [FR9, FR10, NFR2, NFR6]
 adrs: [0004, 0005, 0007]
 ---

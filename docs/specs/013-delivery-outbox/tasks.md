@@ -33,10 +33,10 @@ spec: 013-delivery-outbox
 | AC-12 | T03, T06, T09 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
-- [ ] `OUTBOX_PATH` y `OUTBOX_MAX_BYTES` documentadas en el README, con la nota de volumen persistente
-- [ ] Prueba manual: con NATS caído, el webhook responde 200 `buffered`; al levantar NATS (sin reiniciar el adapter) los mensajes llegan y `outbox.pending` vuelve a 0
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
+- [x] `OUTBOX_PATH` y `OUTBOX_MAX_BYTES` documentadas en el README, con la nota de volumen persistente
+- [x] Prueba manual: con NATS caído, el webhook responde 200 `buffered`; al levantar NATS (sin reiniciar el adapter) los mensajes llegan y `outbox.pending` vuelve a 0
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
 - [ ] PR abierto con la lista de tasks y la matriz AC → tasks
