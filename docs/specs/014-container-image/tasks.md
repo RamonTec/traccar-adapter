@@ -25,9 +25,9 @@ spec: 014-container-image
 | AC-9 | T02, T04 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] `pnpm check`, `pnpm test:e2e` y `pnpm test:image` en verde
-- [ ] README con la sección de imagen de contenedor
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
-- [ ] PR abierto con la lista de tasks y la matriz AC → tasks
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] `pnpm check`, `pnpm test:e2e` y `pnpm test:image` en verde
+- [x] README con la sección de imagen de contenedor
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] PR abierto con la lista de tasks y la matriz AC → tasks

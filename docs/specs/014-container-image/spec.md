@@ -1,6 +1,6 @@
 ---
 id: 014-container-image
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [NFR2]
 adrs: [0001, 0007]
 ---
