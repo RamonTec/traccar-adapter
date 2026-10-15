@@ -1,6 +1,6 @@
 ---
 id: 015-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [015-T02]
 covers: [AC-6]
 ---
@@ -11,7 +11,7 @@ covers: [AC-6]
 - `docs/specs/015-ci-pipeline/design.md`
 
 ## Archivos a crear/modificar
-- [ ] `README.md` (sección "Integración continua")
+- [x] `README.md` (sección "Integración continua")
 
 ## Verificación
 ```bash
@@ -19,3 +19,4 @@ pnpm check
 ```
 
 ## Handoff
+- Sección "Integración continua" en el README: checks, cómo reproducirlos y cómo hacerlos obligatorios.

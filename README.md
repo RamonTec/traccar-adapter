@@ -57,6 +57,23 @@ docker run -d --name traccar-adapter --env-file <archivo> -v traccar-adapter-dat
   en menos de 10 s.
 - **Tests de la imagen**: `pnpm test:image` (requiere Docker; fuera de `pnpm check`).
 
+## Integración continua
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) se ejecuta en cada PR hacia `main` y en cada push a `main`,
+con tres checks en paralelo:
+
+| Check | Qué ejecuta | Reproducir en local |
+|-------|-------------|---------------------|
+| `check` | typecheck, lint, formato, sync de comandos SDD y tests unitarios | `pnpm check` |
+| `e2e` | suites e2e contra un NATS con JetStream efímero | `pnpm test:infra:up && pnpm test:e2e` |
+| `image` | construye la imagen y la verifica con Docker | `pnpm test:image` |
+
+- Versiones: Node de [`.node-version`](.node-version) (la misma que la imagen; `test:image` lo comprueba) y pnpm de
+  `packageManager` en `package.json`. Dependencias exactas del lockfile.
+- Sin secretos y con permisos de solo lectura. Un push nuevo a un PR cancela la ejecución anterior.
+- **Hacer obligatorios los checks** (dueño del repo): *Settings → Branches → Add branch ruleset* para `main` →
+  *Require status checks to pass* → añadir `check`, `e2e` e `image` (aparecen tras la primera ejecución).
+
 ## Integración con Traccar
 
 Configuración requerida de Traccar (reenvío, reintentos, permisos) y caída máxima tolerable: [docs/ops/traccar-config.md](docs/ops/traccar-config.md). Traccar local para desarrollo: [dev/traccar/README.md](dev/traccar/README.md).
