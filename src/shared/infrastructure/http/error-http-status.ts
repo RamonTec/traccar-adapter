@@ -18,6 +18,8 @@ export const ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
     GROUP_NAME_AMBIGUOUS: 409,
     DEVICE_ALREADY_REGISTERED: 409,
     GROUP_NOT_FOUND: 404,
+    DEVICE_NOT_FOUND: 404,
+    DEVICE_RETIRED: 409,
   });
 
 const CODE_BY_STATUS: ReadonlyMap<number, string> = new Map(

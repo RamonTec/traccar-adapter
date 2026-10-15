@@ -26,6 +26,14 @@ describe('httpStatusForCode', () => {
     expect(httpStatusForCode('GROUP_NOT_FOUND')).toBe(404);
   });
 
+  it('AC-5b: maps DEVICE_RETIRED to 409', () => {
+    expect(httpStatusForCode('DEVICE_RETIRED')).toBe(409);
+  });
+
+  it('AC-6: maps DEVICE_NOT_FOUND to 404', () => {
+    expect(httpStatusForCode('DEVICE_NOT_FOUND')).toBe(404);
+  });
+
   it('AC-9b: returns undefined for an unknown code', () => {
     expect(httpStatusForCode('SOMETHING_UNKNOWN')).toBeUndefined();
   });

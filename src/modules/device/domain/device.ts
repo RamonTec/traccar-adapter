@@ -8,3 +8,6 @@ export interface Device {
 
 export const retiredUniqueId = (uniqueId: string, deviceId: number): string =>
   `${uniqueId}:retired:${deviceId}`;
+
+export const isRetired = (uniqueId: string): boolean =>
+  uniqueId.includes(':retired:');
