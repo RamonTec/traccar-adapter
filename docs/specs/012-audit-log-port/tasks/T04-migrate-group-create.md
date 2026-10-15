@@ -1,6 +1,6 @@
 ---
 id: 012-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T03]
 covers: [AC-1, AC-2, AC-6, AC-8, AC-10]
 ---
@@ -72,3 +72,7 @@ pnpm check
 ```
 
 ## Handoff
+- `CreateGroupUseCase(traccar, audit, clock)` + `actor` en el input; lógica intacta en `run` privado envuelta en `runAudited`.
+- `GroupController` sin Logger/try-finally/errores de dominio; su spec comprueba status 409/503 y que no emite auditoría.
+- Desviación: fakes compartidos `FakeAuditLog`/`FakeClock` en `shared/application/ports/__fakes__/` (los reutilizan T05/T06).
+- e2e 68/68 sin cambios en `test/`.

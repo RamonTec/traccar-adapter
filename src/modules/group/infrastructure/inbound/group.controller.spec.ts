@@ -113,7 +113,7 @@ describe('GroupController (integration)', () => {
     const res = await postGroup({ name: ' acme ' }).expect(201);
 
     expect(res.body).toEqual({ groupId: 7, name: ' acme ' });
-    expect(useCase.calls).toEqual([{ name: ' acme ' }]);
+    expect(useCase.calls).toEqual([{ name: ' acme ', actor: 'svc-test' }]);
   });
 
   it('AC-2: existing → 200 with groupId and name', async () => {
@@ -125,59 +125,24 @@ describe('GroupController (integration)', () => {
   });
 
   it.each([
-    {
-      result: 'created',
-      outcome: { group: { id: 7, name: 'acme' }, created: true },
-      status: 201,
-      level: 'info',
-      groupId: 7,
-    },
-    {
-      result: 'existing',
-      outcome: { group: { id: 7, name: 'acme' }, created: false },
-      status: 200,
-      level: 'info',
-      groupId: 7,
-    },
-    {
-      result: 'ambiguous',
-      outcome: new GroupNameAmbiguousError('acme', 2),
-      status: 409,
-      level: 'warn',
-      groupId: undefined,
-    },
-    {
-      result: 'failed',
-      outcome: new UpstreamUnavailableError('traccar'),
-      status: 503,
-      level: 'warn',
-      groupId: undefined,
-    },
-  ])(
-    'AC-7/AC-7b: logs exactly one audit line with result $result and msg',
-    async ({ result, outcome, status, level, groupId }) => {
-      useCase.result = outcome;
+    ['ambiguous', new GroupNameAmbiguousError('acme', 2), 409],
+    ['failed', new UpstreamUnavailableError('traccar'), 503],
+  ] as const)(
+    'AC-8: %s error keeps its HTTP status (%s)',
+    async (_, error, status) => {
+      useCase.result = error;
 
       await postGroup({ name: 'acme' }).expect(status);
-
-      await vi.waitFor(() => expect(auditLines()).toHaveLength(1));
-      const [line] = auditLines();
-      expect(line).toMatchObject({
-        msg: 'group.create',
-        op: 'group.create',
-        actor: 'svc-test',
-        name: 'acme',
-        result,
-        level,
-      });
-      expect(typeof line?.durationMs).toBe('number');
-      if (groupId === undefined) {
-        expect(line).not.toHaveProperty('groupId');
-      } else {
-        expect(line?.groupId).toBe(groupId);
-      }
     },
   );
+
+  it('ADR-0006: the controller emits no audit line (the use case does)', async () => {
+    await postGroup({ name: 'acme' }).expect(201);
+    useCase.result = new GroupNameAmbiguousError('acme', 2);
+    await postGroup({ name: 'acme' }).expect(409);
+
+    expect(auditLines()).toEqual([]);
+  });
 
   it('AC-6: create requires the groups:write role', () => {
     const handler = Object.getOwnPropertyDescriptor(
