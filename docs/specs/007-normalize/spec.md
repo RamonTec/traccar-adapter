@@ -16,7 +16,8 @@ Traccar reenvía posiciones y eventos en su propio formato JSON. Los consumidore
 
 ## Comportamiento (criterios de aceptación)
 - **AC-1** — CUANDO un payload de posición es válido, el resultado DEBE ser un `position.reported` (`version: 1`) con:
-  - `id` = `traccar-position-<position.id>`;
+  - `id` = `traccar-position-<device.id>-<fixTime en epoch ms>` (ADR-0004, enmienda 2026-10-15);
+  - `data.positionId` = `null` si Traccar envía `0` (siempre en el forward de posiciones);
   - `occurredAt` = `fixTime`;
   - `groupId` tomado de `device.groupId`;
   - los campos de `data` que define ADR-0004.
@@ -37,8 +38,9 @@ Traccar reenvía posiciones y eventos en su propio formato JSON. Los consumidore
 Salida según ADR-0004 (`position.reported`, `device.event`; motivos de rechazo `MISSING_GROUP`, `SCHEMA_MISMATCH`).
 
 ## Preguntas abiertas
-**Q1 (2026-10-15, abierta, bloquea 007-T03)** — En las capturas reales de Traccar 6.15.3 (007-T01), el forward de **posiciones** llega con `position.id = 0` siempre: se reenvía antes de persistir. Los eventos sí traen `event.id` y `positionId` reales. Con AC-1 (`id = traccar-position-<position.id>`) todas las posiciones tendrían el `id` `traccar-position-0`. Como ADR-0004 usa ese `id` como `Nats-Msg-Id`, JetStream descartaría como duplicada cada posición tras la primera, dentro de su ventana de deduplicación.
+**Q1 (2026-10-15, resuelta 2026-10-15)** — En las capturas reales de Traccar 6.15.3 (007-T01), el forward de **posiciones** llega con `position.id = 0` siempre: se reenvía antes de persistir. Los eventos sí traen `event.id` y `positionId` reales. Con AC-1 (`id = traccar-position-<position.id>`) todas las posiciones tendrían el `id` `traccar-position-0`. Como ADR-0004 usa ese `id` como `Nats-Msg-Id`, JetStream descartaría como duplicada cada posición tras la primera, dentro de su ventana de deduplicación.
 Propuesta: `id = traccar-position-<deviceId>-<fixTime en epoch ms>` (clave natural; un reintento del mismo fix sigue deduplicándose) y `data.positionId: number | null` (`0` → `null`). Requiere enmendar ADR-0004 y AC-1, y ajustar 007-T02 (tipo) y 007-T03.
+→ **Aprobada** por el usuario: ADR-0004 enmendado, AC-1 actualizado, `PositionData.positionId: number | null`.
 
 Resueltas 2026-10-14:
 1. `attributes` se copian sin transformar en v1; ningún atributo se promueve a campo de primer nivel.

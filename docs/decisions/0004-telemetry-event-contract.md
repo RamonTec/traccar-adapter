@@ -27,13 +27,13 @@ Configuración mínima (NFR6):
 Los valores se pueden configurar por variables de entorno.
 
 ### Headers de todo mensaje
-- `Nats-Msg-Id`: `traccar-position-<positionId>`, `traccar-event-<eventId>` o, en el dead-letter, `traccar-deadletter-<sha256 del body>`. Los prefijos evitan que choquen los distintos espacios de ids; el hash hace que un reintento del mismo body no genere un dead-letter duplicado.
+- `Nats-Msg-Id`: `traccar-position-<deviceId>-<fixTime en epoch ms>` (ver enmienda 2026-10-15), `traccar-event-<eventId>` o, en el dead-letter, `traccar-deadletter-<sha256 del body>`. Los prefijos evitan que choquen los distintos espacios de ids; el hash hace que un reintento del mismo body no genere un dead-letter duplicado.
 - `x-correlation-id`: según ADR-0002 §1.
 
 ### Formato común (`TELEMETRY_EVENTS`)
 ```json
 {
-  "id": "traccar-position-123",
+  "id": "traccar-position-4-1792091219000",
   "type": "position.reported",
   "version": 1,
   "source": "traccar",
@@ -44,7 +44,7 @@ Los valores se pueden configurar por variables de entorno.
 }
 ```
 - `id` coincide con `Nats-Msg-Id`. `type` ∈ {`position.reported`, `device.event`}. Si un cambio rompe el contrato, se incrementa `version` y se mantiene la anterior durante la migración.
-- `data` de `position.reported`: `positionId`, `deviceId`, `groupId`, `fixTime`, `deviceTime`, `serverTime`, `valid`, `latitude`, `longitude`, `altitude`, `speedKmh`, `course`, `accuracy`, `attributes` (objeto, sin transformar).
+- `data` de `position.reported`: `positionId` (o `null`), `deviceId`, `groupId`, `fixTime`, `deviceTime`, `serverTime`, `valid`, `latitude`, `longitude`, `altitude`, `speedKmh`, `course`, `accuracy`, `attributes` (objeto, sin transformar).
 - `data` de `device.event`: `eventId`, `eventType` (tipo de Traccar sin transformar, p.ej. `alarm`), `deviceId`, `groupId`, `eventTime`, `positionId` (o `null`), `attributes`.
 - Unidades: **km/h** (Traccar envía nudos; se convierte una sola vez, aquí). Las fechas en ISO-8601 UTC.
 
@@ -64,6 +64,12 @@ Los valores se pueden configurar por variables de entorno.
 }
 ```
 - `rawPayload` es el body tal cual: en `utf8` si es UTF-8 válido y en `base64` si no lo es. Si el body supera 64 KiB solo se guardan los primeros 64 KiB y `truncated` vale `true` (siempre ocurre con `PAYLOAD_TOO_LARGE`). El `id` se calcula sobre el body completo.
+
+### Enmienda 2026-10-15 — id de `position.reported`
+Las capturas reales de Traccar 6.15.3 (spec 007, T01) muestran que el forward de posiciones se envía **antes de persistir**: `position.id` llega siempre como `0`. Un `id` basado en él (`traccar-position-0`) haría que JetStream descartara como duplicadas todas las posiciones tras la primera.
+- El `id` de una posición pasa a ser `traccar-position-<deviceId>-<fixTime en epoch ms>`: clave natural, estable entre reintentos de Traccar del mismo fix y distinta entre fixes del mismo device.
+- `data.positionId` es `number | null`: `null` cuando Traccar envía `0`.
+- Los eventos no cambian: `event.id` y `event.positionId` sí son reales.
 
 ## Consecuencias
 - (+) Los consumidores filtran por subject y deduplican por `id`. Las unidades se normalizan en un solo lugar.
