@@ -12,7 +12,8 @@ interface Envelope<T extends string, D> {
 }
 
 export interface PositionData {
-  positionId: number;
+  /** null: Traccar forwards positions before persisting them (id 0, ADR-0004 amendment). */
+  positionId: number | null;
   deviceId: number;
   groupId: number;
   fixTime: string;
