@@ -18,6 +18,7 @@ import { HealthModule } from './shared/infrastructure/health/health.module.js';
 import { HttpExceptionFilter } from './shared/infrastructure/http/http-exception.filter.js';
 import { LoggingModule } from './shared/infrastructure/logging/logging.module.js';
 import { AuditModule } from './shared/infrastructure/audit/audit.module.js';
+import { OutboxModule } from './shared/infrastructure/outbox/outbox.module.js';
 import { MessagingModule } from './shared/infrastructure/nats/messaging.module.js';
 import { TraccarModule } from './shared/infrastructure/traccar/traccar.module.js';
 import { GroupModule } from './modules/group/group.module.js';
@@ -66,6 +67,7 @@ export class AppModule implements NestModule {
         TraccarModule,
         MessagingModule,
         AuditModule,
+        OutboxModule,
         LoggingModule.forRoot(config, logStream),
         GroupModule,
         DeviceModule,

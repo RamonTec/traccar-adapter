@@ -315,7 +315,8 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'ok',
-        checks: { traccar: 'ok', nats: 'ok' },
+        checks: { traccar: 'ok', nats: 'ok', outbox: 'ok' },
+        outbox: { pending: 0, oldestAgeMs: null },
       });
     });
 
@@ -331,7 +332,8 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'error',
-        checks: { traccar: 'error', nats: 'ok' },
+        checks: { traccar: 'error', nats: 'ok', outbox: 'ok' },
+        outbox: { pending: 0, oldestAgeMs: null },
       });
     });
 
@@ -344,7 +346,8 @@ describe('Foundation (e2e)', () => {
 
       expect(res.body).toEqual({
         status: 'error',
-        checks: { traccar: 'error', nats: 'ok' },
+        checks: { traccar: 'error', nats: 'ok', outbox: 'ok' },
+        outbox: { pending: 0, oldestAgeMs: null },
       });
     });
 

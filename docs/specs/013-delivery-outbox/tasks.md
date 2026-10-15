@@ -11,7 +11,7 @@ spec: 013-delivery-outbox
 | T03 | Support non-critical checks and info in readiness | — | done |
 | T04 | Add ReliablePublisher | T02 | done |
 | T05 | Add OutboxDrainer | T02 | done |
-| T06 | Add OutboxModule, readiness wiring and non-critical NATS | T03, T04, T05 | todo |
+| T06 | Add OutboxModule, readiness wiring and non-critical NATS | T03, T04, T05 | done |
 | T07 | Return Delivery from ingestion ports and add buffered outcome | — | todo |
 | T08 | Publish ingestion events and dead-letters through ReliablePublisher | T06, T07 | todo |
 | T09 | Add outbox e2e suite and webhook buffered logging | T08 | todo |

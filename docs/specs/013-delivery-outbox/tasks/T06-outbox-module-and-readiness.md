@@ -1,6 +1,6 @@
 ---
 id: 013-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T03, 013-T04, 013-T05]
 covers: [AC-11, AC-12]
 ---
@@ -55,3 +55,6 @@ pnpm check
 ```
 
 ## Handoff
+- `OutboxModule` @Global: store (factory con `c.outbox`), drainer, `ReliablePublisher`; readiness `outbox` crítico + info `{pending, oldestAgeMs}`; cierra el store al apagar.
+- `nats` no crítico; e2e de readiness (009 AC-5 y app.e2e) actualizados: NATS caído → 200 `nats: 'down'`.
+- Ajuste en el drainer (T05): todo el bucle en try/catch, para tolerar un store cerrado durante el apagado (lo reenviado lo absorbe la dedup).

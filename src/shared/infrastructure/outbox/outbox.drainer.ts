@@ -50,15 +50,10 @@ export class OutboxDrainer
     try {
       let entry = this.store.oldest();
       while (!this.stopped && entry) {
-        try {
-          await this.js.publish(entry.subject, JSON.parse(entry.body), {
-            msgId: entry.msgId,
-            correlationId: entry.correlationId,
-          });
-        } catch {
-          this.scheduleRetry();
-          return;
-        }
+        await this.js.publish(entry.subject, JSON.parse(entry.body), {
+          msgId: entry.msgId,
+          correlationId: entry.correlationId,
+        });
         this.store.delete(entry.seq);
         this.attempt = 0;
         this.logger.log(
@@ -71,6 +66,10 @@ export class OutboxDrainer
         );
         entry = this.store.oldest();
       }
+    } catch {
+      // Includes a store closed during shutdown; an entry published but not yet
+      // deleted is resent later and dropped by JetStream dedup (AC-9).
+      this.scheduleRetry();
     } finally {
       this.draining = false;
     }
