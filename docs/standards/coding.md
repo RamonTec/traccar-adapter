@@ -43,7 +43,7 @@
 
 ### Auditoría de operaciones
 
-Cada operación de escritura expuesta (p.ej. `POST /groups`) emite **exactamente una** línea de auditoría por petición válida, haya éxito o fallo. Responde a *quién, qué, con qué resultado y cuánto tardó* (OWASP Logging Cheat Sheet). Los campos de ADR-0002 §4 (`time`, `level`, `service`, `context`, `correlationId`) los pone el logger; además:
+Cada ejecución de un use case de escritura (p.ej. `CreateGroupUseCase`, invocado desde `POST /groups`) emite **exactamente una** línea de auditoría, haya éxito o fallo. Responde a *quién, qué, con qué resultado y cuánto tardó* (OWASP Logging Cheat Sheet). Los campos de ADR-0002 §4 (`time`, `level`, `service`, `context`, `correlationId`) los pone el logger; además:
 
 | Campo | Contenido | Equivalente ECS / OpenTelemetry |
 |-------|-----------|------------------|
@@ -57,7 +57,9 @@ Cada operación de escritura expuesta (p.ej. `POST /groups`) emite **exactamente
 - Nivel: `info` si `result` es un éxito, `warn` si es un rechazo o `failed`. Los `error` los emite el exception filter, no la auditoría.
 - La línea de auditoría no sustituye al log de request de pino-http ni al de cada comando a Traccar; son eventos distintos.
 - Prohibido incluir tokens, headers o el body completo; solo los campos de la tabla.
-- Ubicación: es responsabilidad del adaptador de entrada (necesita `actor`, que es un concepto de transporte), **no** del use case. Objetivo: un interceptor transversal (`@Audit('<op>')`) para no repetir `try/finally` en cada controller. Hasta que exista, el controller lo hace con `try/finally` y relanza el error sin tocarlo.
+- Ubicación (**ADR-0006**): la auditoría es responsabilidad del **use case**, vía `AuditLogPort` + `ClockPort` (`shared/application/ports`). El use case recibe `actor` en su input, mide con `ClockPort`, clasifica `result` en `try/catch/finally`, relanza el error sin tocarlo y llama a `audit.record(...)`.
+- Controllers, consumers y demás adaptadores de entrada **no** auditan ni importan el `Logger` para ello: solo obtienen `actor` del transporte y lo pasan al use case.
+- El adapter (`PinoAuditLogAdapter`) fija `msg = op`, `context: 'Audit'` y el nivel según `succeeded`; nunca lanza.
 
 ## Configuración
 
