@@ -1,6 +1,6 @@
 ---
 spec: 013-delivery-outbox
-status: draft          # draft | approved
+status: approved          # draft | approved
 ---
 
 # 013 — Diseño
