@@ -1,6 +1,6 @@
 ---
 id: 012-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [012-T01]
 covers: [AC-1, AC-7, AC-9]
 ---
@@ -68,3 +68,5 @@ pnpm check
 ```
 
 ## Handoff
+- `PinoAuditLogAdapter`: `new Logger('Audit')`, campos fijos tras el spread de `fields` (no se pueden pisar), info/warn según `succeeded`, nunca lanza; `actor` undefined desaparece del JSON.
+- `SystemClock.now()` = `performance.now()`.
