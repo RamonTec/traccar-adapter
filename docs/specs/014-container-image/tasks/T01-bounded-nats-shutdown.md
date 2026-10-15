@@ -1,6 +1,6 @@
 ---
 id: 014-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-8]
 ---
@@ -23,12 +23,12 @@ const SHUTDOWN_DRAIN_TIMEOUT_MS = 5_000;
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/nats/nats-connection.manager.ts` (mod)
-- [ ] `test/nats-connection.e2e-spec.ts` (mod)
+- [x] `src/shared/infrastructure/nats/nats-connection.manager.ts` (mod)
+- [x] `test/nats-connection.e2e-spec.ts` (mod)
 
 ## Criterios de aceptación
-- [ ] **AC-8** — Conectado a NATS y con NATS detenido después, `app.close()` termina en < 6 s.
-- [ ] Con NATS disponible, el apagado sigue drenando (sin regresión en las suites e2e).
+- [x] **AC-8** — Conectado a NATS y con NATS detenido después, `app.close()` termina en < 6 s.
+- [x] Con NATS disponible, el apagado sigue drenando (sin regresión en las suites e2e).
 
 ## Fuera de alcance
 - Cambios en el orden de los hooks de Nest u otros módulos.
@@ -40,3 +40,8 @@ pnpm check
 ```
 
 ## Handoff
+- `onApplicationShutdown` hace `drain()` en carrera con 5 s; si vence, log warn `NATS drain timed out` y `close()`.
+- El corte limpio de TCP no colgaba; el cuelgue real es NATS sin responder con el socket abierto (partición). El test
+  lo simula con un proxy TCP que descarta tráfico; sin el límite el apagado superaba los 20 s.
+- Nota de entorno: el port-forward de Docker del host dejó de funcionar; e2e ejecutados dentro de un contenedor con
+  `--network container:traccar-adapter-test-nats`.

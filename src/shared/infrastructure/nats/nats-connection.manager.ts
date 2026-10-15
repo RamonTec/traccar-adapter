@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { setTimeout as sleep } from 'node:timers/promises';
 import {
   Inject,
   Injectable,
@@ -29,6 +30,8 @@ import {
 
 const STREAM_NOT_FOUND = 10059;
 const MAX_BACKOFF_MS = 30_000;
+/** An unresponsive NATS must not stall shutdown past the container's grace period. */
+const SHUTDOWN_DRAIN_TIMEOUT_MS = 5_000;
 
 /**
  * Connects in the background so the app starts without NATS (readiness reports it).
@@ -73,7 +76,19 @@ export class NatsConnectionManager
     this.stopped = true;
     this.ready = false;
     clearTimeout(this.timer);
-    if (this.nc && !this.nc.isClosed()) await this.nc.drain();
+    const nc = this.nc;
+    if (!nc || nc.isClosed()) return;
+    const drained = await Promise.race([
+      nc.drain().then(
+        () => true,
+        () => false,
+      ),
+      sleep(SHUTDOWN_DRAIN_TIMEOUT_MS, false, { ref: false }),
+    ]);
+    if (!drained && !nc.isClosed()) {
+      this.logger.warn('NATS drain timed out');
+      await nc.close();
+    }
   }
 
   private async start(): Promise<void> {
