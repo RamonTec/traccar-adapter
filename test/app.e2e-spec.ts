@@ -1,10 +1,20 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import net from 'node:net';
-import { type INestApplication } from '@nestjs/common';
+import { Controller, Get, type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
+import {
+  Actor,
+  RequireRole,
+} from './../src/shared/infrastructure/auth/auth.decorators.js';
+import {
+  InvalidTokenError,
+  type JwtVerifier,
+  type VerifiedPrincipal,
+} from './../src/shared/infrastructure/auth/jwt-verifier.js';
+import { createLogCapture, type LogCapture } from './support/log-capture.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
 async function resetLoggerState(): Promise<void> {
@@ -115,6 +125,124 @@ describe('Foundation (e2e)', () => {
         message: 'Resource not found',
         correlationId: 'e2e-1',
       });
+    });
+  });
+
+  describe('Service auth (in-process)', () => {
+    const TOKEN = 'e2e-secret-token-value';
+    let app: INestApplication;
+    let capture: LogCapture;
+
+    @Controller('protected-test')
+    class ProtectedTestController {
+      @Get()
+      @RequireRole('groups:write')
+      get(@Actor() actor: string | undefined): { actor: string | undefined } {
+        return { actor };
+      }
+    }
+
+    const fakeVerifier: Pick<JwtVerifier, 'verify'> = {
+      verify: (token: string): Promise<VerifiedPrincipal> =>
+        token === TOKEN
+          ? Promise.resolve({ actor: 'core-service', roles: ['groups:write'] })
+          : Promise.reject(new InvalidTokenError('SIGNATURE')),
+    };
+
+    beforeEach(async () => {
+      await resetLoggerState();
+      capture = createLogCapture();
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [
+          AppModule.register(
+            testConfig({ port: 0, logLevel: 'debug' }),
+            capture.stream,
+            { jwtVerifier: fakeVerifier },
+          ),
+        ],
+        controllers: [ProtectedTestController],
+      }).compile();
+
+      app = moduleFixture.createNestApplication({ bufferLogs: true });
+      app.useLogger(app.get(Logger));
+      await app.init();
+    });
+
+    afterEach(async () => {
+      if (app) {
+        await app.close();
+      }
+      await resetLoggerState();
+    });
+
+    const requestLog = (url: string): Record<string, unknown> | undefined =>
+      capture
+        .lines()
+        .find(
+          (l) =>
+            l.context === 'HTTP' &&
+            (l.req as { url?: string } | undefined)?.url === url,
+        );
+
+    it('AC-7: GET /health without token returns 200 and logs no actor', async () => {
+      const res = await request(app.getHttpServer()).get('/health').expect(200);
+
+      expect(res.body).toEqual({ status: 'ok' });
+      await vi.waitFor(() => expect(requestLog('/health')).toBeDefined());
+      expect(requestLog('/health')).not.toHaveProperty('actor');
+    });
+
+    it('AC-1: protected route without token returns 401 UNAUTHORIZED', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/protected-test')
+        .expect(401);
+
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          code: 'UNAUTHORIZED',
+          correlationId: expect.any(String),
+        }),
+      );
+      await vi.waitFor(() =>
+        expect(requestLog('/protected-test')).toBeDefined(),
+      );
+      expect(requestLog('/protected-test')).not.toHaveProperty('actor');
+    });
+
+    it('AC-6: authenticated request logs actor on request completion', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/protected-test')
+        .set('authorization', `Bearer ${TOKEN}`)
+        .expect(200);
+
+      expect(res.body).toEqual({ actor: 'core-service' });
+      await vi.waitFor(() =>
+        expect(requestLog('/protected-test')).toEqual(
+          expect.objectContaining({ actor: 'core-service' }),
+        ),
+      );
+    });
+
+    it('AC-11: no captured log line contains the token value', async () => {
+      await request(app.getHttpServer())
+        .get('/protected-test')
+        .set('authorization', `Bearer ${TOKEN}`)
+        .expect(200);
+      await request(app.getHttpServer())
+        .get('/protected-test')
+        .set('authorization', `Bearer ${TOKEN}-tampered`)
+        .expect(401);
+
+      await vi.waitFor(() =>
+        expect(
+          capture.lines().filter((l) => l.context === 'HTTP').length,
+        ).toBeGreaterThanOrEqual(2),
+      );
+      const lines = capture.lines();
+      expect(lines.length).toBeGreaterThan(0);
+      for (const line of lines) {
+        expect(JSON.stringify(line)).not.toContain(TOKEN);
+      }
     });
   });
 

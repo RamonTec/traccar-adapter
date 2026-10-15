@@ -9,7 +9,7 @@ spec: 002-service-auth
 | T01 | Add auth config section and shared test env helper | 001 | done |
 | T02 | Add JwtVerifier with jose | T01 | done |
 | T03 | Add auth decorators and ServiceAuthGuard | T02 | done |
-| T04 | Wire global guard, public health and actor logging | T03 | todo |
+| T04 | Wire global guard, public health and actor logging | T03 | done |
 
 ## Cobertura AC → tasks
 | AC | Tasks |

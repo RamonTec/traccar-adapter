@@ -1,6 +1,8 @@
 import { type DynamicModule, Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import type { DestinationStream } from 'pino';
+import { JwtVerifier } from './shared/infrastructure/auth/jwt-verifier.js';
+import { ServiceAuthGuard } from './shared/infrastructure/auth/service-auth.guard.js';
 import {
   APP_CONFIG,
   type AppConfig,
@@ -9,12 +11,25 @@ import { HealthController } from './shared/infrastructure/http/health.controller
 import { HttpExceptionFilter } from './shared/infrastructure/http/http-exception.filter.js';
 import { LoggingModule } from './shared/infrastructure/logging/logging.module.js';
 
+export interface AppModuleOverrides {
+  readonly jwtVerifier?: Pick<JwtVerifier, 'verify'>;
+}
+
 @Module({})
 export class AppModule {
   static register(
     config: AppConfig,
     logStream?: DestinationStream,
+    overrides?: AppModuleOverrides,
   ): DynamicModule {
+    const jwtVerifierProvider = overrides?.jwtVerifier
+      ? { provide: JwtVerifier, useValue: overrides.jwtVerifier }
+      : {
+          provide: JwtVerifier,
+          useFactory: (c: AppConfig) => new JwtVerifier(c.auth),
+          inject: [APP_CONFIG],
+        };
+
     return {
       module: AppModule,
       imports: [LoggingModule.forRoot(config, logStream)],
@@ -22,6 +37,8 @@ export class AppModule {
       providers: [
         { provide: APP_CONFIG, useValue: config },
         { provide: APP_FILTER, useClass: HttpExceptionFilter },
+        jwtVerifierProvider,
+        { provide: APP_GUARD, useClass: ServiceAuthGuard },
       ],
     };
   }
