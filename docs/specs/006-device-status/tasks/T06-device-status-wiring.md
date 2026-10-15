@@ -1,6 +1,6 @@
 ---
 id: 006-T06
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T04, 006-T05, 005-T07]
 covers: [AC-9]
 ---
@@ -50,3 +50,5 @@ pnpm check
 ```
 
 ## Handoff
+- `DeviceModule` registra `DeviceStatusController`, `TRACCAR_DEVICE_STATUS_PORT` → `TraccarDeviceStatusHttpAdapter` y `SetDeviceStatusUseCase`.
+- Allowlist: + `POST /devices/:deviceId/{disable,enable}`; `pnpm test:e2e` verde.

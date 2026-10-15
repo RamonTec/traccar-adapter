@@ -11,7 +11,7 @@ spec: 006-device-status
 | T03 | Add SetDeviceStatusUseCase | T02 | done |
 | T04 | Extract device mapper and add TraccarDeviceStatusHttpAdapter | T02, 005-T04 | done |
 | T05 | Add DeviceStatusController with param/body validation and audit log | T03, 004-T01, 002-T04 | done |
-| T06 | Wire device status into DeviceModule and route allowlist | T04, T05, 005-T07 | todo |
+| T06 | Wire device status into DeviceModule and route allowlist | T04, T05, 005-T07 | done |
 | T07 | Add device-status e2e suite | T06, 005-T08 | todo |
 
 ## Cobertura AC → tasks
