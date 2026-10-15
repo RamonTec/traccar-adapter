@@ -1,6 +1,6 @@
 ---
 id: 009-jetstream-publish
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [FR9, NFR6]
 adrs: [ADR-0002, ADR-0004]
 ---
