@@ -1,6 +1,6 @@
 ---
 id: 004-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [001]
 covers: [AC-3]
 ---
@@ -36,13 +36,13 @@ GROUP_NAME_AMBIGUOUS: 409,
 Ojo: `CODE_BY_STATUS` invierte el mapa. Añadir otro código con 409 no debe cambiar `codeForHttpStatus(409)`, que debe seguir siendo `'CONFLICT'`. Si el orden de inserción lo rompe, coloca la entrada **después** de `CONFLICT` o excluye los códigos de dominio de la inversión.
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/group/domain/group.ts` (nuevo)
-- [ ] `src/modules/group/domain/errors.ts` (nuevo) + `errors.spec.ts`
-- [ ] `src/shared/infrastructure/http/error-http-status.ts` (modificado) + ampliar `.spec.ts`
+- [x] `src/modules/group/domain/group.ts` (nuevo)
+- [x] `src/modules/group/domain/errors.ts` (nuevo) + `errors.spec.ts`
+- [x] `src/shared/infrastructure/http/error-http-status.ts` (modificado) + ampliar `.spec.ts`
 
 ## Criterios de aceptación
-- [ ] **AC-3a** — `new GroupNameAmbiguousError('acme', 2)`: `code === 'GROUP_NAME_AMBIGUOUS'`, `instanceof DomainError`, expone `name` y `matches`.
-- [ ] **AC-3b** — `httpStatusForCode('GROUP_NAME_AMBIGUOUS') === 409`, y `codeForHttpStatus(409)` sigue siendo `'CONFLICT'`.
+- [x] **AC-3a** — `new GroupNameAmbiguousError('acme', 2)`: `code === 'GROUP_NAME_AMBIGUOUS'`, `instanceof DomainError`, expone `name` y `matches`.
+- [x] **AC-3b** — `httpStatusForCode('GROUP_NAME_AMBIGUOUS') === 409`, y `codeForHttpStatus(409)` sigue siendo `'CONFLICT'`.
 
 ## Fuera de alcance
 - Port y use case (T03).
@@ -54,3 +54,6 @@ pnpm check
 ```
 
 ## Handoff
+- La pista "colocar después de CONFLICT" no funcionaba (el `Map` invertido se queda con la última entrada). Se usó la otra opción: excluir los códigos de dominio de la inversión.
+- `error-http-status.ts` exporta ahora `GENERIC_ERROR_HTTP_STATUS` (base de la inversión) y `ERROR_HTTP_STATUS` = genéricos + dominio. Los futuros códigos de dominio van solo en el segundo.
+- `GroupNameAmbiguousError.name` sobrescribe `Error.name` (`'acme'` en lugar del nombre de la clase), como fija el contrato. Ojo en logs/serializers.

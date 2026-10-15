@@ -1,4 +1,5 @@
-export const ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
+// Generic codes: the only ones codeForHttpStatus may return.
+export const GENERIC_ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
   Object.freeze({
     VALIDATION_ERROR: 400,
     UNAUTHORIZED: 401,
@@ -9,8 +10,19 @@ export const ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
     INTERNAL_ERROR: 500,
   });
 
+// Domain-specific codes share a status with a generic code and are excluded
+// from the reverse mapping so codeForHttpStatus(409) stays 'CONFLICT'.
+export const ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
+  Object.freeze({
+    ...GENERIC_ERROR_HTTP_STATUS,
+    GROUP_NAME_AMBIGUOUS: 409,
+  });
+
 const CODE_BY_STATUS: ReadonlyMap<number, string> = new Map(
-  Object.entries(ERROR_HTTP_STATUS).map(([code, status]) => [status, code]),
+  Object.entries(GENERIC_ERROR_HTTP_STATUS).map(([code, status]) => [
+    status,
+    code,
+  ]),
 );
 
 export function httpStatusForCode(code: string): number | undefined {
