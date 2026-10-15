@@ -14,8 +14,8 @@ import {
 import { createLogCapture, type LogCapture } from './support/log-capture.js';
 import {
   connectTestNats,
+  deleteStreamIfExists,
   NATS_TEST_URL,
-  purgeStreamIfExists,
 } from './support/nats.js';
 import { testConfig } from './support/test-env.js';
 
@@ -53,6 +53,8 @@ describe('JetStreamPublisher (e2e)', () => {
     waitReady = true,
   ): Promise<JetStreamPublisher> {
     await resetLoggerState();
+    // Deleting (not purging) resets the dedup window; the app recreates the stream.
+    await deleteStreamIfExists(jsm, EVENTS_STREAM);
     logs = createLogCapture();
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -73,7 +75,6 @@ describe('JetStreamPublisher (e2e)', () => {
       await vi.waitFor(() => expect(manager.isReady()).toBe(true), {
         timeout: 5000,
       });
-      await purgeStreamIfExists(jsm, EVENTS_STREAM);
     }
     return app.get(JetStreamPublisher);
   }

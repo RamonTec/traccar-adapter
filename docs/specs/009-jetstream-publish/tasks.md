@@ -12,7 +12,7 @@ spec: 009-jetstream-publish
 | T02 | Add NATS test infrastructure and testing recipe | — | done |
 | T03 | Add NatsConnectionManager | T01, T02, 003-T05 | done |
 | T04 | Add JetStreamPublisher | T03, 003-T02 | done |
-| T05 | Add JetStreamEventPublisher and bind it in IngestionModule | T04, 008-T06 | todo |
+| T05 | Add JetStreamEventPublisher and bind it in IngestionModule | T04, 008-T06 | done |
 
 Paralelizables: T01 y T02.
 

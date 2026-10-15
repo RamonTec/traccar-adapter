@@ -212,7 +212,10 @@ it('AC-2: publishes the envelope', async () => {
 });
 ```
 
-- Cada suite usa sus propios streams o los purga en `beforeEach`; nunca dependas del orden entre suites.
+- **Purgar no reinicia la deduplicación**: un `Nats-Msg-Id` ya visto sigue siendo duplicado durante
+  `duplicate_window` aunque el stream esté vacío. Si el test depende de dedup, **borra** el stream
+  (`deleteStreamIfExists`) antes de arrancar la app, que lo recrea; nunca dependas del orden entre suites.
+- Las suites e2e corren en serie (`fileParallelism: false`): todas comparten NATS y los mismos streams.
 - Para "NATS caído" no pares el contenedor compartido: apunta la app a un puerto cerrado
   (`testConfig({ nats: { servers: ['nats://127.0.0.1:1'] } })`).
 - Cierra siempre la app (`app.close()` hace `drain`) y la conexión del test, o Vitest queda colgado.

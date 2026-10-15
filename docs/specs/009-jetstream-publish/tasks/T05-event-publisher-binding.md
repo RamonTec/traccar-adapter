@@ -1,6 +1,6 @@
 ---
 id: 009-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [009-T04, 008-T06]
 covers: [AC-2, AC-3]
 ---
@@ -51,3 +51,6 @@ pnpm check
 ```
 
 ## Handoff
+- `JetStreamEventPublisher`: position.reported → telemetry.events.position, device.event → telemetry.events.device-event; msgId = event.id.
+- `IngestionModule`: EVENT_PUBLISHER_PORT por defecto = JetStream (override de tests con prioridad); dead-letter sigue provisional hasta 010.
+- Tests: suites con dedup **borran** el stream antes de arrancar (purgar no reinicia la ventana); aplicado también a `jetstream-publisher.e2e-spec.ts`; receta §7 ampliada. El test 'sin overrides → 503' de 008 ahora usa NATS inaccesible.
