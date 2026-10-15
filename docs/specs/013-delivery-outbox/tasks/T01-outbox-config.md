@@ -1,6 +1,6 @@
 ---
 id: 013-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-10]
 ---
@@ -45,3 +45,5 @@ pnpm check
 ```
 
 ## Handoff
+- `AppConfig.outbox` = { path (OUTBOX_PATH, default data/outbox.db), maxBytes (OUTBOX_MAX_BYTES 1 MiB..64 GiB, default 512 MiB) }.
+- `TEST_ENV.OUTBOX_PATH = ':memory:'`; `testConfig({ outbox })`; README con variables y nota de volumen persistente; `data/` en .gitignore.
