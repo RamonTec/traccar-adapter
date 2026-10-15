@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "build": "nest build",
     "deploy": "nest deploy",
@@ -25,7 +26,9 @@
     "check": "scripts/sync-agent-commands.sh --check && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
     "sdd:sync": "scripts/sync-agent-commands.sh",
     "test:infra:up": "docker run -d --rm --name traccar-adapter-test-nats -p 4222:4222 nats:2.11-alpine -js",
-    "test:infra:down": "docker stop traccar-adapter-test-nats"
+    "test:infra:down": "docker stop traccar-adapter-test-nats",
+    "docker:build": "docker build -t traccar-adapter:local .",
+    "test:image": "vitest run --config ./vitest.config.image.ts"
   },
   "dependencies": {
     "@nats-io/jetstream": "^3.4.0",

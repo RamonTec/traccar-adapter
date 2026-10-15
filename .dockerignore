@@ -1,0 +1,10 @@
+# Only package.json, pnpm-lock.yaml, nest-cli.json, tsconfig*.json and src/ are needed.
+**
+!package.json
+!pnpm-lock.yaml
+!nest-cli.json
+!tsconfig.json
+!tsconfig.build.json
+!src/**
+src/**/*.spec.ts
+src/**/__fakes__/**

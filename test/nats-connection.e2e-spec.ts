@@ -3,6 +3,7 @@ import type { NatsConnection } from '@nats-io/transport-node';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Logger } from 'nestjs-pino';
+import { createServer, connect as tcpConnect, type Socket } from 'node:net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import type { AppConfig } from '../src/shared/infrastructure/config/app-config.js';
@@ -26,6 +27,40 @@ import { testConfig } from './support/test-env.js';
 
 const DAY_NANOS = 86_400 * 1e9;
 const CLOSED_PORT = 'nats://127.0.0.1:1';
+
+/**
+ * TCP proxy to the test NATS that can black-hole the link: sockets stay open but
+ * nothing reaches NATS, like a network partition (the client sees no disconnect).
+ */
+async function createNatsProxy(): Promise<{
+  url: string;
+  blackHole: () => void;
+  close: () => void;
+}> {
+  const target = new URL(NATS_TEST_URL);
+  const sockets = new Set<Socket>();
+  let dropping = false;
+  const server = createServer((client) => {
+    const upstream = tcpConnect(Number(target.port), target.hostname);
+    sockets.add(client).add(upstream);
+    client.on('data', (chunk) => dropping || upstream.write(chunk));
+    upstream.on('data', (chunk) => dropping || client.write(chunk));
+    client.on('error', () => upstream.destroy());
+    upstream.on('error', () => client.destroy());
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address() as { port: number };
+  return {
+    url: `nats://127.0.0.1:${port}`,
+    blackHole: () => {
+      dropping = true;
+    },
+    close: () => {
+      server.close();
+      for (const socket of sockets) socket.destroy();
+    },
+  };
+}
 
 async function resetLoggerState(): Promise<void> {
   const url = new URL('./rootLogger.js', import.meta.resolve('nestjs-pino'));
@@ -190,4 +225,27 @@ describe('NatsConnectionManager (e2e)', () => {
 
     expect(conn.nc.isClosed()).toBe(true);
   });
+
+  it('014 AC-8: NATS unresponsive mid-session → close() finishes in < 6 s', async () => {
+    const proxy = await createNatsProxy();
+    try {
+      await start([proxy.url]);
+      await vi.waitFor(() => expect(manager().isReady()).toBe(true), {
+        timeout: 5000,
+      });
+      proxy.blackHole();
+
+      const startedAt = Date.now();
+      await app!.close();
+      const closeMs = Date.now() - startedAt;
+      app = undefined;
+
+      expect(closeMs).toBeLessThan(6000);
+      expect(logs.lines()).toContainEqual(
+        expect.objectContaining({ msg: 'NATS drain timed out' }),
+      );
+    } finally {
+      proxy.close();
+    }
+  }, 20_000);
 });
