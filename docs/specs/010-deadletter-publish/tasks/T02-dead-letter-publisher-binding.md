@@ -1,6 +1,6 @@
 ---
 id: 010-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [010-T01, 009-T04, 008-T06]
 covers: [AC-1, AC-2, AC-3, AC-5, AC-6]
 ---
@@ -55,3 +55,6 @@ pnpm check
 ```
 
 ## Handoff
+- `JetStreamDeadLetterPublisher`: publica `buildDeadLetterMessage` en `telemetry.deadletter.traccar` con msgId = id; log error {reason, kind, id} sin rawPayload.
+- DEAD_LETTER_PUBLISHER_PORT por defecto = JetStream; `UnconfiguredPublisher` eliminado (ya no lo usaba nada).
+- E2E contra NATS real: INVALID_JSON con bytes exactos, dedup, MISSING_GROUP y NATS caído → 503.

@@ -7,7 +7,7 @@ spec: 010-deadletter-publish
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
 | T01 | Add buildDeadLetterMessage | 008-T02 | done |
-| T02 | Add JetStreamDeadLetterPublisher and bind it in IngestionModule | T01, 009-T04, 008-T06 | todo |
+| T02 | Add JetStreamDeadLetterPublisher and bind it in IngestionModule | T01, 009-T04, 008-T06 | done |
 
 T01 es paralelizable con todo 009.
 
