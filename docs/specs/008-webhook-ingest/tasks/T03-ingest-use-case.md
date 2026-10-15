@@ -1,6 +1,6 @@
 ---
 id: 008-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [008-T02, 007-T04]
 covers: [AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8]
 ---
@@ -63,3 +63,5 @@ pnpm check
 ```
 
 ## Handoff
+- Orden: oversized → utf-8 → JSON → normalize (por `kind`) → publish; cualquier rechazo va al dead-letter con el `rawBody` original.
+- Errores inesperados de normalización → `PROCESSING_ERROR` (detail = `error.name`); los errores de ambos publishers se propagan sin capturar (las publicaciones están fuera de los try).
