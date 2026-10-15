@@ -10,7 +10,7 @@ spec: 006-device-status
 | T02 | Add TraccarDeviceStatusPort with structural type test | T01 | done |
 | T03 | Add SetDeviceStatusUseCase | T02 | done |
 | T04 | Extract device mapper and add TraccarDeviceStatusHttpAdapter | T02, 005-T04 | done |
-| T05 | Add DeviceStatusController with param/body validation and audit log | T03, 004-T01, 002-T04 | todo |
+| T05 | Add DeviceStatusController with param/body validation and audit log | T03, 004-T01, 002-T04 | done |
 | T06 | Wire device status into DeviceModule and route allowlist | T04, T05, 005-T07 | todo |
 | T07 | Add device-status e2e suite | T06, 005-T08 | todo |
 

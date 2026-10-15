@@ -1,6 +1,6 @@
 ---
 id: 006-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [006-T03, 004-T01, 002-T04]
 covers: [AC-6, AC-9, AC-10]
 ---
@@ -75,3 +75,6 @@ pnpm check
 ```
 
 ## Handoff
+- `POST /devices/:deviceId/{disable,enable}` → 200 `{deviceId, disabled}`; `@RequireRole('devices:write')`.
+- `device-status.dto.ts`: `deviceIdParamSchema` (string→int seguro) y `emptyBodySchema` (undefined | {} estricto).
+- Auditoría en finally: info changed/unchanged; warn retired/not-found/failed. Niveles en log = etiquetas ('info'/'warn').
