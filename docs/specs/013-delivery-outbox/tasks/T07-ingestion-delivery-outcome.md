@@ -1,6 +1,6 @@
 ---
 id: 013-T07
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-1, AC-2]
 ---
@@ -52,3 +52,6 @@ pnpm check
 ```
 
 ## Handoff
+- `EventPublisherPort`/`DeadLetterPublisherPort.publish` → `Delivery` ('published' | 'buffered'); `IngestOutcome` += `buffered` (con eventId o reason).
+- Fakes con propiedad `delivery` (default 'published').
+- Desviación: los dos publishers de JetStream devuelven 'published' de forma provisional para compilar; T08 los pasa a `ReliablePublisher`.

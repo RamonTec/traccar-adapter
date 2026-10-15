@@ -182,4 +182,23 @@ describe('IngestTraccarPayloadUseCase', () => {
       detail: 'TypeError',
     });
   });
+
+  it('AC-1 (013): an event kept in the outbox → buffered with its eventId', async () => {
+    events.delivery = 'buffered';
+
+    const outcome = await useCase.execute(command(fixtureText));
+
+    expect(outcome).toEqual({
+      outcome: 'buffered',
+      eventId: `traccar-position-${fixture.device.id}-${Date.parse(fixture.position.fixTime)}`,
+    });
+  });
+
+  it('AC-2 (013): a dead-letter kept in the outbox → buffered with its reason', async () => {
+    deadLetters.delivery = 'buffered';
+
+    const outcome = await useCase.execute(command('{"position":'));
+
+    expect(outcome).toEqual({ outcome: 'buffered', reason: 'INVALID_JSON' });
+  });
 });

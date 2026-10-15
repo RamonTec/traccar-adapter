@@ -1,3 +1,5 @@
+import type { Delivery } from './event-publisher.port.js';
+
 export const DEAD_LETTER_PUBLISHER_PORT = Symbol('DeadLetterPublisherPort');
 
 export type DeadLetterReason =
@@ -20,5 +22,5 @@ export interface DeadLetterRequest {
 }
 
 export interface DeadLetterPublisherPort {
-  publish(req: DeadLetterRequest): Promise<void>;
+  publish(req: DeadLetterRequest): Promise<Delivery>;
 }

@@ -1,12 +1,15 @@
 import type { JetStreamPublisher } from '../../../../shared/infrastructure/nats/jetstream.publisher.js';
 import { SUBJECTS } from '../../../../shared/infrastructure/nats/stream-definitions.js';
-import type { EventPublisherPort } from '../../application/ports/event-publisher.port.js';
+import type {
+  Delivery,
+  EventPublisherPort,
+} from '../../application/ports/event-publisher.port.js';
 import type { TelemetryEvent } from '../../domain/telemetry-event.js';
 
 export class JetStreamEventPublisher implements EventPublisherPort {
   constructor(private readonly publisher: JetStreamPublisher) {}
 
-  async publish(event: TelemetryEvent): Promise<void> {
+  async publish(event: TelemetryEvent): Promise<Delivery> {
     const subject =
       event.type === 'position.reported'
         ? SUBJECTS.position
@@ -16,5 +19,6 @@ export class JetStreamEventPublisher implements EventPublisherPort {
       msgId: event.id,
       correlationId: event.correlationId,
     });
+    return 'published';
   }
 }

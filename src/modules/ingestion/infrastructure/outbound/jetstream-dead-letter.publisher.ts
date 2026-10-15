@@ -5,6 +5,7 @@ import type {
   DeadLetterPublisherPort,
   DeadLetterRequest,
 } from '../../application/ports/dead-letter-publisher.port.js';
+import type { Delivery } from '../../application/ports/event-publisher.port.js';
 import { buildDeadLetterMessage } from './dead-letter-message.js';
 
 /** Persists every payload that could not be processed (FR10). */
@@ -13,7 +14,7 @@ export class JetStreamDeadLetterPublisher implements DeadLetterPublisherPort {
 
   constructor(private readonly publisher: JetStreamPublisher) {}
 
-  async publish(req: DeadLetterRequest): Promise<void> {
+  async publish(req: DeadLetterRequest): Promise<Delivery> {
     const msg = buildDeadLetterMessage(req);
     await this.publisher.publish(SUBJECTS.deadLetter, msg, {
       msgId: msg.id,
@@ -24,5 +25,6 @@ export class JetStreamDeadLetterPublisher implements DeadLetterPublisherPort {
       { reason: msg.reason, kind: msg.kind, id: msg.id },
       'Payload dead-lettered',
     );
+    return 'published';
   }
 }
