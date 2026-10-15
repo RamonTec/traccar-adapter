@@ -7,7 +7,7 @@ spec: 013-delivery-outbox
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
 | T01 | Add outbox config section | — | done |
-| T02 | Add SqliteOutboxStore | T01 | todo |
+| T02 | Add SqliteOutboxStore | T01 | done |
 | T03 | Support non-critical checks and info in readiness | — | todo |
 | T04 | Add ReliablePublisher | T02 | todo |
 | T05 | Add OutboxDrainer | T02 | todo |

@@ -1,6 +1,6 @@
 ---
 id: 013-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T01]
 covers: [AC-2, AC-4, AC-8, AC-10, AC-11]
 ---
@@ -60,3 +60,6 @@ pnpm check
 ```
 
 ## Handoff
+- `SqliteOutboxStore` (`node:sqlite` DatabaseSync, WAL + synchronous=FULL): FIFO append/oldest/delete, `stats()`, `isWritable()`, `close()`.
+- Límite por bytes de `body` con contador en memoria reconstruido al abrir; `OutboxFullError` sin escribir.
+- Crea el directorio padre; `:memory:` soportado.
