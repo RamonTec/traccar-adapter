@@ -1,6 +1,6 @@
 ---
 id: 014-T04
-status: todo
+status: done
 depends_on: [014-T03]
 covers: [AC-8, AC-9]
 ---
@@ -22,13 +22,13 @@ Red Docker de test (`traccar-adapter-image-test`) con un contenedor `nats:2.11-a
 volumen con nombre para `/app/data`. Todo se crea en `beforeAll` y se borra en `afterAll`.
 
 ## Archivos a crear/modificar
-- [ ] `test/image/container.image-spec.ts` (mod)
-- [ ] `test/image/docker.ts` (mod, si hacen falta helpers de red/volumen)
-- [ ] `README.md` (mod: sección "Imagen de contenedor")
+- [x] `test/image/container.image-spec.ts` (mod)
+- [x] `test/image/docker.ts` (mod, si hacen falta helpers de red/volumen)
+- [x] `README.md` (mod: sección "Imagen de contenedor")
 
 ## Criterios de aceptación
-- [ ] **AC-8** — Conectado a NATS: `docker stop` → exit code 0 en < 10 s. Con NATS parado tras conectar: ídem.
-- [ ] **AC-9** — NATS parado → webhook → `buffered`; recrear el contenedor con el mismo volumen; arrancar NATS → el
+- [x] **AC-8** — Conectado a NATS: `docker stop` → exit code 0 en < 10 s. Con NATS parado tras conectar: ídem.
+- [x] **AC-9** — NATS parado → webhook → `buffered`; recrear el contenedor con el mismo volumen; arrancar NATS → el
       mensaje llega a `TELEMETRY_EVENTS`.
 
 ## Fuera de alcance
@@ -41,3 +41,7 @@ pnpm check
 ```
 
 ## Handoff
+- Nueva suite `test/image/shutdown-and-volume.image-spec.ts` (3 tests) y helpers `streamMessages` / `stopTimed`.
+- NATS "sin responder" se simula con `docker pause` (sockets abiertos, sin respuesta); `afterEach` lo reanuda.
+- AC-9: el conteo del stream se lee desde un contenedor efímero de la propia imagen (ya trae el cliente NATS).
+- README: sección "Imagen de contenedor".

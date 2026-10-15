@@ -39,6 +39,24 @@ pnpm check   # typecheck + lint + format + tests
 
 > **Despliegue:** `OUTBOX_PATH` debe estar en un **volumen persistente por réplica** (Compose: volumen con nombre; Kubernetes: StatefulSet con un PVC por réplica). Sin él, un reinicio con NATS caído pierde los mensajes pendientes.
 
+## Imagen de contenedor
+
+La misma imagen sirve para cualquier entorno: toda la configuración entra por las variables de entorno de arriba.
+
+```bash
+pnpm docker:build        # → traccar-adapter:local
+docker run -d --name traccar-adapter --env-file <archivo> -v traccar-adapter-data:/app/data -p 3000:3000 traccar-adapter:local
+```
+
+- **Base**: `node:24.22.0-alpine3.24`. Solo `dist/`, dependencias de producción y `package.json`.
+- **Usuario**: `node` (uid 1000), sin privilegios.
+- **Datos**: `OUTBOX_PATH=/app/data/outbox.db`; `/app/data` está declarado como volumen. Monta un **volumen con nombre por
+  réplica**: sin él, recrear el contenedor con NATS caído pierde los pendientes.
+- **Healthcheck**: `GET /health` (liveness) cada 10 s. La disponibilidad de dependencias está en `GET /health/ready`.
+- **Apagado**: `SIGTERM` (`docker stop`) cierra HTTP, NATS (espera como máximo 5 s) y el outbox, y sale con código 0
+  en menos de 10 s.
+- **Tests de la imagen**: `pnpm test:image` (requiere Docker; fuera de `pnpm check`).
+
 ## Integración con Traccar
 
 Configuración requerida de Traccar (reenvío, reintentos, permisos) y caída máxima tolerable: [docs/ops/traccar-config.md](docs/ops/traccar-config.md). Traccar local para desarrollo: [dev/traccar/README.md](dev/traccar/README.md).

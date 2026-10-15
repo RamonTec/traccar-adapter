@@ -138,3 +138,51 @@ export async function httpInContainer(
 export async function removeAll(names: string[]): Promise<void> {
   if (names.length > 0) await docker(['rm', '-f', '-v', ...names]);
 }
+
+/**
+ * Number of messages in a JetStream stream, read from a throwaway container on
+ * `network` (the image already ships the NATS client).
+ */
+export async function streamMessages(
+  network: string,
+  natsUrl: string,
+  stream: string,
+): Promise<number> {
+  const script = `
+    import { connect } from '@nats-io/transport-node';
+    import { jetstreamManager } from '@nats-io/jetstream';
+    const nc = await connect({ servers: process.argv[1], timeout: 5000 });
+    const jsm = await jetstreamManager(nc);
+    const info = await jsm.streams.info(process.argv[2]);
+    process.stdout.write(String(info.state.messages));
+    await nc.close();
+  `;
+  const out = await dockerOk([
+    'run',
+    '--rm',
+    '--network',
+    network,
+    '--entrypoint',
+    'node',
+    IMAGE,
+    '--input-type=module',
+    '-e',
+    script,
+    natsUrl,
+    stream,
+  ]);
+  return Number(out);
+}
+
+/** Stops a container and returns how long it took and its exit code. */
+export async function stopTimed(
+  name: string,
+): Promise<{ ms: number; exitCode: number }> {
+  const startedAt = Date.now();
+  await dockerOk(['stop', '-t', '10', name], { timeoutMs: 30_000 });
+  const ms = Date.now() - startedAt;
+  const exitCode = Number(
+    await dockerOk(['inspect', '-f', '{{.State.ExitCode}}', name]),
+  );
+  return { ms, exitCode };
+}
