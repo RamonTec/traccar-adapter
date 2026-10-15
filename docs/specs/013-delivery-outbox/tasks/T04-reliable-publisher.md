@@ -1,6 +1,6 @@
 ---
 id: 013-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [013-T02]
 covers: [AC-1, AC-2, AC-3, AC-4, AC-7, AC-11]
 ---
@@ -53,3 +53,5 @@ pnpm check
 ```
 
 ## Handoff
+- `ReliablePublisher.publish` → 'published' | 'buffered': con pendientes encola detrás (AC-7); `UpstreamUnavailableError` de NATS → outbox + `drainer.kick()`; otros errores se propagan.
+- Fallo del outbox (lleno/escritura) → log error + `UpstreamUnavailableError('outbox')` (503). Log warn 'Message buffered' sin body.
