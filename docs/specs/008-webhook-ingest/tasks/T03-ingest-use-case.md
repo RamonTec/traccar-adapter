@@ -45,7 +45,7 @@ Las excepciones inesperadas en 2-3 (que no sean de parseo) → `PROCESSING_ERROR
 - [ ] `src/modules/ingestion/application/use-cases/ingest-traccar-payload.use-case.spec.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-2** — El fixture `position.json` → un evento publicado y el resultado `published` con `eventId = 'traccar-position-<id>'`; el dead-letter está vacío.
+- [ ] **AC-2** — El fixture `position.json` → un evento publicado y el resultado `published` con `eventId = 'traccar-position-<deviceId>-<fixTime epoch ms>'`; el dead-letter está vacío.
 - [ ] **AC-3** — Body `{"position":` (truncado) → `INVALID_JSON`, y el `rawBody` del dead-letter es **idéntico byte a byte** (`Buffer.compare === 0`). Bytes `0xff 0xfe` → `INVALID_JSON` (`invalid utf-8`).
 - [ ] **AC-4** — Un fixture con `groupId: 0` → `MISSING_GROUP` en el dead-letter, con `kind: 'position'`.
 - [ ] **AC-5** — `oversized: true` → `PAYLOAD_TOO_LARGE` sin intentar parsear.
