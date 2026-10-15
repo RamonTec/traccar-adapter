@@ -29,9 +29,9 @@ spec: 012-audit-log-port
 | AC-10 | T04, T05, T06, T07 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
-- [ ] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
-- [ ] Ningún controller importa `Logger` para auditar ni errores de dominio para clasificar resultados
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde
+- [x] `pnpm check` y `pnpm test:e2e` en verde, con `pnpm test:infra:up`
+- [x] Ningún controller importa `Logger` para auditar ni errores de dominio para clasificar resultados
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
 - [ ] PR abierto con la lista de tasks y la matriz AC → tasks
