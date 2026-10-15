@@ -8,10 +8,17 @@ export interface AuthConfig {
   readonly audience: string;
 }
 
+export interface TraccarConfig {
+  readonly baseUrl: string;
+  readonly apiToken: string;
+  readonly timeoutMs: number;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly logLevel: LogLevel;
   readonly auth: AuthConfig;
+  readonly traccar: TraccarConfig;
 }
 
 export const APP_CONFIG = Symbol('AppConfig');
@@ -47,6 +54,9 @@ const appEnvSchema = z.object({
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   KEYCLOAK_ISSUER_URL: z.url().transform((val) => val.replace(/\/+$/, '')),
   KEYCLOAK_AUDIENCE: z.string().min(1).default('traccar-adapter'),
+  TRACCAR_BASE_URL: z.url().transform((val) => val.replace(/\/+$/, '')),
+  TRACCAR_API_TOKEN: z.string().min(1),
+  TRACCAR_TIMEOUT_MS: z.coerce.number().int().min(100).max(60000).default(5000),
 });
 
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
@@ -57,6 +67,11 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     auth: {
       issuerUrl: parsed.KEYCLOAK_ISSUER_URL,
       audience: parsed.KEYCLOAK_AUDIENCE,
+    },
+    traccar: {
+      baseUrl: parsed.TRACCAR_BASE_URL,
+      apiToken: parsed.TRACCAR_API_TOKEN,
+      timeoutMs: parsed.TRACCAR_TIMEOUT_MS,
     },
   };
 }

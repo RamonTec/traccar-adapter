@@ -1,16 +1,22 @@
 import {
   type AppConfig,
   type AuthConfig,
+  type TraccarConfig,
   loadConfig,
 } from '../../src/shared/infrastructure/config/app-config.js';
 
 export const TEST_ENV: Readonly<Record<string, string>> = Object.freeze({
   KEYCLOAK_ISSUER_URL: 'http://keycloak.test/realms/telemetry',
   KEYCLOAK_AUDIENCE: 'traccar-adapter',
+  TRACCAR_BASE_URL: 'http://traccar.test',
+  TRACCAR_API_TOKEN: 'test-token',
 });
 
-export type TestConfigOverrides = Partial<Omit<AppConfig, 'auth'>> & {
+export type TestConfigOverrides = Partial<
+  Omit<AppConfig, 'auth' | 'traccar'>
+> & {
   readonly auth?: Partial<AuthConfig>;
+  readonly traccar?: Partial<TraccarConfig>;
 };
 
 export function testConfig(overrides?: TestConfigOverrides): AppConfig {
@@ -24,6 +30,10 @@ export function testConfig(overrides?: TestConfigOverrides): AppConfig {
     auth: {
       ...base.auth,
       ...overrides.auth,
+    },
+    traccar: {
+      ...base.traccar,
+      ...overrides.traccar,
     },
   };
 }

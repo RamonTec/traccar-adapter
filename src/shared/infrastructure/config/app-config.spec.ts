@@ -27,6 +27,11 @@ describe('loadConfig', () => {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'traccar-adapter',
       },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
+      },
     });
 
     expect(
@@ -43,6 +48,11 @@ describe('loadConfig', () => {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'custom-aud',
       },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
+      },
     });
 
     expect(loadConfig({ ...TEST_ENV, PORT: '' })).toEqual({
@@ -51,6 +61,11 @@ describe('loadConfig', () => {
       auth: {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'traccar-adapter',
+      },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
       },
     });
   });
@@ -77,6 +92,11 @@ describe('loadConfig', () => {
       auth: {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'traccar-adapter',
+      },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
       },
     });
   });
@@ -118,6 +138,60 @@ describe('loadConfig', () => {
     expect(error.message).not.toContain('verbose');
     expect(error.message).not.toContain('secret-url');
   });
+
+  it('AC-1a: throws ConfigValidationError naming TRACCAR_BASE_URL and TRACCAR_API_TOKEN when missing', () => {
+    const error = captureError(() =>
+      loadConfig({
+        KEYCLOAK_ISSUER_URL: 'http://keycloak.test/realms/telemetry',
+      }),
+    );
+    expect(error.invalidVariables).toContain('TRACCAR_BASE_URL');
+    expect(error.invalidVariables).toContain('TRACCAR_API_TOKEN');
+  });
+
+  it('AC-1b: normalizes TRACCAR_BASE_URL, sets default timeoutMs, and rejects invalid timeout values', () => {
+    const config = loadConfig({
+      ...TEST_ENV,
+      TRACCAR_BASE_URL: 'http://t:8082/',
+    });
+    expect(config.traccar.baseUrl).toBe('http://t:8082');
+    expect(config.traccar.timeoutMs).toBe(5000);
+
+    const withExplicitTimeout = loadConfig({
+      ...TEST_ENV,
+      TRACCAR_TIMEOUT_MS: '10000',
+    });
+    expect(withExplicitTimeout.traccar.timeoutMs).toBe(10000);
+
+    const errorBelowMin = captureError(() =>
+      loadConfig({
+        ...TEST_ENV,
+        TRACCAR_TIMEOUT_MS: '50',
+      }),
+    );
+    expect(errorBelowMin.invalidVariables).toEqual(['TRACCAR_TIMEOUT_MS']);
+
+    const errorNotNumber = captureError(() =>
+      loadConfig({
+        ...TEST_ENV,
+        TRACCAR_TIMEOUT_MS: 'abc',
+      }),
+    );
+    expect(errorNotNumber.invalidVariables).toEqual(['TRACCAR_TIMEOUT_MS']);
+  });
+
+  it('AC-1c: error message never contains the value of TRACCAR_API_TOKEN', () => {
+    const secretToken = 'super-secret-traccar-token-12345';
+    const error = captureError(() =>
+      loadConfig({
+        ...TEST_ENV,
+        TRACCAR_API_TOKEN: secretToken,
+        PORT: 'not-a-number',
+      }),
+    );
+    expect(error.invalidVariables).toContain('PORT');
+    expect(error.message).not.toContain(secretToken);
+  });
 });
 
 describe('testConfig helper', () => {
@@ -129,6 +203,11 @@ describe('testConfig helper', () => {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'traccar-adapter',
       },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
+      },
     });
   });
 
@@ -139,6 +218,27 @@ describe('testConfig helper', () => {
       auth: {
         issuerUrl: 'http://keycloak.test/realms/telemetry',
         audience: 'custom-aud',
+      },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 5000,
+      },
+    });
+  });
+
+  it('supports partial traccar overrides with deep merge', () => {
+    expect(testConfig({ traccar: { timeoutMs: 10000 } })).toEqual({
+      port: 3000,
+      logLevel: 'info',
+      auth: {
+        issuerUrl: 'http://keycloak.test/realms/telemetry',
+        audience: 'traccar-adapter',
+      },
+      traccar: {
+        baseUrl: 'http://traccar.test',
+        apiToken: 'test-token',
+        timeoutMs: 10000,
       },
     });
   });
