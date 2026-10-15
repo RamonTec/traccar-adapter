@@ -7,8 +7,9 @@ import {
 } from './readiness.registry.js';
 
 export interface ReadinessResponse {
-  readonly status: ReadinessStatus;
+  readonly status: 'ok' | 'error';
   readonly checks: Record<string, ReadinessStatus>;
+  readonly [info: string]: unknown;
 }
 
 @Public()
@@ -20,11 +21,8 @@ export class ReadinessController {
   async ready(
     @Res({ passthrough: true }) res: Response,
   ): Promise<ReadinessResponse> {
-    const { ok, checks } = await this.registry.run();
-    if (!ok) {
-      res.status(HttpStatus.SERVICE_UNAVAILABLE);
-      return { status: 'error', checks };
-    }
-    return { status: 'ok', checks };
+    const { ok, checks, info } = await this.registry.run();
+    if (!ok) res.status(HttpStatus.SERVICE_UNAVAILABLE);
+    return { status: ok ? 'ok' : 'error', checks, ...info };
   }
 }

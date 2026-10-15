@@ -8,7 +8,7 @@ spec: 013-delivery-outbox
 |------|--------|-----------|--------|
 | T01 | Add outbox config section | — | done |
 | T02 | Add SqliteOutboxStore | T01 | done |
-| T03 | Support non-critical checks and info in readiness | — | todo |
+| T03 | Support non-critical checks and info in readiness | — | done |
 | T04 | Add ReliablePublisher | T02 | todo |
 | T05 | Add OutboxDrainer | T02 | todo |
 | T06 | Add OutboxModule, readiness wiring and non-critical NATS | T03, T04, T05 | todo |

@@ -1,6 +1,6 @@
 ---
 id: 013-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-12]
 ---
@@ -43,3 +43,5 @@ pnpm check
 ```
 
 ## Handoff
+- `register(name, check, { critical })`: un no crítico que falla da 'down' sin tumbar `ok`; `registerInfo(name, fn)` añade bloques a la respuesta (`{ status, checks, ...info }`).
+- Sin opciones el comportamiento no cambia; e2e 70/70.
