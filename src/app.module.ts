@@ -19,6 +19,7 @@ import { HttpExceptionFilter } from './shared/infrastructure/http/http-exception
 import { LoggingModule } from './shared/infrastructure/logging/logging.module.js';
 import { TraccarModule } from './shared/infrastructure/traccar/traccar.module.js';
 import { GroupModule } from './modules/group/group.module.js';
+import { DeviceModule } from './modules/device/device.module.js';
 
 export interface AppModuleOverrides {
   readonly jwtVerifier?: Pick<JwtVerifier, 'verify'>;
@@ -58,6 +59,7 @@ export class AppModule implements NestModule {
         TraccarModule,
         LoggingModule.forRoot(config, logStream),
         GroupModule,
+        DeviceModule,
       ],
       controllers: [HealthController],
       providers: [

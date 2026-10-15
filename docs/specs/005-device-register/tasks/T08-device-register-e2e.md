@@ -1,6 +1,6 @@
 ---
 id: 005-T08
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [005-T06, 004-T07]
 covers: [AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8, AC-9]
 ---
@@ -27,19 +27,19 @@ Amplía `test/support/fake-traccar.ts`, sin romper a quienes ya lo usan, con un 
 Tokens del verifier falso: uno con `devices:write` y otro sin ese rol.
 
 ## Archivos a crear/modificar
-- [ ] `test/support/fake-traccar.ts` (modificado)
-- [ ] `test/device-register.e2e-spec.ts` (nuevo)
+- [x] `test/support/fake-traccar.ts` (modificado)
+- [x] `test/device-register.e2e-spec.ts` (nuevo)
 
 ## Criterios de aceptación
-- [ ] **AC-1** — Group 2 sin devices → 201 `{deviceId, uniqueId, groupId:2}`.
-- [ ] **AC-2** — Repetir → 200 con el mismo `deviceId`; el fake no recibió ningún POST ni PUT adicional.
-- [ ] **AC-3** — Device habilitado en el group 3 → 409 `DEVICE_ALREADY_REGISTERED`; ese device sigue igual en el fake.
-- [ ] **AC-4** — Device deshabilitado (id N, group 3) y registro en el group 2 → 201 con `deviceId ≠ N`. En el fake, N queda con `uniqueId '<imei>:retired:N'`, `groupId 3` y `disabled:true`.
-- [ ] **AC-5** — Como AC-4 con `failNextPost` → 503. Al reintentar → 201 (camino AC-1), y solo existe un device retirado.
-- [ ] **AC-6** — `groupId: 999` → 404 `GROUP_NOT_FOUND`.
-- [ ] **AC-7** — `uniqueId:'123'` → 400 `VALIDATION_ERROR` con `details`.
-- [ ] **AC-8** — Traccar caído → 503 `UPSTREAM_UNAVAILABLE`.
-- [ ] **AC-9** — Sin token → 401; token sin `devices:write` → 403.
+- [x] **AC-1** — Group 2 sin devices → 201 `{deviceId, uniqueId, groupId:2}`.
+- [x] **AC-2** — Repetir → 200 con el mismo `deviceId`; el fake no recibió ningún POST ni PUT adicional.
+- [x] **AC-3** — Device habilitado en el group 3 → 409 `DEVICE_ALREADY_REGISTERED`; ese device sigue igual en el fake.
+- [x] **AC-4** — Device deshabilitado (id N, group 3) y registro en el group 2 → 201 con `deviceId ≠ N`. En el fake, N queda con `uniqueId '<imei>:retired:N'`, `groupId 3` y `disabled:true`.
+- [x] **AC-5** — Como AC-4 con `failNextPost` → 503. Al reintentar → 201 (camino AC-1), y solo existe un device retirado.
+- [x] **AC-6** — `groupId: 999` → 404 `GROUP_NOT_FOUND`.
+- [x] **AC-7** — `uniqueId:'123'` → 400 `VALIDATION_ERROR` con `details`.
+- [x] **AC-8** — Traccar caído → 503 `UPSTREAM_UNAVAILABLE`.
+- [x] **AC-9** — Sin token → 401; token sin `devices:write` → 403.
 
 ## Fuera de alcance
 - AC-10 (logs), cubierto en T05. AC-11, cubierto en T02, T04 y T07.
@@ -51,3 +51,6 @@ pnpm check
 ```
 
 ## Handoff
+Suite e2e `test/device-register.e2e-spec.ts` y fake extendido en `test/support/fake-traccar.ts`.
+Cubre AC-1 a AC-9 de punta a punta: validación, creación, idempotencia, colisiones y reuso tras retiro de IMEI.
+Último task de 005 completado; spec listo para cierre.
