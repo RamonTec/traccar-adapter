@@ -18,6 +18,14 @@ describe('httpStatusForCode', () => {
     expect(httpStatusForCode('GROUP_NAME_AMBIGUOUS')).toBe(409);
   });
 
+  it('AC-3: maps DEVICE_ALREADY_REGISTERED to 409', () => {
+    expect(httpStatusForCode('DEVICE_ALREADY_REGISTERED')).toBe(409);
+  });
+
+  it('AC-6: maps GROUP_NOT_FOUND to 404', () => {
+    expect(httpStatusForCode('GROUP_NOT_FOUND')).toBe(404);
+  });
+
   it('AC-9b: returns undefined for an unknown code', () => {
     expect(httpStatusForCode('SOMETHING_UNKNOWN')).toBeUndefined();
   });

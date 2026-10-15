@@ -1,6 +1,6 @@
 ---
 id: 005-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [004-T02]
 covers: [AC-3, AC-4, AC-6]
 ---
@@ -45,15 +45,15 @@ GROUP_NOT_FOUND: 404,
 `codeForHttpStatus(409)` debe seguir siendo `'CONFLICT'` y `codeForHttpStatus(404)` `'NOT_FOUND'`. Respeta el mecanismo que dejó 004-T02 para `GROUP_NAME_AMBIGUOUS`.
 
 ## Archivos a crear/modificar
-- [ ] `src/modules/device/domain/device.ts` (nuevo) + `device.spec.ts`
-- [ ] `src/modules/device/domain/errors.ts` (nuevo) + `errors.spec.ts`
-- [ ] `src/shared/infrastructure/http/error-http-status.ts` (modificado) + ampliar `.spec.ts`
+- [x] `src/modules/device/domain/device.ts` (nuevo) + `device.spec.ts`
+- [x] `src/modules/device/domain/errors.ts` (nuevo) + `errors.spec.ts`
+- [x] `src/shared/infrastructure/http/error-http-status.ts` (modificado) + ampliar `.spec.ts`
 
 ## Criterios de aceptación
-- [ ] **AC-4** — `retiredUniqueId('123456789012345', 18) === '123456789012345:retired:18'`.
-- [ ] **AC-3** — `DeviceAlreadyRegisteredError`: `code` correcto, `instanceof DomainError`, expone `uniqueId` y `existingGroupId`; `httpStatusForCode('DEVICE_ALREADY_REGISTERED') === 409`.
-- [ ] **AC-6** — `GroupNotFoundError`: `code` correcto, expone `groupId`; `httpStatusForCode('GROUP_NOT_FOUND') === 404`.
-- [ ] `codeForHttpStatus(409) === 'CONFLICT'` y `codeForHttpStatus(404) === 'NOT_FOUND'`.
+- [x] **AC-4** — `retiredUniqueId('123456789012345', 18) === '123456789012345:retired:18'`.
+- [x] **AC-3** — `DeviceAlreadyRegisteredError`: `code` correcto, `instanceof DomainError`, expone `uniqueId` y `existingGroupId`; `httpStatusForCode('DEVICE_ALREADY_REGISTERED') === 409`.
+- [x] **AC-6** — `GroupNotFoundError`: `code` correcto, expone `groupId`; `httpStatusForCode('GROUP_NOT_FOUND') === 404`.
+- [x] `codeForHttpStatus(409) === 'CONFLICT'` y `codeForHttpStatus(404) === 'NOT_FOUND'`.
 
 ## Fuera de alcance
 - Port y use case (T02, T03).
@@ -65,3 +65,7 @@ pnpm check
 ```
 
 ## Handoff
+- Creados `Device` y `retiredUniqueId` en `device.ts`.
+- Creados `DeviceAlreadyRegisteredError` y `GroupNotFoundError` en `errors.ts`.
+- Mapeados a 409 y 404 en `error-http-status.ts`, preservando mapeo inverso genérico.
+- T02 (TraccarDevicePort) queda desbloqueado para implementación.

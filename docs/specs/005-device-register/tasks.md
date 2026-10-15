@@ -6,7 +6,7 @@ spec: 005-device-register
 
 | Task | Título | Depende de | Estado |
 |------|--------|-----------|--------|
-| T01 | Add Device domain, retiredUniqueId and device errors (409/404) | 004-T02 | todo |
+| T01 | Add Device domain, retiredUniqueId and device errors (409/404) | 004-T02 | done |
 | T02 | Add TraccarDevicePort with structural type test | T01 | todo |
 | T03 | Add RegisterDeviceUseCase | T02 | todo |
 | T04 | Add TraccarDeviceHttpAdapter | T02, 003-T04 | todo |

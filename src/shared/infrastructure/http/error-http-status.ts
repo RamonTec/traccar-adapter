@@ -16,6 +16,8 @@ export const ERROR_HTTP_STATUS: Readonly<Record<string, number>> =
   Object.freeze({
     ...GENERIC_ERROR_HTTP_STATUS,
     GROUP_NAME_AMBIGUOUS: 409,
+    DEVICE_ALREADY_REGISTERED: 409,
+    GROUP_NOT_FOUND: 404,
   });
 
 const CODE_BY_STATUS: ReadonlyMap<number, string> = new Map(
