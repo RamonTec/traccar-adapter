@@ -1,6 +1,6 @@
 ---
 id: 009-T04
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [009-T03, 003-T02]
 covers: [AC-2, AC-3, AC-4, AC-8]
 ---
@@ -56,3 +56,5 @@ pnpm check
 ```
 
 ## Handoff
+- `JetStreamPublisher.publish(subject, payload, {msgId, correlationId?})` → `{stream, seq, duplicate}`; PubAck con timeout `publishTimeoutMs`.
+- Log info (o debug si es duplicado) con subject/msgId/duplicate/durationMs, sin payload; cualquier fallo → error log + `UpstreamUnavailableError('nats')`.
