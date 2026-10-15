@@ -178,4 +178,41 @@ afterEach(() => children.splice(0).forEach((c) => c.exitCode === null && c.kill(
 
 ## §7 NATS / JetStream
 
-_Pendiente: se completa con el spec 008 (publish-events)._
+Los tests de NATS son **e2e contra un NATS real** con JetStream (no mocks): deduplicación y PubAck se comportan
+como en producción.
+
+```bash
+pnpm test:infra:up      # nats:2.11-alpine -js en :4222 (contenedor traccar-adapter-test-nats)
+pnpm test:e2e
+pnpm test:infra:down
+```
+
+`NATS_TEST_URL` cambia el destino (por defecto `nats://127.0.0.1:4222`). Si NATS no está, `connectTestNats()` falla
+con ``run `pnpm test:infra:up` ``.
+
+```ts
+import type { JetStreamManager } from '@nats-io/jetstream';
+import type { NatsConnection } from '@nats-io/transport-node';
+import { connectTestNats, purgeStreamIfExists } from './support/nats.js';
+
+let nc: NatsConnection;
+let jsm: JetStreamManager;
+
+beforeAll(async () => ({ nc, jsm } = await connectTestNats()));
+beforeEach(() => purgeStreamIfExists(jsm, 'TELEMETRY_EVENTS'));
+afterAll(() => nc?.close());
+
+it('AC-2: publishes the envelope', async () => {
+  // … acción que publica …
+  const msg = await jsm.streams.getMessage('TELEMETRY_EVENTS', {
+    last_by_subj: 'telemetry.events.position',
+  });
+  expect(msg?.json()).toMatchObject({ type: 'position.reported' });
+  expect(msg?.header.get('Nats-Msg-Id')).toBe('traccar-position-…');
+});
+```
+
+- Cada suite usa sus propios streams o los purga en `beforeEach`; nunca dependas del orden entre suites.
+- Para "NATS caído" no pares el contenedor compartido: apunta la app a un puerto cerrado
+  (`testConfig({ nats: { servers: ['nats://127.0.0.1:1'] } })`).
+- Cierra siempre la app (`app.close()` hace `drain`) y la conexión del test, o Vitest queda colgado.

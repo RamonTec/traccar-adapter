@@ -1,6 +1,6 @@
 ---
 id: 009-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: []
 ---
@@ -50,3 +50,7 @@ pnpm check
 ```
 
 ## Handoff
+- Deps `@nats-io/transport-node` + `@nats-io/jetstream` 3.4; scripts `test:infra:up/down` (nats:2.11-alpine -js).
+- `test/support/nats.ts`: `connectTestNats` (2 s, mensaje `run pnpm test:infra:up`), `purgeStreamIfExists`, `deleteStreamIfExists`.
+- Smoke `test/nats-infra.e2e-spec.ts`; receta §7 + `pnpm sdd:sync`.
+- Nota de entorno: el sandbox del agente no alcanza puertos Docker; los e2e con NATS se ejecutan en un contenedor con `--network container:traccar-adapter-test-nats`.

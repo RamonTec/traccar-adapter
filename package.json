@@ -23,9 +23,13 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check": "scripts/sync-agent-commands.sh --check && pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
-    "sdd:sync": "scripts/sync-agent-commands.sh"
+    "sdd:sync": "scripts/sync-agent-commands.sh",
+    "test:infra:up": "docker run -d --rm --name traccar-adapter-test-nats -p 4222:4222 nats:2.11-alpine -js",
+    "test:infra:down": "docker stop traccar-adapter-test-nats"
   },
   "dependencies": {
+    "@nats-io/jetstream": "^3.4.0",
+    "@nats-io/transport-node": "^3.4.0",
     "@nestjs/common": "^12.0.1",
     "@nestjs/core": "^12.0.1",
     "@nestjs/platform-express": "^12.0.1",
