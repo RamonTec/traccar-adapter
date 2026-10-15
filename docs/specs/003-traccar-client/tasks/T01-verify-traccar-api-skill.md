@@ -1,6 +1,6 @@
 ---
 id: 003-T01
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: []
 covers: [AC-8]
 ---
@@ -37,15 +37,15 @@ Si falta alguno → `status: blocked`.
 Limpieza: deshabilitar los devices de prueba y renombrar los groups `sdd-probe-*` (no se borran: soft delete).
 
 ## Archivos a crear/modificar
-- [ ] `docs/sdd/skills/traccar-api/SKILL.md` (nuevo): `description` con disparadores (Traccar, devices, groups, uniqueId), reglas de uso y permisos mínimos.
-- [ ] `docs/sdd/skills/traccar-api/reference.md` (nuevo): por cada fila, request, status y body de respuesta **reales** (anonimizar IMEIs y nombres). Fecha y versión verificadas.
-- [ ] `pnpm sdd:sync`
+- [x] `docs/sdd/skills/traccar-api/SKILL.md` (nuevo): `description` con disparadores (Traccar, devices, groups, uniqueId), reglas de uso y permisos mínimos.
+- [x] `docs/sdd/skills/traccar-api/reference.md` (nuevo): por cada fila, request, status y body de respuesta **reales** (anonimizar IMEIs y nombres). Fecha y versión verificadas.
+- [x] `pnpm sdd:sync`
 
 ## Criterios de aceptación
-- [ ] **AC-8a** — Las 11 filas están documentadas con datos observados, no supuestos. Las que no se pudieron verificar se marcan `NO VERIFICADO`.
-- [ ] **AC-8b** — Queda explícito cómo detectar un `uniqueId` duplicado (status y mensaje) y si `PUT` exige el objeto completo.
-- [ ] **AC-8c** — Ningún token, contraseña ni IMEI real en los archivos.
-- [ ] **AC-8d** — `pnpm check` en verde (el sync de skills incluido).
+- [x] **AC-8a** — Las 11 filas están documentadas con datos observados, no supuestos. Las que no se pudieron verificar se marcan `NO VERIFICADO`.
+- [x] **AC-8b** — Queda explícito cómo detectar un `uniqueId` duplicado (status y mensaje) y si `PUT` exige el objeto completo.
+- [x] **AC-8c** — Ningún token, contraseña ni IMEI real en los archivos.
+- [x] **AC-8d** — `pnpm check` en verde (el sync de skills incluido).
 
 ## Fuera de alcance
 - Código. Cambiar `traccar.xml`.
@@ -56,3 +56,7 @@ pnpm sdd:sync && pnpm check
 ```
 
 ## Handoff
+Verificadas las 11 llamadas contra Traccar 6.15.3 activo con token Bearer no-admin.
+Documentado skill `traccar-api` (`SKILL.md` y `reference.md`) con datos anonimizados.
+Confirmado: detección de uniqueId duplicado retorna 400 (StorageException) y PUT exige objeto completo con groupId para no desvincular.
+Sincronizado vía `pnpm sdd:sync` y validado con `pnpm check` en verde.

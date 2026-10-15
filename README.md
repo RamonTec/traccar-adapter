@@ -23,6 +23,9 @@ pnpm check   # typecheck + lint + format + tests
 | `LOG_LEVEL` | Nivel de log (`trace`, `debug`, `info`, `warn`, `error`, `fatal`) | No | `info` |
 | `KEYCLOAK_ISSUER_URL` | URL base del realm emisor de tokens JWT (ej. `http://localhost:8080/realms/telemetry`) | Sí | — |
 | `KEYCLOAK_AUDIENCE` | Audiencia esperada en el claim `aud` | No | `traccar-adapter` |
+| `TRACCAR_BASE_URL` | URL base de la instancia de Traccar (ej. `http://localhost:8082`) | Sí | — |
+| `TRACCAR_API_TOKEN` | Token de API del usuario de servicio en Traccar | Sí | — |
+| `TRACCAR_TIMEOUT_MS` | Timeout en milisegundos para llamadas HTTP a Traccar (100–60000) | No | `5000` |
 
 ## Autenticación de servicios (S2S)
 

@@ -6,7 +6,7 @@ Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS
 |------|---------|-----------|------|-----------|--------|
 | 001-foundation | config, logging, errores, health | NFR4 (base) | 0001, 0002 | — | done |
 | 002-service-auth | guard JWT Keycloak para endpoints S2S | NFR4 (actor) | 0003 | 001 | done |
-| 003-traccar-client | cliente HTTP a Traccar (Bearer, timeouts, errores, readiness) | — | 0005 | 001 | tasks listos |
+| 003-traccar-client | cliente HTTP a Traccar (Bearer, timeouts, errores, readiness) | — | 0005 | 001 | done |
 | 004-group-create | `POST /groups` get-or-create | FR1, NFR3, NFR4 | 0003, 0005 | 002, 003 | spec aprobado · design tras 003-T01 |
 | 005-device-register | `POST /devices` get-or-create + retiro de IMEI | FR2, FR3, NFR3, NFR4, NFR5 | 0003, 0005 | 002, 003 | spec aprobado · design tras 003-T01 |
 | 006-device-status | disable / enable idempotentes | FR3, FR4, NFR1, NFR4 | 0003, 0005 | 005 | spec aprobado · design tras 003-T01 |

@@ -10,6 +10,7 @@ export const TEST_ENV: Readonly<Record<string, string>> = Object.freeze({
   KEYCLOAK_AUDIENCE: 'traccar-adapter',
   TRACCAR_BASE_URL: 'http://traccar.test',
   TRACCAR_API_TOKEN: 'test-token',
+  TRACCAR_TIMEOUT_MS: '5000',
 });
 
 export type TestConfigOverrides = Partial<
