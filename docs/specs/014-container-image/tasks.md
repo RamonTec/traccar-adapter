@@ -8,7 +8,7 @@ spec: 014-container-image
 |------|--------|-----------|--------|
 | T01 | Acotar el drain de NATS en el apagado | — | done |
 | T02 | Dockerfile, `.dockerignore` y scripts de build | T01 | done |
-| T03 | Suite de imagen: build, arranque, config, usuario, contenido, healthcheck | T02 | todo |
+| T03 | Suite de imagen: build, arranque, config, usuario, contenido, healthcheck | T02 | done |
 | T04 | Suite de imagen: apagado y volumen del outbox; README | T03 | todo |
 
 ## Cobertura AC → tasks

@@ -31,7 +31,8 @@ const SHUTDOWN_DRAIN_TIMEOUT_MS = 5_000;
 // test/image/docker.ts
 export const IMAGE = 'traccar-adapter:test';
 export function docker(args: string[], opts?: { timeoutMs?: number }): Promise<{ code: number; stdout: string; stderr: string }>;
-export function runContainer(name: string, opts: { env: Record<string, string>; volume?: string; network?: string; publish?: boolean }): Promise<{ port: number }>;
+export function runContainer(name: string, opts: { env: Record<string, string>; volume?: string; network?: string }): Promise<void>;
+export function httpInContainer(name: string, path: string, init?: { method?; headers?; body? }): Promise<{ status: number; body: unknown }>; // fetch vía `docker exec`, sin publicar puertos
 export function waitHealthy(name: string, timeoutMs: number): Promise<void>;   // docker inspect .State.Health.Status
 export function removeAll(names: string[]): Promise<void>;                      // docker rm -f, ignora errores
 ```
