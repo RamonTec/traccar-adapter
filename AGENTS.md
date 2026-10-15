@@ -1,6 +1,6 @@
 # traccar-adapter
 
-Único servicio que conoce Traccar. Vocabulario: **Device** y **Group** (nunca vehicle/tenant). Stateless: sin BD propia.
+Único servicio que conoce Traccar. Vocabulario: **Device** y **Group** (nunca vehicle/tenant). Stateless: sin BD de negocio; la única persistencia permitida es el buffer local de entrega de ADR-0007 (solo pendientes, se borran al confirmar).
 Stack: NestJS 12 (ESM, imports relativos con `.js`), TypeScript strict, Vitest, oxlint, prettier, pnpm.
 
 ## Reglas duras (no negociables)

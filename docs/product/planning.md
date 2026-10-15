@@ -24,6 +24,7 @@ Its vocabulary is strictly **Device** and **Group** (Traccar's own concepts). It
   - **Ports** — interfaces the application layer depends on without implementing (e.g. `TraccarClientPort`, `EventPublisherPort`, `DeadLetterPublisherPort`).
   - **Adapters** — concrete implementations plugged in via DI: an HTTP client implementing `TraccarClientPort` against Traccar's REST API, a JetStream publisher implementing `EventPublisherPort`.
 - **Stateless by design.** No own database for business data. No persistence of locations, events, or malformed payloads — that's telemetry-service's job (see Phase 2 and 3).
+  - *Exception (ADR-0007, 2026-10-15)*: a local delivery outbox holds messages **only while JetStream is unavailable** and deletes each one on PubAck. It is a transient delivery buffer, not storage: not queryable, not shared, never a source of truth.
 - **No operation may move a device between groups.** Not restricted by convention — absent from the API surface entirely. A device belongs to one tenant's group for its lifetime (see Phase 2).
 - **NestJS modules**, communicating with other services over:
   - **REST (sync)** — for direct commands initiated by core-service (create group, register device, disable/enable device).
