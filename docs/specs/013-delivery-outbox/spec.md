@@ -37,21 +37,24 @@ pierde alarmas, posiciones y dead-letters aunque el adapter esté sano (ADR-0007
 - **AC-8** — CUANDO el proceso arranca con pendientes de una ejecución anterior, el sistema DEBE drenarlos.
 - **AC-9** — Reenviar un pendiente que JetStream ya había confirmado NO DEBE crear un duplicado dentro de su ventana
   de deduplicación.
-- **AC-10** — La ruta del buffer y su límite DEBEN ser configurables; un valor inválido DEBE impedir el arranque
-  nombrando la variable.
+- **AC-10** — La ruta del buffer y su límite de tamaño (por defecto 512 MiB) DEBEN ser configurables; un valor
+  inválido DEBE impedir el arranque nombrando la variable. No hay antigüedad máxima.
 - **AC-11** — El sistema DEBE exponer el número de pendientes y la antigüedad del más viejo, y registrar en logs cada
   mensaje guardado y drenado (`id`, `kind`, motivo), sin el payload ni el token.
+- **AC-12** — MIENTRAS JetStream no esté disponible y el buffer acepte escrituras, el readiness DEBE seguir respondiendo
+  `ready`, indicando `nats: "down"` y el número de pendientes; SI el buffer no acepta escrituras, ENTONCES DEBE
+  responder no listo.
 
 ## Contratos externos
 - Webhook (008): `outcome` admite el nuevo valor `buffered`.
-- Variables de entorno nuevas: ruta del archivo del buffer y límite de pendientes.
-- Despliegue: un volumen persistente por réplica para el archivo del buffer.
+- Variables de entorno nuevas: ruta del archivo del buffer y límite de tamaño.
+- Despliegue: un volumen persistente por réplica para el archivo del buffer (Compose: volumen con nombre;
+  Kubernetes: StatefulSet con un PVC por réplica). Sin él, un reinicio con NATS caído pierde los pendientes.
 
 ## Preguntas abiertas
-1. **Readiness con NATS caído y buffer operativo**: ¿`ready` (aceptar tráfico) con `nats: "down"` y la profundidad
-   del buffer, o fallar el readiness? Propuesta: `ready` mientras el buffer acepte escrituras.
-2. **Límites por defecto**: número máximo de pendientes y/o tamaño del archivo (propuesta: 100 000 mensajes o
-   512 MiB), y si hace falta antigüedad máxima.
-3. **Despliegue**: confirmar con infraestructura el volumen persistente por réplica (p.ej. StatefulSet).
-4. **ADR-0007** debe quedar aceptado antes de aprobar este spec (cambia la regla *stateless* de `AGENTS.md` y del
-   planning).
+_Ninguna._ Resueltas 2026-10-15 con el usuario:
+1. Readiness con NATS caído: `ready` mientras el buffer acepte escrituras (AC-12).
+2. Límite: 512 MiB por defecto, configurable; sin antigüedad máxima (AC-10).
+3. Persistencia: volumen persistente por réplica; el entorno de despliegue concreto (Compose/Kubernetes) se fija en
+   el design.
+4. ADR-0007 aceptado; regla *stateless* actualizada en `AGENTS.md` y planning.

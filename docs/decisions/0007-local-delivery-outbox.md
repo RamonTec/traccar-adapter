@@ -1,6 +1,6 @@
 # ADR-0007 — Outbox local de entrega cuando JetStream no está disponible
 
-- Estado: propuesto
+- Estado: aceptado (2026-10-15)
 - Fecha: 2026-10-15
 - Alcance: **servicio** (traccar-adapter). Complementa ADR-0004 (contrato y dedup) y modifica ADR-0005 §5.
 - Excepción acotada al principio *stateless* del planning (§ "Stateless by design").
@@ -30,7 +30,7 @@ Por tanto, una indisponibilidad de NATS, aunque sea breve, pierde datos aunque e
 5. **Duplicados**: un reenvío cuyo PubAck original se perdió lo absorbe la deduplicación de JetStream dentro de
    `duplicate_window`; fuera de ella, los consumidores deduplican por `id` (ADR-0004).
 6. **Tecnología**: SQLite embebido mediante `node:sqlite` (Node 24, sin dependencias nuevas), un archivo por réplica
-   en un volumen persistente, modo WAL y `synchronous=FULL`. Límite de pendientes configurable.
+   en un volumen persistente, modo WAL y `synchronous=FULL`. Límite por **tamaño** configurable (por defecto 512 MiB); sin antigüedad máxima.
 7. **Lo que NO es**: ni almacenamiento de telemetría, ni consultable, ni compartido entre réplicas. Un mensaje vive
    en el buffer solo hasta su PubAck. La regla de `AGENTS.md` pasa a ser: *sin BD de negocio; solo el buffer local de
    entrega de ADR-0007*.
@@ -50,6 +50,7 @@ Por tanto, una indisponibilidad de NATS, aunque sea breve, pierde datos aunque e
 - (−) El despliegue pasa a tener estado: un volumen persistente por réplica (p.ej. StatefulSet). Perder el volumen
   pierde los pendientes.
 - (−) Hay que vigilar la profundidad del buffer (pendientes y antigüedad del más viejo).
+- Readiness: el servicio sigue `ready` con NATS caído mientras el buffer acepte escrituras; el detalle (`nats`, pendientes) se expone en `/health/ready`.
 - (=) **No cubre** la caída del propio adapter: para eso, al menos 2 réplicas con despliegue escalonado y la
   reconciliación del spec 011.
-- Al aceptar este ADR: actualizar la regla *stateless* de `AGENTS.md` y la sección correspondiente del planning.
+- Regla *stateless* actualizada en `AGENTS.md` y en el planning (§ "Stateless by design") al aceptar este ADR.
