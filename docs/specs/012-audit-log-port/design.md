@@ -1,6 +1,6 @@
 ---
 spec: 012-audit-log-port
-status: draft             # draft | approved
+status: approved             # draft | approved
 ---
 
 # 012 — Diseño
