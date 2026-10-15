@@ -1,6 +1,6 @@
 ---
 id: 002-T03
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [002-T02]
 covers: [AC-1, AC-5, AC-6, AC-7, AC-9]
 ---
@@ -39,16 +39,16 @@ export class ServiceAuthGuard implements CanActivate {
 ```
 
 ## Archivos a crear/modificar
-- [ ] `src/shared/infrastructure/auth/auth.decorators.ts` (nuevo)
-- [ ] `src/shared/infrastructure/auth/service-auth.guard.ts` (nuevo)
-- [ ] `src/shared/infrastructure/auth/service-auth.guard.spec.ts` (nuevo). App de prueba con `APP_GUARD` + `HttpExceptionFilter` y un `JwtVerifier` **fake** (objeto con `verify` programable). Controller dummy con `@Public() GET /open`, `@RequireRole('devices:write') GET /secured` (devuelve `@Actor()`) y `GET /unannotated`.
+- [x] `src/shared/infrastructure/auth/auth.decorators.ts` (nuevo)
+- [x] `src/shared/infrastructure/auth/service-auth.guard.ts` (nuevo)
+- [x] `src/shared/infrastructure/auth/service-auth.guard.spec.ts` (nuevo). App de prueba con `APP_GUARD` + `HttpExceptionFilter` y un `JwtVerifier` **fake** (objeto con `verify` programable). Controller dummy con `@Public() GET /open`, `@RequireRole('devices:write') GET /secured` (devuelve `@Actor()`) y `GET /unannotated`.
 
 ## Criterios de aceptación
-- [ ] **AC-1** — `GET /secured` sin header, o con `Authorization: Basic x` → `401 UNAUTHORIZED`.
-- [ ] **AC-9** — Si el verifier lanza `InvalidTokenError('JWKS_UNAVAILABLE')` → `401`, y hay un log `warn` con `reason`, sin el token.
-- [ ] **AC-5** — Token válido con `roles: ['groups:write']` en `/secured` → `403 FORBIDDEN`.
-- [ ] **AC-6** — Token válido con `devices:write` y `actor: 'core-service'` → `200` y el body es `'core-service'`.
-- [ ] **AC-7** — `GET /unannotated` con un token válido → `403`; `GET /open` sin token → `200`.
+- [x] **AC-1** — `GET /secured` sin header, o con `Authorization: Basic x` → `401 UNAUTHORIZED`.
+- [x] **AC-9** — Si el verifier lanza `InvalidTokenError('JWKS_UNAVAILABLE')` → `401`, y hay un log `warn` con `reason`, sin el token.
+- [x] **AC-5** — Token válido con `roles: ['groups:write']` en `/secured` → `403 FORBIDDEN`.
+- [x] **AC-6** — Token válido con `devices:write` y `actor: 'core-service'` → `200` y el body es `'core-service'`.
+- [x] **AC-7** — `GET /unannotated` con un token válido → `403`; `GET /open` sin token → `200`.
 
 ## Fuera de alcance
 - Registro global en `AppModule` y log de `actor` (T04).
@@ -60,3 +60,7 @@ pnpm check
 ```
 
 ## Handoff
+- `ServiceAuthGuard` + decorators listos; aún **no** registrado como `APP_GUARD` en `AppModule` (T04). T04 debe proveer `JwtVerifier` (necesita `AuthConfig`) y marcar `@Public()` el health.
+- `AuthenticatedRequest` (con `actor?`) exportado desde `auth.decorators.ts`; T04 puede usar `req.actor` para el log.
+- Warn log: `{ reason, msg: 'Rejected service token' }` (mismo patrón que `HttpExceptionFilter`: nestjs-pino toma el 2º arg como contexto). Errores no-`InvalidTokenError` del verifier se relanzan → 500.
+- Esquema `Bearer` aceptado case-insensitive (`/^Bearer\s+(\S+)$/i`).

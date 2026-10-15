@@ -9,6 +9,11 @@ import {
 
 export const SERVICE_NAME = 'traccar-adapter';
 
+function actorOf(req: IncomingMessage): { actor?: string } {
+  const actor = (req as { actor?: string }).actor;
+  return actor === undefined ? {} : { actor };
+}
+
 export function buildPinoHttpOptions(
   config: Pick<AppConfig, 'logLevel'>,
 ): Options {
@@ -46,21 +51,23 @@ export function buildPinoHttpOptions(
       return 'info';
     },
     customSuccessObject: (
-      _req: IncomingMessage,
+      req: IncomingMessage,
       _res: ServerResponse,
       val: Record<string, unknown>,
     ) => ({
       ...(typeof val === 'object' && val !== null ? val : {}),
       context: 'HTTP',
+      ...actorOf(req),
     }),
     customErrorObject: (
-      _req: IncomingMessage,
+      req: IncomingMessage,
       _res: ServerResponse,
       _err: Error,
       val: Record<string, unknown>,
     ) => ({
       ...(typeof val === 'object' && val !== null ? val : {}),
       context: 'HTTP',
+      ...actorOf(req),
     }),
     serializers: {
       req: (req: IncomingMessage) => ({

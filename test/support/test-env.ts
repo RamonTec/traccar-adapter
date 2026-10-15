@@ -6,6 +6,7 @@ import {
 
 export const TEST_ENV: Readonly<Record<string, string>> = Object.freeze({
   KEYCLOAK_ISSUER_URL: 'http://keycloak.test/realms/telemetry',
+  KEYCLOAK_AUDIENCE: 'traccar-adapter',
 });
 
 export type TestConfigOverrides = Partial<Omit<AppConfig, 'auth'>> & {
