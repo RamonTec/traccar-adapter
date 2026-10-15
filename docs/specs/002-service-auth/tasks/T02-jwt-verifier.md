@@ -1,6 +1,6 @@
 ---
 id: 002-T02
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [002-T01]
 covers: [AC-2, AC-3, AC-4, AC-8, AC-9]
 ---
@@ -32,17 +32,17 @@ export class JwtVerifier {
 Mapeo de errores de jose → `reason`: `JWSSignatureVerificationFailed`/`JWKSNoMatchingKey` → `SIGNATURE`; `JWTExpired` → `EXPIRED`; `JWTClaimValidationFailed` → `CLAIMS`; `JOSEAlgNotAllowed` → `ALGORITHM`; `JWSInvalid`/`JWTInvalid` → `MALFORMED`; fallo de red o timeout del JWKS → `JWKS_UNAVAILABLE`.
 
 ## Archivos a crear/modificar
-- [ ] `pnpm add jose`
-- [ ] `src/shared/infrastructure/auth/jwt-verifier.ts` (nuevo)
-- [ ] `src/shared/infrastructure/auth/jwt-verifier.spec.ts` (nuevo). Claves con `generateKeyPair('RS256')`; tokens con `new SignJWT(...)`; `getKey` = `createLocalJWKSet`, salvo en AC-8 y AC-9.
+- [x] `pnpm add jose`
+- [x] `src/shared/infrastructure/auth/jwt-verifier.ts` (nuevo)
+- [x] `src/shared/infrastructure/auth/jwt-verifier.spec.ts` (nuevo). Claves con `generateKeyPair('RS256')`; tokens con `new SignJWT(...)`; `getKey` = `createLocalJWKSet`, salvo en AC-8 y AC-9.
 
 ## Criterios de aceptación
-- [ ] **AC-2** — Firmado con otra clave → `SIGNATURE`; token mal formado (`'abc'`) → `MALFORMED`.
-- [ ] **AC-3** — `exp` 60 s en el pasado → `EXPIRED`; `exp` 10 s en el pasado → válido (tolerancia de 30 s); `nbf` 60 s en el futuro → rechazado.
-- [ ] **AC-4** — `iss` distinto o `aud` sin `traccar-adapter` → `CLAIMS`; token `HS256` → `ALGORITHM`.
-- [ ] **AC-4b** — Token válido → `{ actor: <azp>, roles: resource_access['traccar-adapter'].roles }`. Sin `resource_access` → `roles: []`.
-- [ ] **AC-8** — Con un servidor JWKS falso (puerto 0) y el `getKey` por defecto: dos verificaciones válidas seguidas hacen **1** petición al JWKS; un `kid` desconocido provoca como máximo 1 petición extra en 30 s.
-- [ ] **AC-9** — Con el JWKS caído (puerto cerrado) y sin caché → `JWKS_UNAVAILABLE`.
+- [x] **AC-2** — Firmado con otra clave → `SIGNATURE`; token mal formado (`'abc'`) → `MALFORMED`.
+- [x] **AC-3** — `exp` 60 s en el pasado → `EXPIRED`; `exp` 10 s en el pasado → válido (tolerancia de 30 s); `nbf` 60 s en el futuro → rechazado.
+- [x] **AC-4** — `iss` distinto o `aud` sin `traccar-adapter` → `CLAIMS`; token `HS256` → `ALGORITHM`.
+- [x] **AC-4b** — Token válido → `{ actor: <azp>, roles: resource_access['traccar-adapter'].roles }`. Sin `resource_access` → `roles: []`.
+- [x] **AC-8** — Con un servidor JWKS falso (puerto 0) y el `getKey` por defecto: dos verificaciones válidas seguidas hacen **1** petición al JWKS; un `kid` desconocido provoca como máximo 1 petición extra en 30 s.
+- [x] **AC-9** — Con el JWKS caído (puerto cerrado) y sin caché → `JWKS_UNAVAILABLE`.
 
 ## Fuera de alcance
 - Guard, decoradores y HTTP (T03).
@@ -54,3 +54,7 @@ pnpm check
 ```
 
 ## Handoff
+- Implementado `JwtVerifier` y `InvalidTokenError` con `jose` según el contrato estricto en `src/shared/infrastructure/auth/jwt-verifier.ts`.
+- Mapeo completo de errores de verificación de JWT y errores de JWKS (timeout, fallos de red/fetch, respuestas HTTP no-200) hacia `InvalidTokenReason`.
+- Pruebas unitarias y de integración en `src/shared/infrastructure/auth/jwt-verifier.spec.ts` cubriendo AC-2, AC-3, AC-4, AC-4b, AC-8 y AC-9.
+- T03 puede inyectar o instanciar `JwtVerifier` directamente en el `ServiceAuthGuard` usando `config.auth`.
