@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía de Estudio y Análisis Técnico: traccar-adapter</title>
+<style>
+
+@page {
+  size: A4;
+  margin: 20mm 15mm 20mm 15mm;
+  @bottom-right {
+    content: counter(page);
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  color: #1e293b;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 24pt;
+  color: #0f172a;
+  border-bottom: 3px solid #2563eb;
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 16px;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-size: 16pt;
+  color: #1e3a8a;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding-bottom: 6px;
+  margin-top: 28px;
+  margin-bottom: 14px;
+  page-break-before: always;
+  page-break-after: avoid;
+}
+
+/* Don't page break on first h2 */
+h2:first-of-type {
+  page-break-before: avoid;
+}
+
+h3 {
+  font-size: 13pt;
+  color: #1e40af;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  color: #334155;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  page-break-after: avoid;
+}
+
+p {
+  margin: 8px 0;
+  text-align: justify;
+}
+
+strong {
+  color: #0f172a;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+blockquote {
+  margin: 12px 0;
+  padding: 10px 16px;
+  background-color: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  border-radius: 0 6px 6px 0;
+  color: #166534;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+.table-wrapper {
+  margin: 16px 0;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+  margin: 8px 0;
+}
+
+th, td {
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+tr:nth-child(even) td {
+  background-color: #f8fafc;
+}
+
+.code-container {
+  position: relative;
+  margin: 12px 0;
+  page-break-inside: avoid;
+}
+
+.code-badge {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 7.5pt;
+  font-family: monospace;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+pre.code-block {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-family: "JetBrains Mono", Consolas, "Liberation Mono", Courier, monospace;
+  font-size: 8pt;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+code.inline-code {
+  background-color: #f1f5f9;
+  color: #be185d;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", Consolas, "Liberation Mono", Courier, monospace;
+  font-size: 9pt;
+  border: 1px solid #e2e8f0;
+}
+
+ul, ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 4px;
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 24px 0;
+}
+
+</style>
+</head>
+<body>
+<h1 id="guía-de-estudio-y-análisis-técnico-traccaradapter">Guía de Estudio y Análisis Técnico: traccar-adapter</h1>
+<blockquote><strong>Servicio:</strong> <code class="inline-code">traccar-adapter</code>  <br/><strong>Ecosistema:</strong> Plataforma de Telemetría Vehicular Multi-tenant  <br/><strong>Stack:</strong> NestJS 12, Node.js 24 LTS (ESM), TypeScript Strict, NATS JetStream, SQLite Embebido (<code class="inline-code">node:sqlite</code>), Keycloak, Pino, Zod, Vitest, Oxlint, Docker  <br/><strong>Documento de Referencia:</strong> Arquitectura, Tecnologías, Decisiones de Diseño y Guía de Aprendizaje  </blockquote>
+<hr class="divider" />
+<h2 id="tabla-de-contenidos">Tabla de Contenidos</h2>
+<ol>
+<li><a href="#1-visión-general-y-propósito-del-sistema">Visión General y Propósito del Sistema</a></li>
+</ol>
+<ul>
+<li><a href="#el-ecosistema-de-microservicios">El Ecosistema de Microservicios</a></li>
+<li><a href="#la-misión-de-traccar-adapter-anti-corruption-layer-acl">La Misión de traccar-adapter: Anti-Corruption Layer (ACL)</a></li>
+<li><a href="#ubicuidad-de-vocabulario-device-y-group">Ubicuidad de Vocabulario: Device y Group</a></li>
+</ul>
+<ol>
+<li><a href="#2-conceptos-arquitectónicos-y-patrones-de-diseño">Conceptos Arquitectónicos y Patrones de Diseño</a></li>
+</ol>
+<ul>
+<li><a href="#arquitectura-hexagonal-ports--adapters">Arquitectura Hexagonal (Ports &amp; Adapters)</a></li>
+<li><a href="#estructura-feature-first-vs-layer-first-adr-0001">Estructura Feature-First vs. Layer-First (ADR-0001)</a></li>
+<li><a href="#diseño-stateless-con-outbox-local-de-entrega-adr-0007">Diseño Stateless con Outbox Local de Entrega (ADR-0007)</a></li>
+<li><a href="#autenticación-servicio-a-servicio-s2s-y-modelo-zero-trust-adr-0003">Autenticación Servicio a Servicio (S2S) y Modelo Zero-Trust (ADR-0003)</a></li>
+<li><a href="#trazabilidad-distribuida-y-observabilidad-adr-0002">Trazabilidad Distribuida y Observabilidad (ADR-0002)</a></li>
+<li><a href="#auditoría-desacoplada-en-capa-de-aplicación-adr-0006">Auditoría Desacoplada en Capa de Aplicación (ADR-0006)</a></li>
+<li><a href="#deduplicación-de-eventos-y-manejo-de-dead-letter-adr-0004--fr10">Deduplicación de Eventos y Manejo de Dead-Letter (ADR-0004 &amp; FR10)</a></li>
+<li><a href="#invariantes-duras-de-dominio">Invariantes Duras de Dominio</a></li>
+</ul>
+<ol>
+<li><a href="#3-stack-tecnológico-y-justificación-de-herramientas">Stack Tecnológico y Justificación de Herramientas</a></li>
+</ol>
+<ul>
+<li><a href="#runtime-lenguaje-y-empaquetado">Runtime, Lenguaje y Empaquetado</a></li>
+<li><a href="#framework-y-servidor-http">Framework y Servidor HTTP</a></li>
+<li><a href="#mensajería-asíncrona-message-broker">Mensajería Asíncrona (Message Broker)</a></li>
+<li><a href="#persistencia-efímera-y-concurrencia">Persistencia Efímera y Concurrencia</a></li>
+<li><a href="#seguridad-criptografía-y-validación">Seguridad, Criptografía y Validación</a></li>
+<li><a href="#logging-y-rendimiento">Logging y Rendimiento</a></li>
+<li><a href="#calidad-de-código-y-testing">Calidad de Código y Testing</a></li>
+<li><a href="#infraestructura-y-contenedores">Infraestructura y Contenedores</a></li>
+<li><a href="#metodología-sdd-spec-driven-development">Metodología SDD (Spec-Driven Development)</a></li>
+</ul>
+<ol>
+<li><a href="#4-registro-de-decisiones-arquitectónicas-adrs-deep-dive">Registro de Decisiones Arquitectónicas (ADRs Deep-Dive)</a></li>
+</ol>
+<ul>
+<li><a href="#adr-0001-hexagonal-feature-first-con-capas-puras">ADR-0001: Hexagonal Feature-First con Capas Puras</a></li>
+<li><a href="#adr-0002-convenciones-de-plataforma">ADR-0002: Convenciones de Plataforma (Correlation ID, Health, Errores y Logs)</a></li>
+<li><a href="#adr-0003-autenticación-s2s-con-keycloak">ADR-0003: Autenticación S2S con Keycloak (Client Credentials + JWKS)</a></li>
+<li><a href="#adr-0004-contrato-de-eventos-en-jetstream">ADR-0004: Contrato de Eventos en JetStream y Estrategia de IDs</a></li>
+<li><a href="#adr-0005-integración-con-traccar-e-idempotencia">ADR-0005: Integración con Traccar e Idempotencia</a></li>
+<li><a href="#adr-0006-auditoría-de-operaciones-en-capa-de-aplicación">ADR-0006: Auditoría de Operaciones en Capa de Aplicación</a></li>
+<li><a href="#adr-0007-outbox-local-de-entrega">ADR-0007: Outbox Local de Entrega con SQLite Embebido</a></li>
+</ul>
+<ol>
+<li><a href="#5-flujos-del-sistema-paso-a-paso">Flujos del Sistema Paso a Paso</a></li>
+</ol>
+<ul>
+<li><a href="#flujo-1-creación-idempotente-de-grupo">Flujo 1: Creación Idempotente de Grupo</a></li>
+<li><a href="#flujo-2-registro-de-dispositivo-y-reciclaje-de-imei">Flujo 2: Registro de Dispositivo y Reciclaje de IMEI</a></li>
+<li><a href="#flujo-3-ingesta-webhook-contingencia-outbox-y-dead-letter">Flujo 3: Ingesta Webhook, Contingencia Outbox y Dead-Letter</a></li>
+<li><a href="#flujo-4-drenado-del-outbox-en-segundo-plano">Flujo 4: Drenado del Outbox en Segundo Plano</a></li>
+</ul>
+<ol>
+<li><a href="#6-resiliencia-salud-y-ciclo-de-vida">Resiliencia, Salud y Ciclo de Vida</a></li>
+</ol>
+<ul>
+<li><a href="#liveness-vs-readiness">Liveness vs. Readiness con Dependencias Críticas y No Críticas</a></li>
+<li><a href="#apagado-elegante-graceful-shutdown">Apagado Elegante (Graceful Shutdown)</a></li>
+</ul>
+<ol>
+<li><a href="#7-cuestionario-de-estudio-y-autoevaluación">Cuestionario de Estudio y Autoevaluación</a></li>
+</ol>
+<hr class="divider" />
+<h2 id="1-visión-general-y-propósito-del-sistema">1. Visión General y Propósito del Sistema</h2>
+<h3 id="el-ecosistema-de-microservicios">El Ecosistema de Microservicios</h3>
+<p>La plataforma de telemetría vehicular está diseñada bajo una arquitectura distribuida orientada a eventos (<em>event-driven</em>) y servicios REST sincrónicos para comandos. Se compone de 5 microservicios coordinados:</p>
+<div class="code-container"><pre class="code-block language-"><code>                                  ┌────────────────────────┐
+                                  │      api-gateway       │ (Borde exterior, enrutamiento,
+                                  └───────────┬────────────┘  autenticación de usuarios)
+                                              │ REST (S2S + Bearer)
+                                              ▼
+┌─────────────────┐             ┌────────────────────────┐
+│  telemetry-db   │             │      core-service      │ (Entidades de negocio:
+│ (Histórico GPS) │             └───────────┬────────────┘  Vehículos, Tenants, Flotas)
+└────────┬────────┘                         │ REST (S2S: groups, devices)
+         ▲                                  ▼
+         │ NATS Push             ┌────────────────────────┐             ┌─────────────────────┐
+┌────────┴────────┐  JetStream   │    traccar-adapter     │  HTTP REST  │    Traccar Server   │
+│telemetry-service│◄─────────────┤ (Anti-Corruption Layer)├────────────►│(Multi-protocol GPS) │
+└─────────────────┘              └───────────▲────────────┘◄────────────┴─────────────────────┘
+                                             │               Webhooks (posiciones y eventos)
+┌─────────────────┐  JetStream               │
+│realtime-gateway ├◄─────────────────────────┘
+│  (WebSockets)   │
+└─────────────────┘</code></pre></div>
+<ol>
+<li><strong><code class="inline-code">api-gateway</code></strong>: Punto de entrada perimetral. Enruta peticiones externas, valida usuarios finales y propaga la cabecera <code class="inline-code">x-correlation-id</code>.</li>
+<li><strong><code class="inline-code">core-service</code></strong>: Corazón del dominio del negocio. Gestiona Tenants (inquilinos), Vehículos, Usuarios y Asociaciones. Es el dueño de la relación <code class="inline-code">tenant_id ↔ traccar_group_id</code> y <code class="inline-code">vehicle_id ↔ traccar_device_id</code>.</li>
+<li><strong><code class="inline-code">traccar-adapter</code></strong> <em>(este servicio)</em>: Capa de adaptación anti-corrupción. Es el <strong>único</strong> servicio que conoce y habla con el servidor Traccar.</li>
+<li><strong><code class="inline-code">telemetry-service</code></strong>: Consume eventos normalizados desde NATS JetStream, resuelve el Tenant consultando al <code class="inline-code">core-service</code>, filtra ruido (ej. vehículos detenidos) y almacena el historial cronológico de posiciones.</li>
+<li><strong><code class="inline-code">realtime-gateway</code></strong>: Provee canales WebSocket bidireccionales hacia el frontend web/móvil para visualizar vehículos en vivo sobre el mapa.</li>
+</ol>
+<hr class="divider" />
+<h3 id="la-misión-de-traccaradapter-anticorruption-layer-acl">La Misión de traccar-adapter: Anti-Corruption Layer (ACL)</h3>
+<p>En Domain-Driven Design (DDD), un <strong>Anti-Corruption Layer (Capa Anti-Corrupción)</strong> es un patrón arquitectónico que traduce la semántica, protocolos y modelos de datos entre dos subsistemas distintos, evitando que el modelo de un sistema externo "contamine" el modelo de dominio interno.</p>
+<p>Traccar es un servidor open-source maduro capaz de comunicarse con cientos de protocolos binarios propietarios de dispositivos GPS físicos (Teltonika, Coban, Concox, Queclink, etc.). Sin embargo:</p>
+<ul>
+<li>Su API REST y su base de datos tienen su propio modelo conceptual (<code class="inline-code">tc_devices</code>, <code class="inline-code">tc_groups</code>, <code class="inline-code">tc_positions</code>).</li>
+<li>Traccar reporta la velocidad en <strong>nudos</strong> (<em>knots</em>).</li>
+<li>Traccar reenvía posiciones por webhook HTTP antes de guardarlas en su base de datos.</li>
+<li>Traccar no tiene concepto de "Vehículo de flota", "Tenant SaaS" ni "Auditoría empresarial".</li>
+</ul>
+<p>Si <code class="inline-code">core-service</code> o <code class="inline-code">telemetry-service</code> se comunicaran directamente con Traccar:</p>
+<ol>
+<li>El código de negocio quedaría acoplado a las particularidades y cambios de versión de Traccar.</li>
+<li>Si el día de mañana se reemplaza Traccar por otro motor de ingestión (o un servicio IoT en AWS/GCP), habría que reescribir toda la plataforma.</li>
+</ol>
+<p><strong>Con <code class="inline-code">traccar-adapter</code> como ACL:</strong></p>
+<ul>
+<li>El resto del sistema interactúa con una API limpia y uniforme.</li>
+<li>Si Traccar cambia o se reemplaza, <strong>únicamente</strong> se modifica <code class="inline-code">traccar-adapter</code>.</li>
+</ul>
+<hr class="divider" />
+<h3 id="ubicuidad-de-vocabulario-device-y-group">Ubicuidad de Vocabulario: Device y Group</h3>
+<p>Una de las reglas no negociables de diseño en este servicio es el <strong>Lenguaje Ubicuo Estricto</strong>:</p>
+<ul>
+<li>En <code class="inline-code">traccar-adapter</code> <strong>solo existen <code class="inline-code">Device</code> y <code class="inline-code">Group</code></strong>.</li>
+<li>Está terminantemente prohibido utilizar conceptos como <code class="inline-code">Vehicle</code>, <code class="inline-code">Tenant</code>, <code class="inline-code">Driver</code> o <code class="inline-code">Fleet</code>.</li>
+<li><strong>Razón técnica:</strong> Mantener la frontera de responsabilidades. <code class="inline-code">traccar-adapter</code> no sabe qué vehículo corresponde a qué dispositivo GPS, ni qué empresa es dueña de qué grupo. Esa correlación vive exclusivamente en <code class="inline-code">core-service</code>.</li>
+</ul>
+<hr class="divider" />
+<h2 id="2-conceptos-arquitectónicos-y-patrones-de-diseño">2. Conceptos Arquitectónicos y Patrones de Diseño</h2>
+<h3 id="arquitectura-hexagonal-ports-adapters">Arquitectura Hexagonal (Ports &amp; Adapters)</h3>
+<p>La Arquitectura Hexagonal, formulada por Alistair Cockburn, busca aislar el núcleo de lógica de la aplicación de las tecnologías de entrada/salida (I/O), frameworks y protocolos externos.</p>
+<div class="code-container"><pre class="code-block language-"><code>┌────────────────────────────────────────────────────────────────────────┐
+│                        INFRASTRUCTURE LAYER                            │
+│  ┌─────────────────────────┐            ┌───────────────────────────┐  │
+│  │     Inbound Adapters    │            │     Outbound Adapters     │  │
+│  │  - Express Controllers  │            │  - Traccar HTTP Client    │  │
+│  │  - Zod Validation Pipes │            │  - JetStream Publisher    │  │
+│  │  - Keycloak JWT Guards  │            │  - SQLite Outbox Store    │  │
+│  │  - Raw Body Middleware  │            │  - Pino Audit Adapter     │  │
+│  └────────────┬────────────┘            └─────────────▲─────────────┘  │
+│               │ Invocación                            │ Implementa     │
+│               ▼                                       │ interfaz       │
+│  ┌────────────────────────────────────────────────────┴─────────────┐  │
+│  │                      APPLICATION LAYER                           │  │
+│  │  ┌────────────────────────────────────────────────────────────┐  │  │
+│  │  │ Use Cases (Clases TypeScript puras sin decoradores)         │  │  │
+│  │  │ - CreateGroupUseCase        - SetDeviceStatusUseCase       │  │  │
+│  │  │ - RegisterDeviceUseCase     - IngestTraccarPayloadUseCase  │  │  │
+│  │  └─────────────────────────┬──────────────────────────────────┘  │  │
+│  │                            │ Orquesta                            │  │
+│  │  ┌─────────────────────────▼──────────────────────────────────┐  │  │
+│  │  │ Ports (Interfaces TypeScript + Injection Symbols)          │  │  │
+│  │  │ - TraccarGroupPort          - EventPublisherPort           │  │  │
+│  │  │ - TraccarDevicePort         - DeadLetterPublisherPort      │  │  │
+│  │  │ - AuditLogPort              - ClockPort                    │  │  │
+│  │  └────────────────────────────────────────────────────────────┘  │  │
+│  │                            │ Depende                             │  │
+│  │                            ▼                                     │  │
+│  │  ┌────────────────────────────────────────────────────────────┐  │  │
+│  │  │                      DOMAIN LAYER                          │  │  │
+│  │  │  - Entidades puras (Device, Group)                         │  │  │
+│  │  │  - Value Objects (Imei, retiredUniqueId)                   │  │  │
+│  │  │  - Errores de Dominio (DomainError, GroupNotFoundError)   │  │  │
+│  │  │  - Reglas de normalización de telemetría                   │  │  │
+│  │  └────────────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘</code></pre></div>
+<h4 id="regla-de-dependencia-estricta">Regla de Dependencia Estricta</h4>
+<p>Las capas interiores <strong>desconocen</strong> a las capas exteriores:</p>
+<p>$$\text{Domain} \longleftarrow \text{Application} \longleftarrow \text{Infrastructure}$$</p>
+<ul>
+<li><strong><code class="inline-code">domain</code></strong>: No importa <code class="inline-code">@nestjs/*</code>, ni Express, ni librerías de I/O.</li>
+<li><strong><code class="inline-code">application</code></strong>: Solo conoce <code class="inline-code">domain</code> y sus propios puertos. No contiene decoradores <code class="inline-code">@Injectable()</code> ni referencias a transportes HTTP o colas.</li>
+<li><strong><code class="inline-code">infrastructure</code></strong>: Implementa los puertos y configura los controladores, módulos y dependencias de NestJS.</li>
+</ul>
+<hr class="divider" />
+<h3 id="estructura-featurefirst-vs-layerfirst-adr0001">Estructura Feature-First vs. Layer-First (ADR-0001)</h3>
+<p>El proyecto organiza su código agrupando por <strong>funcionalidad primero y capa después</strong>, en lugar de crear carpetas monolíticas globales (<code class="inline-code">controllers/</code>, <code class="inline-code">services/</code>, <code class="inline-code">models/</code>):</p>
+<div class="code-container"><pre class="code-block language-"><code>src/
+├── app.module.ts
+├── main.ts
+├── modules/
+│   ├── device/              # Feature: Dispositivos GPS
+│   │   ├── domain/
+│   │   ├── application/
+│   │   │   ├── ports/
+│   │   │   └── use-cases/
+│   │   ├── infrastructure/
+│   │   │   ├── inbound/     # Controllers, DTOs
+│   │   └── outbound/    # HTTP Adapters hacia Traccar
+│   │   └── device.module.ts
+│   ├── group/               # Feature: Grupos de Traccar
+│   └── ingestion/           # Feature: Webhooks y Normalización
+└── shared/                  # Componentes transversales
+    ├── domain/              # Errores base (DomainError)
+    ├── application/         # Ports transversales (AuditLogPort, ClockPort)
+    └── infrastructure/      # Auth JWT, Logging, NATS, Outbox</code></pre></div>
+<h4 id="por-qué-featurefirst">¿Por qué Feature-First?</h4>
+<ol>
+<li><strong>Alta Cohesión y Bajo Acoplamiento:</strong> Todo lo que cambia junto para una funcionalidad (<code class="inline-code">Device</code>) vive en el mismo directorio.</li>
+<li><strong>Carga Cognitiva Reducida:</strong> Tanto para desarrolladores humanos como para agentes de IA (Claude Code / Antigravity), implementar un requerimiento solo requiere cargar en contexto los archivos de ese módulo específico.</li>
+<li><strong>Control Automático con Linter:</strong> En <code class="inline-code">.oxlintrc.json</code> se definen reglas <code class="inline-code">no-restricted-imports</code> para que el compilador y el linter prohíban que <code class="inline-code">modules/group</code> importe código privado de <code class="inline-code">modules/device</code>.</li>
+</ol>
+<hr class="divider" />
+<h3 id="diseño-stateless-con-outbox-local-de-entrega-adr0007">Diseño Stateless con Outbox Local de Entrega (ADR-0007)</h3>
+<p>Originalmente, <code class="inline-code">traccar-adapter</code> fue concebido como un servicio <strong>100% Stateless</strong> (sin base de datos propia). Sin embargo, un análisis riguroso de Traccar 6.15.3 reveló un riesgo crítico de pérdida de datos:</p>
+<ul>
+<li><strong>Eventos de Traccar:</strong> Cuando ocurre una alarma o un evento crítico (ej. botón de pánico, exceso de velocidad), Traccar envía un webhook HTTP POST a <code class="inline-code">traccar-adapter</code>. Si este endpoint responde <code class="inline-code">503 Service Unavailable</code> porque NATS está temporalmente caído, <strong>Traccar nunca reintenta el evento</strong>. Se pierde para siempre.</li>
+<li><strong>Posiciones GPS:</strong> Aunque Traccar permite configurar reintentos en posiciones (<code class="inline-code">forward.retry.enable=true</code>), su cola interna es en memoria y finita (~17 minutos). Si el adapter o NATS están caídos más de ese lapso, Traccar lanza un <code class="inline-code">NullPointerException</code> interno y aborta el flujo.</li>
+</ul>
+<h4 id="la-solución-local-delivery-outbox">La Solución: Local Delivery Outbox</h4>
+<p>Para garantizar que <strong>ningún dato se pierda en silencio (FR10)</strong> sin convertir al servicio en un almacén de datos de negocio:</p>
+<div class="code-container"><pre class="code-block language-"><code>[Traccar Webhook]
+       │
+       ▼
+[WebhookController]
+       │
+       ▼
+[IngestUseCase] ──(Normaliza / DLQ)──► [ReliablePublisher]
+                                             │
+                       ┌─────────────────────┴─────────────────────┐
+                       │ ¿NATS JetStream disponible?               │
+                      SÍ                                           NO
+                       │                                           │
+                       ▼                                           ▼
+             [Publicar en JetStream]                     [SqliteOutboxStore]
+                       │                                    (Buffer local en disco)
+                       ▼                                           │
+             [Responder 200 OK]                          [Responder 200 OK (buffered)]
+                                                                   │
+                                                                   ▼
+                                                         [OutboxDrainer en background]
+                                                          (Reintenta con backoff y
+                                                           borra fila con PubAck)</code></pre></div>
+<ol>
+<li><strong>Camino Normal:</strong> El mensaje se publica directamente en JetStream. Si JetStream responde con <code class="inline-code">PubAck</code>, el webhook devuelve <code class="inline-code">200 OK</code>.</li>
+<li><strong>Camino de Contingencia:</strong> Si JetStream no está accesible, el mensaje se serializa y se guarda en un archivo SQLite local (<code class="inline-code">data/outbox.db</code>) en modo <strong>WAL</strong> con <code class="inline-code">synchronous = FULL</code>. Inmediatamente el webhook responde <code class="inline-code">200 OK</code> a Traccar (evitando que Traccar aborte).</li>
+<li><strong>Drenado en Background:</strong> Un componente (<code class="inline-code">OutboxDrainer</code>) procesa los mensajes en estricto orden de llegada (FIFO). En cuanto NATS se recupera, publica los mensajes y <strong>borra cada registro al recibir el PubAck</strong>.</li>
+<li><strong>Por qué sigue siendo arquitectónicamente Stateless:</strong></li>
+</ol>
+<ul>
+<li>La base de datos SQLite no contiene entidades de negocio, ni histórico, ni es consultable por API.</li>
+<li>Solo contiene mensajes en tránsito. En estado estable, la tabla <code class="inline-code">outbox</code> tiene <strong>0 registros</strong>.</li>
+</ul>
+<hr class="divider" />
+<h3 id="autenticación-servicio-a-servicio-s2s-y-modelo-zerotrust-adr0003">Autenticación Servicio a Servicio (S2S) y Modelo Zero-Trust (ADR-0003)</h3>
+<p>En entornos corporativos y de microservicios, confiar ciegamente en que "estamos dentro de la misma red Docker o VPC" es una vulnerabilidad grave. Si un contenedor o pod secundario fuese vulnerado, un atacante podría enviar comandos HTTP a <code class="inline-code">traccar-adapter</code> para registrar dispositivos o dar de baja flotas enteras.</p>
+<p><code class="inline-code">traccar-adapter</code> implementa <strong>Zero-Trust S2S</strong> utilizando Keycloak y el estándar OAuth 2.0 Client Credentials:</p>
+<div class="code-container"><pre class="code-block language-"><code>┌────────────────┐                     ┌────────────────┐                     ┌─────────────────┐
+│  core-service  │                     │    Keycloak    │                     │ traccar-adapter │
+└───────┬────────┘                     └───────┬────────┘                     └────────┬────────┘
+        │ 1. Obtener Token                     │                                       │
+        │ grant_type=client_credentials        │                                       │
+        ├─────────────────────────────────────►│                                       │
+        │ 2. Devuelve JWT firmado (RS256)      │                                       │
+        │    aud: "traccar-adapter"            │                                       │
+        │    azp: "core-service"               │                                       │
+        │    roles: ["devices:write"]          │                                       │
+        │◄─────────────────────────────────────┤                                       │
+        │                                                                              │
+        │ 3. HTTP POST /devices (Authorization: Bearer &lt;JWT&gt;)                          │
+        ├─────────────────────────────────────────────────────────────────────────────►│
+        │                                                                              │ 4. Descarga / Cachea JWKS
+        │                                                                              │    GET /protocol/.../certs
+        │                                                                              ├───────────────► Keycloak
+        │                                                                              │◄─────────────── Keycloak
+        │                                                                              │
+        │                                                                              │ 5. Validación Local:
+        │                                                                              │    - Firma criptográfica
+        │                                                                              │    - Emisor (iss) y Audiencia (aud)
+        │                                                                              │    - Expiración (exp &lt;= 30s tol)
+        │                                                                              │    - Rol en resource_access
+        │ 6. 201 Created                                                               │
+        │◄─────────────────────────────────────────────────────────────────────────────┤</code></pre></div>
+<h4 id="ventajas-del-enfoque">Ventajas del enfoque:</h4>
+<ul>
+<li><strong>Cero Llamadas de Introspección Remota:</strong> Validar tokens mediante introspección HTTP en cada request ahogaría a Keycloak y sumaría decenas de milisegundos de latencia. <code class="inline-code">traccar-adapter</code> descarga el juego de claves públicas (JWKS) una sola vez y valida criptográficamente en memoria (<code class="inline-code">jose</code>).</li>
+<li><strong>Deny-by-Default:</strong> En NestJS, el <code class="inline-code">ServiceAuthGuard</code> bloquea <strong>por defecto</strong> toda ruta con <code class="inline-code">403 Forbidden</code> a menos que tenga explícitamente el decorador <code class="inline-code">@RequireRole(...)</code> o <code class="inline-code">@Public()</code>.</li>
+</ul>
+<hr class="divider" />
+<h3 id="trazabilidad-distribuida-y-observabilidad-adr0002">Trazabilidad Distribuida y Observabilidad (ADR-0002)</h3>
+<p>En una arquitectura con múltiples microservicios y colas asíncronas, rastrear un error o una transacción requiere <strong>Trazabilidad Distribuida</strong>:</p>
+<ul>
+<li><strong>Cabecera <code class="inline-code">x-correlation-id</code>:</strong> Se genera en el borde (<code class="inline-code">api-gateway</code>) como un UUID v4 o se recibe del cliente.</li>
+<li><code class="inline-code">traccar-adapter</code> extrae el <code class="inline-code">correlationId</code> en un middleware (<code class="inline-code">RequestContextMiddleware</code> usando <code class="inline-code">AsyncLocalStorage</code> de Node.js) y:</li>
+</ul>
+<ol>
+<li>Lo incluye en la respuesta HTTP (<code class="inline-code">x-correlation-id</code>).</li>
+<li>Lo inyecta en cada línea de log estructurado de Pino.</li>
+<li>Lo adjunta como cabecera nativa en cada mensaje publicado a NATS JetStream.</li>
+<li>Lo almacena en el registro de Dead-Letter si el payload falló.</li>
+</ol>
+<p>De este modo, con solo buscar un <code class="inline-code">correlationId</code> en un agregador de logs (Elasticsearch, Grafana Loki, Datadog), un operador puede reconstruir el camino completo:</p>
+<p>$$\text{Llamada REST de api-core} \longrightarrow \text{traccar-adapter} \longrightarrow \text{NATS JetStream} \longrightarrow \text{telemetry-service}$$</p>
+<hr class="divider" />
+<h3 id="auditoría-desacoplada-en-capa-de-aplicación-adr0006">Auditoría Desacoplada en Capa de Aplicación (ADR-0006)</h3>
+<p>El requisito <strong>NFR4</strong> exige que toda operación de creación o modificación sobre un dispositivo o grupo sea auditada (quién, cuándo, resultado y duración).</p>
+<p>Inicialmente, se intentó implementar mediante interceptores HTTP de NestJS o directamente en los controladores. Esto presentaba serios problemas:</p>
+<ul>
+<li>Un controlador HTTP solo conoce peticiones web; no puede auditar operaciones que ingresen por colas o tareas programadas.</li>
+<li>Un interceptor HTTP desconoce la semántica del negocio: no puede saber si un error fue por nombre ambiguo, dispositivo ya registrado o caída de red sin acoplarse a los errores de dominio.</li>
+</ul>
+<p><strong>La Solución (ADR-0006):</strong></p>
+<p>La auditoría se modela como un <strong>Puerto de Aplicación</strong> (<code class="inline-code">AuditLogPort</code>) y se ejecuta dentro del Caso de Uso mediante el helper funcional <code class="inline-code">runAudited</code>:</p>
+<div class="code-container"><div class="code-badge">typescript</div><pre class="code-block language-typescript"><code>export class RegisterDeviceUseCase {
+  execute(input: RegisterDeviceInput): Promise&lt;RegisterDeviceOutput&gt; {
+    return runAudited(
+      { audit: this.audit, clock: this.clock },
+      {
+        op: 'device.register',
+        actor: input.actor,
+        fields: { uniqueId: input.uniqueId, groupId: input.groupId },
+        success: (out) =&gt; ({ result: out.result, fields: { deviceId: out.device.id } }),
+        failure: (err) =&gt; ({ result: err instanceof DeviceAlreadyRegisteredError ? 'conflict' : 'failed' }),
+      },
+      () =&gt; this.run(input),
+    );
+  }
+}</code></pre></div>
+<ul>
+<li>Se inyecta un <code class="inline-code">ClockPort</code> para medir el tiempo transcurrido con precisión monotónica (<code class="inline-code">performance.now()</code>).</li>
+<li>El adaptador (<code class="inline-code">PinoAuditLogAdapter</code>) emite una línea JSON estructurada en <code class="inline-code">stdout</code> con nivel <code class="inline-code">info</code> si fue exitoso o <code class="inline-code">warn</code> si falló.</li>
+<li><strong>Principio de Resiliencia:</strong> El adaptador de auditoría <strong>nunca lanza excepciones</strong> (<code class="inline-code">try/catch</code> interno silencioso); un fallo al escribir una línea de auditoría jamás debe abortar la operación de negocio.</li>
+</ul>
+<hr class="divider" />
+<h3 id="deduplicación-de-eventos-y-manejo-de-deadletter-adr0004-fr10">Deduplicación de Eventos y Manejo de Dead-Letter (ADR-0004 &amp; FR10)</h3>
+<h4 id="deduplicación-idempotente-en-jetstream">Deduplicación Idempotente en JetStream</h4>
+<p>Cuando Traccar reenvía posiciones por webhook, ante cualquier timeout o fallo de red puede reenviar la misma posición múltiples veces. Si no se filtran, <code class="inline-code">telemetry-service</code> guardaría puntos duplicados en el historial de trayectorias.</p>
+<p>NATS JetStream ofrece <strong>deduplicación nativa</strong> mediante la cabecera <code class="inline-code">Nats-Msg-Id</code>. Si un mensaje llega con un <code class="inline-code">Nats-Msg-Id</code> que JetStream ya vio dentro de una ventana de tiempo configurable (<code class="inline-code">duplicate_window</code>, ej. 10 minutos), JetStream lo reconoce (<em>ack</em>) pero <strong>no lo almacena ni lo entrega a los suscriptores</strong>.</p>
+<h4 id="el-hallazgo-empírico-de-traccar-positionid-0">El Hallazgo Empírico de Traccar: <code class="inline-code">position.id = 0</code></h4>
+<p>Durante las pruebas de integración con Traccar 6.15.3, se descubrió un comportamiento crucial:</p>
+<blockquote>Traccar reenvía las posiciones por webhook <strong>antes</strong> de persistirlas en su propia base de datos MySQL/H2. Por ende, en el payload JSON el campo <code class="inline-code">position.id</code> llega siempre con el valor <code class="inline-code">0</code>.</blockquote>
+<p>Si se hubiese usado <code class="inline-code">traccar-position-${payload.position.id}</code>, el ID habría sido <code class="inline-code">traccar-position-0</code> para todos los paquetes. ¡JetStream habría descartado todas las posiciones del mundo después de la primera!</p>
+<p><strong>La solución adoptada (Enmienda ADR-0004):</strong></p>
+<p>Construir una <strong>clave natural estable</strong>:</p>
+<p>$$\text{Nats-Msg-Id} = \text{"traccar-position-" } + \text{deviceId} + \text{"-" } + \text{fixTime (epoch ms)}$$</p>
+<ul>
+<li>Si Traccar reintenta el mismo punto, el <code class="inline-code">deviceId</code> y el <code class="inline-code">fixTime</code> son idénticos $\rightarrow$ JetStream lo deduplica.</li>
+<li>Cuando llega un nuevo fix GPS, el timestamp cambia $\rightarrow$ JetStream lo acepta.</li>
+</ul>
+<h4 id="deadletter-queue-dlq-regla-de-oro-fr10">Dead-Letter Queue (DLQ): Regla de Oro FR10</h4>
+<blockquote><strong>"Nunca descartar un payload en silencio."</strong></blockquote>
+<p>Si un payload recibido en el webhook:</p>
+<ul>
+<li>No es JSON válido,</li>
+<li>Contiene caracteres UTF-8 corruptos,</li>
+<li>No cumple con el esquema esperado (ej. faltan coordenadas o fecha),</li>
+<li>Excede el tamaño máximo permitido (<code class="inline-code">WEBHOOK_MAX_BODY_BYTES</code>), o</li>
+<li>Carece de <code class="inline-code">groupId</code> en Traccar (<code class="inline-code">MISSING_GROUP</code>),</li>
+</ul>
+<p>El caso de uso captura el error y publica inmediatamente el evento en el stream <code class="inline-code">TELEMETRY_DEADLETTER</code> (subject <code class="inline-code">telemetry.deadletter.traccar</code>), conservando:</p>
+<ul>
+<li>El cuerpo crudo byte a byte (<code class="inline-code">rawPayload</code> en string o base64).</li>
+<li>La razón del fallo (<code class="inline-code">INVALID_JSON</code>, <code class="inline-code">SCHEMA_MISMATCH</code>, <code class="inline-code">PAYLOAD_TOO_LARGE</code>, etc.).</li>
+<li>La cabecera <code class="inline-code">x-correlation-id</code> y timestamp de recepción.</li>
+</ul>
+<hr class="divider" />
+<h3 id="invariantes-duras-de-dominio">Invariantes Duras de Dominio</h3>
+<ol>
+<li><strong>FR3 / NFR5: Prohibición Estructural de Mover Dispositivos entre Grupos:</strong></li>
+</ol>
+<ul>
+<li>En un sistema multi-tenant, si un dispositivo pudiera moverse de un grupo a otro, los datos de telemetría de una empresa podrían filtrarse a otra.</li>
+<li>En lugar de simplemente prohibirlo por convención o validación en tiempo de ejecución, <strong>la operación ni siquiera existe en la API</strong>. Los DTOs de actualización no aceptan <code class="inline-code">groupId</code>.</li>
+</ul>
+<ol>
+<li><strong>ADR-0005 §4: Reciclaje de IMEI y Dispositivos Retirados:</strong></li>
+</ol>
+<ul>
+<li>Traccar impone una restricción única en su base de datos: el campo <code class="inline-code">uniqueId</code> (el IMEI) debe ser único en toda la tabla, <strong>incluso para dispositivos deshabilitados</strong>.</li>
+<li>Si una empresa da de baja un GPS y meses después otra empresa compra ese mismo GPS e intenta registrarlo, Traccar rechazaría la inserción por unicidad de <code class="inline-code">uniqueId</code>.</li>
+<li><strong>Solución:</strong> Cuando <code class="inline-code">core-service</code> solicita registrar un IMEI que ya existe en Traccar pero está <code class="inline-code">disabled</code>, <code class="inline-code">traccar-adapter</code> primero renombra el dispositivo anterior a:</li>
+</ul>
+<p>     $$\text{uniqueId} \longleftarrow \text{&lt;imei&gt;:retired:&lt;deviceId&gt;}$$</p>
+<p>     Y luego crea un registro completamente nuevo con el IMEI liberado. El historial previo queda congelado e inmutable en el grupo original, y el nuevo dispositivo inicia limpio.</p>
+<hr class="divider" />
+<h2 id="3-stack-tecnológico-y-justificación-de-herramientas">3. Stack Tecnológico y Justificación de Herramientas</h2>
+<div class="table-wrapper"><table>
+<thead><tr><th>Categoría</th><th>Tecnología Seleccionada</th><th>Alternativas Descartadas</th><th>¿Por qué se eligió? Justificación Técnica</th></tr></thead>
+<tbody>
+<tr><td><strong>Runtime</strong></td><td><strong>Node.js 24 LTS</strong></td><td>Node 18/20, Deno, Bun</td><td>Soporte nativo para ECMAScript Modules (ESM), APIs nativas modernas (<code class="inline-code">node:sqlite</code>, <code class="inline-code">performance.now()</code>, <code class="inline-code">fetch</code>), ciclo de soporte empresarial a largo plazo (LTS).</td></tr>
+<tr><td><strong>Módulos JS</strong></td><td><strong>ESM Nativo</strong> (<code class="inline-code">"type": "module"</code>)</td><td>CommonJS (<code class="inline-code">require</code>)</td><td>Estándar oficial de JavaScript. Mejor tree-shaking, interoperabilidad con tooling moderno, evita wrappers lentos de transpilación. Obliga a extensiones explícitas <code class="inline-code">.js</code> en imports relativos.</td></tr>
+<tr><td><strong>Lenguaje</strong></td><td><strong>TypeScript 6.0 (Strict)</strong></td><td>JavaScript vanilla</td><td>Tipado estático estricto (<code class="inline-code">noImplicitAny</code>, <code class="inline-code">strictNullChecks</code>). Previene errores en tiempo de compilación. Modelado preciso de tipos de unión discriminada para resultados y eventos.</td></tr>
+<tr><td><strong>Framework HTTP</strong></td><td><strong>NestJS 12</strong></td><td>Express puro, Fastify, Koa</td><td>Inyección de dependencias robusta, soporte para arquitectura modular, middleware, pipes y guards. Se usa <strong>únicamente</strong> en la capa de infraestructura, manteniendo el dominio desacoplado.</td></tr>
+<tr><td><strong>Motor Web</strong></td><td><strong>Express</strong> (<code class="inline-code">@nestjs/platform-express</code>)</td><td>Fastify</td><td>Ecosistema maduro de middleware para manipulación de streams crudos (<code class="inline-code">raw-body</code>), compatibilidad plena con <code class="inline-code">pino-http</code> y soporte comprobado en NestJS.</td></tr>
+<tr><td><strong>Mensajería</strong></td><td><strong>NATS JetStream</strong> (<code class="inline-code">@nats-io/jetstream</code>)</td><td>Apache Kafka, RabbitMQ, Redis Streams</td><td>Extremadamente ligero, ultra rápido (escrito en Go), consumo mínimo de memoria, persistencia en disco integrada, deduplicación nativa de mensajes mediante cabeceras y soporte de retención por límites.</td></tr>
+<tr><td><strong>Outbox Local</strong></td><td><strong><code class="inline-code">node:sqlite</code></strong> (SQLite nativo)</td><td><code class="inline-code">better-sqlite3</code>, LevelDB, PostgreSQL local</td><td>Módulo integrado en Node.js 24. <strong>Cero dependencias externas en C++</strong> (sin necesidad de <code class="inline-code">node-gyp</code> ni compiladores en Docker). Modo WAL y <code class="inline-code">synchronous = FULL</code> para tolerancia a cortes de energía.</td></tr>
+<tr><td><strong>Seguridad JWT</strong></td><td><strong><code class="inline-code">jose</code></strong></td><td><code class="inline-code">jsonwebtoken</code>, <code class="inline-code">passport-jwt</code></td><td>Estándar de la industria para JOSE (Javascript Object Signing and Encryption). Ligera, compatible con Web Crypto APIs, soporte nativo para JWKS remoto con refresco y caché automática sin dependencias obsoletas.</td></tr>
+<tr><td><strong>Validación</strong></td><td><strong>Zod 4</strong></td><td><code class="inline-code">class-validator</code> / <code class="inline-code">class-transformer</code></td><td>Validación funcional declarativa con inferencia automática de tipos TS. Elimina la necesidad de decoradores experimentales en clases y reduce drásticamente el boilerplate de validación.</td></tr>
+<tr><td><strong>Logging</strong></td><td><strong>Pino</strong> (<code class="inline-code">pino</code>, <code class="inline-code">nestjs-pino</code>)</td><td>Winston, Bunyan, Morgan</td><td>El logger más rápido para Node.js (genera JSON con mínimo impacto en el event loop). Integración con <code class="inline-code">pino-http</code> para registrar peticiones y redactar automáticamente cabeceras sensibles (<code class="inline-code">Authorization</code>).</td></tr>
+<tr><td><strong>Linter</strong></td><td><strong>Oxlint</strong> (<code class="inline-code">oxlint-tsgolint</code>)</td><td>ESLint clásico</td><td>Escrito en Rust. Es entre 50 y 100 veces más rápido que ESLint. Permite verificar reglas de importación restringidas (<code class="inline-code">no-restricted-imports</code>) para hacer cumplir la arquitectura hexagonal en milisegundos.</td></tr>
+<tr><td><strong>Formateo</strong></td><td><strong>Prettier</strong></td><td>Biome, dprint</td><td>Estándar universal sin configuración compleja. Asegura estilo de código unificado en todo el repositorio.</td></tr>
+<tr><td><strong>Test Runner</strong></td><td><strong>Vitest 4</strong></td><td>Jest, Mocha</td><td>Nativo para ESM y TypeScript (usa esbuild/Vite internamente). Ejecución ultra rápida de tests paralelos, excelente cobertura con V8 nativo y compatibilidad total con la API de aserciones modernas.</td></tr>
+<tr><td><strong>Contenedores</strong></td><td><strong>Docker (Alpine 3.24)</strong></td><td>Ubuntu base, Distroless</td><td>Imagen ligera (<code class="inline-code">node:24.22.0-alpine3.24</code>), superficie de ataque reducida, usuario sin privilegios <code class="inline-code">node</code> (UID 1000) y soporte para volúmenes persistentes.</td></tr>
+<tr><td><strong>Metodología</strong></td><td><strong>SDD (Spec-Driven Development)</strong></td><td>BDD clásico, desarrollo ad-hoc</td><td>Ningún código se escribe sin un documento de especificación técnica (<code class="inline-code">spec.md</code>), diseño (<code class="inline-code">design.md</code>) y tareas aprobadas (<code class="inline-code">tasks.md</code>). Cada tarea representa un commit atómico y verificable.</td></tr>
+</tbody></table></div>
+
+<hr class="divider" />
+<h2 id="4-registro-de-decisiones-arquitectónicas-adrs-deepdive">4. Registro de Decisiones Arquitectónicas (ADRs Deep-Dive)</h2>
+<p>Los <strong>Architecture Decision Records (ADRs)</strong> son documentos formales que capturan una decisión arquitectónica importante junto con su contexto, justificación, alternativas descartadas y consecuencias.</p>
+<h3 id="resumen-de-la-matriz-de-decisiones">Resumen de la Matriz de Decisiones</h3>
+<div class="table-wrapper"><table>
+<thead><tr><th>ADR</th><th>Título</th><th>Problema Central</th><th>Decisión Adoptada</th><th>Alternativas Rechazadas</th></tr></thead>
+<tbody>
+<tr><td><strong>0001</strong></td><td>Hexagonal Feature-First</td><td>Código desorganizado, violación de capas y contexto excesivo para tareas de IA.</td><td>Módulos <code class="inline-code">modules/&lt;feature&gt;/{domain,app,infra}</code>. Dominio y aplicación 100% libres de <code class="inline-code">@nestjs/*</code>. Reglas de importación forzadas por <code class="inline-code">oxlint</code>.</td><td>Layer-first global (<code class="inline-code">controllers/</code>, <code class="inline-code">services/</code>); uso de decoradores de NestJS en entidades y casos de uso.</td></tr>
+<tr><td><strong>0002</strong></td><td>Convenciones de Plataforma</td><td>Inconsistencia de logs, trazabilidad rota entre servicios y respuestas de error dispares.</td><td><code class="inline-code">x-correlation-id</code> obligatorio; errores con estructura <code class="inline-code">{ code, message, correlationId, details }</code>; logs en JSON con Pino a <code class="inline-code">stdout</code>.</td><td>Trazabilidad con OpenTelemetry SDK pesado en fase temprana; errores HTTP sin código de máquina estándar.</td></tr>
+<tr><td><strong>0003</strong></td><td>Autenticación S2S con Keycloak</td><td>Riesgo de llamadas no autorizadas entre microservicios en red interna.</td><td>OAuth2 Client Credentials. Validación local de JWT mediante JWKS cacheados (<code class="inline-code">jose</code>). Deny-by-default con <code class="inline-code">ServiceAuthGuard</code>.</td><td>Confiar ciegamente en la red Docker interna; introspección HTTP remota de tokens en cada petición.</td></tr>
+<tr><td><strong>0004</strong></td><td>Contrato de Eventos JetStream</td><td>Streams sin nombres válidos, duplicados por reintentos de Traccar y bug <code class="inline-code">position.id = 0</code>.</td><td>Streams <code class="inline-code">TELEMETRY_EVENTS</code> y <code class="inline-code">TELEMETRY_DEADLETTER</code>. ID de deduplicación natural <code class="inline-code">traccar-position-&lt;dev&gt;-&lt;time&gt;</code>. Conversión a km/h.</td><td>Usar <code class="inline-code">position.id</code> (llegaba en 0 y descartaba datos); omitir Dead-Letter y descartar payloads con error.</td></tr>
+<tr><td><strong>0005</strong></td><td>Integración con Traccar</td><td>Unicidad de IMEI choca con dispositivos dados de baja; autenticación saliente.</td><td>Usuario de servicio con Bearer token en Traccar; retiro de dispositivo renombrando a <code class="inline-code">&lt;imei&gt;:retired:&lt;id&gt;</code> antes de registrar uno nuevo.</td><td>Modificar <code class="inline-code">uniqueId</code> agregando sufijo a mano en base de datos externa; permitir mover dispositivos de grupo (violación FR3).</td></tr>
+<tr><td><strong>0006</strong></td><td>Auditoría en Capa de Aplicación</td><td>Auditoría dispersa en controladores HTTP; operaciones no-HTTP quedaban sin auditar.</td><td>Puerto <code class="inline-code">AuditLogPort</code> y <code class="inline-code">ClockPort</code> en capa de aplicación. Helper <code class="inline-code">runAudited</code>. Adaptador <code class="inline-code">PinoAuditLogAdapter</code> que nunca falla.</td><td>Interceptores globales de NestJS (acoplados solo a HTTP); código manual repetido en cada controlador.</td></tr>
+<tr><td><strong>0007</strong></td><td>Outbox Local con SQLite</td><td>Traccar no reintenta eventos en 503; NATS caído causaba pérdida irreversible de alarmas.</td><td>SQLite embebido (<code class="inline-code">node:sqlite</code>) en modo WAL. Si NATS falla, buffer local y respuesta 200 OK. Drenado en background.</td><td>Aceptar el riesgo de pérdida de datos; reintento solo en memoria (se pierde en reinicios); desplegar NATS Leaf Nodes (complejidad operacional).</td></tr>
+</tbody></table></div>
+
+<hr class="divider" />
+<h2 id="5-flujos-del-sistema-paso-a-paso">5. Flujos del Sistema Paso a Paso</h2>
+<h3 id="flujo-1-creación-idempotente-de-grupo-post-groups">Flujo 1: Creación Idempotente de Grupo (<code class="inline-code">POST /groups</code>)</h3>
+<p>Utilizado durante el onboarding de un nuevo Tenant en la plataforma:</p>
+<div class="code-container"><div class="code-badge">mermaid</div><pre class="code-block language-mermaid"><code>sequenceDiagram
+    autonumber
+    participant CS as core-service
+    participant GC as GroupController
+    participant UC as CreateGroupUseCase
+    participant TP as TraccarGroupHttpAdapter
+    participant TR as Traccar API
+    participant AUD as AuditLogAdapter
+
+    CS-&gt;&gt;GC: POST /groups {"name": "tenant-uuid-123"}&lt;br/&gt;Header: Authorization Bearer (role: groups:write)
+    GC-&gt;&gt;GC: Valida JWT y Rol con ServiceAuthGuard
+    GC-&gt;&gt;GC: Valida Body con Zod (CreateGroupDto)
+    GC-&gt;&gt;UC: execute({ name: "tenant-uuid-123", actor: "core-service" })
+    
+    activate UC
+    UC-&gt;&gt;TP: findByName("tenant-uuid-123")
+    TP-&gt;&gt;TR: GET /api/groups
+    TR--&gt;&gt;TP: Lista de grupos
+    
+    alt Grupo ya existe exactamente 1 vez
+        TP--&gt;&gt;UC: Devuelve Group existente
+        UC-&gt;&gt;AUD: record({ op: "group.create", result: "existing" })
+        UC--&gt;&gt;GC: { group, result: "existing" }
+        GC--&gt;&gt;CS: 200 OK {"groupId": 42}
+    else No existe
+        UC-&gt;&gt;TP: create({ name: "tenant-uuid-123" })
+        TP-&gt;&gt;TR: POST /api/groups {"name": "..."}
+        TR--&gt;&gt;TP: 201 Created {"id": 85, "name": "..."}
+        TP--&gt;&gt;UC: Devuelve nuevo Group
+        UC-&gt;&gt;AUD: record({ op: "group.create", result: "created" })
+        UC--&gt;&gt;GC: { group, result: "created" }
+        GC--&gt;&gt;CS: 201 Created {"groupId": 85}
+    else Existen 2 o más grupos con el mismo nombre
+        TP--&gt;&gt;UC: Lanza GroupNameAmbiguousError
+        UC-&gt;&gt;AUD: record({ op: "group.create", result: "ambiguous" })
+        UC--&gt;&gt;GC: Excepción propagada
+        GC--&gt;&gt;CS: 409 Conflict (code: GROUP_NAME_AMBIGUOUS)
+    end
+    deactivate UC</code></pre></div>
+<hr class="divider" />
+<h3 id="flujo-2-registro-de-dispositivo-y-reciclaje-de-imei-post-devices">Flujo 2: Registro de Dispositivo y Reciclaje de IMEI (<code class="inline-code">POST /devices</code>)</h3>
+<p>Maneja la inserción segura, la idempotencia y la resolución de conflictos cuando un IMEI fue utilizado previamente:</p>
+<div class="code-container"><div class="code-badge">mermaid</div><pre class="code-block language-mermaid"><code>sequenceDiagram
+    autonumber
+    participant CS as core-service
+    participant DC as DeviceController
+    participant UC as RegisterDeviceUseCase
+    participant TP as TraccarDeviceHttpAdapter
+    participant TR as Traccar API
+
+    CS-&gt;&gt;DC: POST /devices {"uniqueId": "123456789012345", "name": "GPS-01", "groupId": 10}
+    DC-&gt;&gt;UC: execute({ uniqueId, name, groupId, actor })
+    activate UC
+
+    UC-&gt;&gt;TP: groupExists(10)
+    alt Grupo no existe en Traccar
+        TP--&gt;&gt;UC: false
+        UC--&gt;&gt;DC: Lanza GroupNotFoundError(10)
+        DC--&gt;&gt;CS: 404 Not Found (code: GROUP_NOT_FOUND)
+    end
+
+    UC-&gt;&gt;TP: findByUniqueId("123456789012345")
+    alt Dispositivo NO existe en Traccar
+        UC-&gt;&gt;TP: create({ uniqueId, name, groupId })
+        TP-&gt;&gt;TR: POST /api/devices
+        TR--&gt;&gt;TP: 201 Created {id: 201}
+        UC--&gt;&gt;DC: { device, result: "created" }
+        DC--&gt;&gt;CS: 201 Created {"deviceId": 201}
+    else Dispositivo existe y está HABILITADO en el MISMO grupo (Idempotencia)
+        UC--&gt;&gt;DC: { device: existing, result: "existing" }
+        DC--&gt;&gt;CS: 200 OK {"deviceId": existing.id}
+    else Dispositivo existe y está HABILITADO en OTRO grupo (Conflicto / FR3)
+        UC--&gt;&gt;DC: Lanza DeviceAlreadyRegisteredError
+        DC--&gt;&gt;CS: 409 Conflict (code: DEVICE_ALREADY_REGISTERED)
+    else Dispositivo existe pero está DESHABILITADO (Reciclaje de IMEI)
+        Note over UC,TP: Paso 1: Retirar el viejo renombrando su uniqueId
+        UC-&gt;&gt;TP: retire(old.id, "123456789012345:retired:oldId")
+        TP-&gt;&gt;TR: PUT /api/devices/oldId (renombra uniqueId)
+        TR--&gt;&gt;TP: 200 OK
+        Note over UC,TP: Paso 2: Crear el nuevo dispositivo con el IMEI liberado
+        UC-&gt;&gt;TP: create({ uniqueId, name, groupId })
+        TP-&gt;&gt;TR: POST /api/devices
+        TR--&gt;&gt;TP: 201 Created {id: 305}
+        UC--&gt;&gt;DC: { device, result: "retired-and-created", retiredDeviceId: old.id }
+        DC--&gt;&gt;CS: 201 Created {"deviceId": 305}
+    end
+    deactivate UC</code></pre></div>
+<hr class="divider" />
+<h3 id="flujo-3-ingesta-webhook-contingencia-outbox-y-deadletter">Flujo 3: Ingesta Webhook, Contingencia Outbox y Dead-Letter</h3>
+<p>El pipeline de alta disponibilidad para la recepción de telemetría:</p>
+<div class="code-container"><div class="code-badge">mermaid</div><pre class="code-block language-mermaid"><code>flowchart TD
+    A[Traccar Webhook POST /webhooks/traccar/positions] --&gt; B{Validar WebhookTokenGuard}
+    B -- Token Inválido --&gt; C[401 Unauthorized]
+    B -- Token Válido --&gt; D[RawBodyMiddleware: Captura buffer crudo]
+    
+    D --&gt; E{¿Excede WEBHOOK_MAX_BODY_BYTES?}
+    E -- Sí (oversized=true) --&gt; F[Dead-Letter: PAYLOAD_TOO_LARGE]
+    E -- No --&gt; G{¿UTF-8 y JSON válido?}
+    
+    G -- No --&gt; H[Dead-Letter: INVALID_JSON]
+    G -- Sí --&gt; I[Normalizar: Posición, velocidad nudos a km/h, validación de coordenadas]
+    
+    I -- Falló esquema o faltan datos --&gt; J[Dead-Letter: SCHEMA_MISMATCH o MISSING_GROUP]
+    I -- Exitoso --&gt; K[Construir TelemetryPositionEvent con ID natural]
+    
+    K --&gt; L[ReliablePublisher: ¿Hay pendientes en Outbox?]
+    L -- Hay pendientes acumulados --&gt; M[Guardar en SQLite Outbox para preservar orden FIFO]
+    L -- Outbox vacío --&gt; N[Intentar publicar en NATS JetStream]
+    
+    N -- JetStream responde PubAck --&gt; O[200 OK outcome: 'published']
+    N -- JetStream caído o Timeout --&gt; P[SqliteOutboxStore: Guardar en outbox.db]
+    
+    P -- Guardado con éxito en disco WAL --&gt; Q[200 OK outcome: 'buffered']
+    P -- Error de disco / Outbox Lleno --&gt; R[503 Service Unavailable]
+    
+    F --&gt; S[Publicar en JetStream Dead-Letter o Guardar en Outbox]
+    H --&gt; S
+    J --&gt; S
+    S --&gt; T[200 OK outcome: 'deadlettered' o 'buffered']</code></pre></div>
+<hr class="divider" />
+<h3 id="flujo-4-drenado-del-outbox-en-segundo-plano">Flujo 4: Drenado del Outbox en Segundo Plano</h3>
+<p>Garantiza la entrega eventual y la auto-sanación del sistema sin intervención humana:</p>
+<div class="code-container"><div class="code-badge">mermaid</div><pre class="code-block language-mermaid"><code>sequenceDiagram
+    autonumber
+    participant D as OutboxDrainer
+    participant S as SqliteOutboxStore (outbox.db)
+    participant JS as JetStreamPublisher
+    participant NATS as NATS JetStream Cluster
+
+    Note over D: Se activa al iniciar la app o tras un nuevo buffer (kick)
+    loop Mientras existan registros y no esté detenido
+        D-&gt;&gt;S: oldest() (Obtiene el mensaje más antiguo por seq)
+        alt No hay mensajes
+            Note over D: Finaliza ciclo de drenado
+        else Mensaje encontrado (seq: 101, subject, msgId, body)
+            D-&gt;&gt;JS: publish(entry.subject, entry.body, { msgId, correlationId })
+            alt NATS JetStream responde PubAck
+                JS--&gt;&gt;D: Éxito
+                D-&gt;&gt;S: delete(101) (Borra la fila físicamente)
+                Note over D: attempt = 0 (Reinicia contador de backoff)
+            else Falla conexión / Timeout
+                JS--&gt;&gt;D: Lanza UpstreamUnavailableError
+                Note over D: Programar reintento con backoff exponencial:&lt;br/&gt;min(1000 * 2^attempt, 30000) ms
+                Note over D: attempt++ y pausa ejecución
+            end
+        end
+    end</code></pre></div>
+<hr class="divider" />
+<h2 id="6-resiliencia-salud-y-ciclo-de-vida">6. Resiliencia, Salud y Ciclo de Vida</h2>
+<h3 id="liveness-vs-readiness">Liveness vs. Readiness</h3>
+<p>El servicio implementa una diferenciación clara entre <strong>estar vivo</strong> y <strong>estar listo</strong> para recibir tráfico (<code class="inline-code">ADR-0002</code> y <code class="inline-code">ReadinessRegistry</code>):</p>
+<ol>
+<li><strong>Liveness (<code class="inline-code">GET /health</code>):</strong></li>
+</ol>
+<ul>
+<li>Responde inmediatamente <code class="inline-code">200 {"status": "ok"}</code>.</li>
+<li><strong>No consulta ninguna dependencia externa</strong>.</li>
+<li>Propósito: Permitir que Docker o Kubernetes verifiquen que el proceso de Node.js no está en un deadlock o con el event loop congelado. Si este endpoint no responde, el contenedor debe reiniciarse.</li>
+</ul>
+<ol>
+<li><strong>Readiness (<code class="inline-code">GET /health/ready</code>):</strong></li>
+</ol>
+<ul>
+<li>Evalúa si el servicio puede realizar su trabajo actual.</li>
+<li>Consulta el estado de las dependencias registradas en <code class="inline-code">ReadinessRegistry</code>:</li>
+<li><strong>Traccar API</strong> (crítica): Si Traccar está caído, no se pueden crear grupos ni registrar dispositivos.</li>
+<li><strong>SQLite Outbox</strong> (crítica): Si el disco está lleno o inaccesible, el servicio no puede garantizar la entrega.</li>
+<li><strong>NATS JetStream</strong> (<strong>no crítica</strong> gracias a ADR-0007): Si NATS está caído pero el Outbox local está operativo y aceptando escrituras, el estado global <strong>sigue siendo <code class="inline-code">status: "ok"</code></strong> y el reporte de NATS marca <code class="inline-code">status: "down"</code>.</li>
+<li>Si una dependencia crítica falla, responde <code class="inline-code">503 Service Unavailable</code>.</li>
+</ul>
+<hr class="divider" />
+<h3 id="apagado-elegante-graceful-shutdown">Apagado Elegante (Graceful Shutdown)</h3>
+<p>Cuando el orquestador (Docker o Kubernetes) envía una señal <code class="inline-code">SIGTERM</code>:</p>
+<ol>
+<li>El servidor HTTP deja de aceptar conexiones nuevas.</li>
+<li><code class="inline-code">OutboxDrainer</code> detiene inmediatamente su bucle y cancela temporizadores activos (<code class="inline-code">onApplicationShutdown</code>).</li>
+<li>Si había un mensaje en proceso de publicación cuyo PubAck no llegó a confirmarse antes de que se corte el proceso, el registro permanece en SQLite. Al reiniciar el servicio, el arranque (<code class="inline-code">onApplicationBootstrap</code>) re-lee el mensaje y lo vuelve a publicar. JetStream lo deduplicará automáticamente mediante <code class="inline-code">Nats-Msg-Id</code>.</li>
+<li>La conexión de NATS se drena con un timeout máximo de 5 segundos.</li>
+<li>El proceso termina limpiamente con código de salida <code class="inline-code">0</code> en menos de 10 segundos.</li>
+</ol>
+<hr class="divider" />
+<h2 id="7-cuestionario-de-estudio-y-autoevaluación">7. Cuestionario de Estudio y Autoevaluación</h2>
+<p>Utiliza estas preguntas para consolidar tu aprendizaje técnico sobre el proyecto:</p>
+<h3 id="pregunta-1-arquitectura-hexagonal">Pregunta 1 (Arquitectura Hexagonal)</h3>
+<p><strong>¿Por qué los casos de uso (<code class="inline-code">RegisterDeviceUseCase</code>, <code class="inline-code">CreateGroupUseCase</code>) no tienen el decorador <code class="inline-code">@Injectable()</code> de NestJS y se instancian mediante <code class="inline-code">useFactory</code> en el módulo?</strong></p>
+<blockquote><strong>Respuesta:</strong> Para garantizar que la capa de aplicación sea 100% agnóstica de frameworks (TypeScript puro). Esto permite probar los casos de uso en tests unitarios ultrarrápidos sin tener que instanciar el contenedor de inyección de dependencias de NestJS (<code class="inline-code">TestingModule</code>), y asegura que la lógica de negocio pueda reutilizarse o migrarse sin depender de NestJS.</blockquote>
+<h3 id="pregunta-2-patrón-anticorruption-layer">Pregunta 2 (Patrón Anti-Corruption Layer)</h3>
+<p><strong>Si un requerimiento solicita que el endpoint <code class="inline-code">POST /devices</code> devuelva el nombre de la empresa dueña del vehículo, ¿por qué debe rechazarse en este servicio?</strong></p>
+<blockquote><strong>Respuesta:</strong> Porque violaría el aislamiento del Anti-Corruption Layer y el principio de responsabilidad única. <code class="inline-code">traccar-adapter</code> solo conoce los conceptos de <code class="inline-code">Device</code> y <code class="inline-code">Group</code>. Las entidades de negocio como "Empresa", "Vehículo" o "Tenant" pertenecen exclusivamente a <code class="inline-code">core-service</code>. Si se introdujeran aquí, se rompería la frontera de dominio.</blockquote>
+<h3 id="pregunta-3-concurrencia-e-idempotencia">Pregunta 3 (Concurrencia e Idempotencia)</h3>
+<p><strong>¿Cómo previene el servicio la creación de grupos duplicados si dos peticiones <code class="inline-code">POST /groups</code> idénticas se ejecutan en paralelo?</strong></p>
+<blockquote><strong>Respuesta:</strong> La operación es de tipo <em>get-or-create</em> por nombre exacto. Si el grupo ya existe, devuelve el registro existente con código HTTP <code class="inline-code">200</code>. Si ocurre una condición de carrera donde ambas intentan crearlo en Traccar al mismo tiempo, el adaptador detecta el conflicto y re-consulta el grupo recién creado. Si Traccar llegase a tener dos grupos con el mismo nombre (creados externamente), el caso de uso lanza <code class="inline-code">GroupNameAmbiguousError</code> resultando en un error <code class="inline-code">409 Conflict</code> para forzar la conciliación.</blockquote>
+<h3 id="pregunta-4-resiliencia-y-mensajería">Pregunta 4 (Resiliencia y Mensajería)</h3>
+<p><strong>¿Por qué no se usó el campo <code class="inline-code">payload.position.id</code> que envía Traccar para deduplicar los mensajes en NATS JetStream?</strong></p>
+<blockquote><strong>Respuesta:</strong> Porque experimentalmente se descubrió que Traccar 6.15.3 reenvía las posiciones vía webhook antes de insertarlas en su base de datos, por lo que <code class="inline-code">position.id</code> llega siempre como <code class="inline-code">0</code>. Usarlo habría causado que JetStream descartara todas las posiciones posteriores como duplicadas. En su lugar, se diseñó una clave natural compuesta: <code class="inline-code">traccar-position-&lt;deviceId&gt;-&lt;fixTimeEpochMs&gt;</code>.</blockquote>
+<h3 id="pregunta-5-diseño-de-almacenamiento-outbox">Pregunta 5 (Diseño de Almacenamiento Outbox)</h3>
+<p><strong>¿Por qué el Outbox de entrega de ADR-0007 utiliza <code class="inline-code">node:sqlite</code> en lugar de una tabla en PostgreSQL o una librería como <code class="inline-code">better-sqlite3</code>?</strong></p>
+<blockquote><strong>Respuesta:</strong> Porque <code class="inline-code">node:sqlite</code> está integrado de forma nativa en Node.js 24 LTS, eliminando dependencias de compilación nativa en C++ (<code class="inline-code">node-gyp</code>) y aligerando la imagen Docker. Además, al ser un archivo local en un volumen persistente por réplica, no añade dependencias de red de bases de datos externas y ofrece latencias de escritura de submilisegundos en modo WAL.</blockquote>
+<h3 id="pregunta-6-seguridad-s2s">Pregunta 6 (Seguridad S2S)</h3>
+<p><strong>¿Por qué <code class="inline-code">traccar-adapter</code> no valida los tokens de Keycloak haciendo una petición HTTP de introspección (<code class="inline-code">/token/introspect</code>) en cada llamada?</strong></p>
+<blockquote><strong>Respuesta:</strong> Por rendimiento y disponibilidad. Hacer una petición remota en cada request HTTP añadiría entre 20 y 100 ms de latencia a cada comando y convertiría a Keycloak en un cuello de botella y punto único de fallo. En su lugar, descarga y cachea el juego de claves públicas (JWKS) y valida las firmas y claims localmente en CPU en menos de un milisegundo.</blockquote>
+<h3 id="pregunta-7-invariantes-de-dominio">Pregunta 7 (Invariantes de Dominio)</h3>
+<p><strong>¿Qué sucede a nivel de base de datos en Traccar cuando se retira un dispositivo por reciclaje de IMEI y por qué no se borra físicamente?</strong></p>
+<blockquote><strong>Respuesta:</strong> No se borra físicamente para conservar el historial de telemetría y auditoría de la empresa original. Para liberar la restricción de unicidad del IMEI en Traccar, el dispositivo antiguo se renombra a <code class="inline-code">&lt;imei&gt;:retired:&lt;deviceId&gt;</code> manteniéndolo deshabilitado (<code class="inline-code">disabled = true</code>). Luego se inserta el nuevo dispositivo con el IMEI limpio asignado al nuevo grupo.</blockquote>
+<h3 id="pregunta-8-observabilidad">Pregunta 8 (Observabilidad)</h3>
+<p><strong>¿Cuál es la diferencia entre un log de request generado por <code class="inline-code">pino-http</code> y un log de auditoría emitido por <code class="inline-code">AuditLogPort</code>?</strong></p>
+<blockquote><strong>Respuesta:</strong> El log de request es operativo a nivel de red (registra IP, método HTTP, URL, status code y tiempo de respuesta en ms). El log de auditoría es de negocio (registra qué actor ejecutó qué operación de dominio, cuál fue el resultado semántico clasificado por el caso de uso —ej. <code class="inline-code">created</code>, <code class="inline-code">existing</code>, <code class="inline-code">retired-and-created</code>— y los identificadores de negocio afectados), asegurando trazabilidad incluso si la operación entrara por un canal que no sea HTTP.</blockquote>
+<hr class="divider" />
+<p><em>Fin de la Guía de Estudio.</em></p>
+</body>
+</html>
