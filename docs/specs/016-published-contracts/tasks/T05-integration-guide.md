@@ -1,6 +1,6 @@
 ---
 id: 016-T05
-status: todo           # todo | doing | blocked | done
+status: done           # todo | doing | blocked | done
 depends_on: [016-T02, 016-T04]
 covers: [AC-8, AC-9]
 ---
@@ -17,3 +17,6 @@ pnpm test:e2e
 ```
 
 ## Handoff
+- `docs/contracts/README.md`: guía para api-core (auth, ids a guardar, flujos, tabla de errores y reintentos,
+  patrón `pending` → confirmar), para consumidores de eventos, política de versiones (semver por documento) e historial.
+- Enlace "Contratos" en el README.

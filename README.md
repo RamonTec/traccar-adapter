@@ -74,6 +74,11 @@ con tres checks en paralelo:
 - **Hacer obligatorios los checks** (dueño del repo): *Settings → Branches → Add branch ruleset* para `main` →
   *Require status checks to pass* → añadir `check`, `e2e` e `image` (aparecen tras la primera ejecución).
 
+## Contratos
+
+API HTTP (OpenAPI), eventos en NATS (AsyncAPI) y guía de integración para api-core y consumidores de eventos:
+[docs/contracts/](docs/contracts/README.md). CI los verifica contra el código.
+
 ## Integración con Traccar
 
 Configuración requerida de Traccar (reenvío, reintentos, permisos) y caída máxima tolerable: [docs/ops/traccar-config.md](docs/ops/traccar-config.md). Traccar local para desarrollo: [dev/traccar/README.md](dev/traccar/README.md).

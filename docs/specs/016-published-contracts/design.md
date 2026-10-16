@@ -81,7 +81,5 @@ JSON Schema; `x-jetstream` por canal (stream, `max_age`, `duplicate_window`); ga
 - **Versión inicial `1.0.0`** en ambos documentos; mayor = cambio incompatible (política en la guía).
 
 ## Riesgos / preguntas abiertas
-- `@asyncapi/parser` es pesado (solo dev); si da problemas con ESM/Node 24, alternativa: validar contra el JSON
-  Schema oficial de AsyncAPI 3.0 vendorizado.
 - AC-6 valida lo que las suites ejercitan; un status documentado que ninguna suite produce no se detecta (se revisa en
   el PR).
