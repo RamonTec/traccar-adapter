@@ -26,6 +26,7 @@ import {
 import { configureHttp } from './../src/shared/infrastructure/http/configure-http.js';
 import { NatsConnectionManager } from './../src/shared/infrastructure/nats/nats-connection.manager.js';
 import { createLogCapture, type LogCapture } from './support/log-capture.js';
+import { checkHttpContract, recordResponses } from './support/http-contract.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
 async function resetLoggerState(): Promise<void> {
@@ -87,6 +88,7 @@ async function waitForHealth(
 describe('Foundation (e2e)', () => {
   describe('In-process', () => {
     let app: NestExpressApplication;
+    let contract: ReturnType<typeof recordResponses> | undefined;
 
     beforeEach(async () => {
       await resetLoggerState();
@@ -102,10 +104,12 @@ describe('Foundation (e2e)', () => {
       });
       app.useLogger(app.get(Logger));
       configureHttp(app, app.get<AppConfig>(APP_CONFIG));
+      contract = recordResponses(app);
       await app.init();
     });
 
     afterEach(async () => {
+      if (contract) expect(checkHttpContract(contract.take())).toEqual([]);
       if (app) {
         await app.close();
       }
@@ -146,6 +150,7 @@ describe('Foundation (e2e)', () => {
   describe('Service auth (in-process)', () => {
     const TOKEN = 'e2e-secret-token-value';
     let app: NestExpressApplication;
+    let contract: ReturnType<typeof recordResponses> | undefined;
     let capture: LogCapture;
 
     @Controller('protected-test')
@@ -184,10 +189,12 @@ describe('Foundation (e2e)', () => {
       });
       app.useLogger(app.get(Logger));
       configureHttp(app, app.get<AppConfig>(APP_CONFIG));
+      contract = recordResponses(app);
       await app.init();
     });
 
     afterEach(async () => {
+      if (contract) expect(checkHttpContract(contract.take())).toEqual([]);
       if (app) {
         await app.close();
       }
@@ -267,6 +274,7 @@ describe('Foundation (e2e)', () => {
 
   describe('Readiness and Traccar (in-process)', () => {
     let app: NestExpressApplication;
+    let contract: ReturnType<typeof recordResponses> | undefined;
     let traccar: FakeTraccarServer;
 
     beforeEach(async () => {
@@ -290,6 +298,7 @@ describe('Foundation (e2e)', () => {
       });
       app.useLogger(app.get(Logger));
       configureHttp(app, app.get<AppConfig>(APP_CONFIG));
+      contract = recordResponses(app);
       await app.init();
       // Readiness also includes NATS since 009: wait for it so only Traccar varies here.
       const nats = app.get(NatsConnectionManager);
@@ -299,6 +308,7 @@ describe('Foundation (e2e)', () => {
     });
 
     afterEach(async () => {
+      if (contract) expect(checkHttpContract(contract.take())).toEqual([]);
       if (app) {
         await app.close();
       }
