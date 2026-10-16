@@ -26,8 +26,8 @@ spec: 016-published-contracts
 | AC-9 | T05 |
 
 ## Checklist de cierre del spec
-- [ ] Todos los tasks en `done` con `## Handoff` relleno
-- [ ] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde (AC-8/AC-9: revisión del documento)
-- [ ] `pnpm check` y `pnpm test:e2e` en verde
-- [ ] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
-- [ ] PR abierto con la lista de tasks y la matriz AC → tasks
+- [x] Todos los tasks en `done` con `## Handoff` relleno
+- [x] Cada AC del spec tiene al menos un test `it('AC-n: …')` en verde (AC-8/AC-9: revisión del documento)
+- [x] `pnpm check` y `pnpm test:e2e` en verde
+- [x] `spec.md` → `status: done` y fila del `ROADMAP.md` actualizada
+- [x] PR abierto con la lista de tasks y la matriz AC → tasks

@@ -1,6 +1,6 @@
 ---
 id: 016-published-contracts
-status: approved       # draft | approved | in-progress | done
+status: done           # draft | approved | in-progress | done
 requirements: [FR1, FR2, FR3, FR4, FR9, FR10, NFR1, NFR3]
 adrs: [0002, 0003, 0004, 0005, 0007]
 ---

@@ -19,7 +19,7 @@ Cada fila es una carpeta `docs/specs/NNN-slug/`. Phase 2 (business rules for GPS
 | 012-audit-log-port | auditoría de operaciones en application (port) y migración de group.create, device.register y device.disable/enable | NFR4 | 0002, 0006 | 004, 005, 006 | done |
 | 014-container-image | imagen de contenedor: build reproducible, no-root, healthcheck, apagado ordenado, volumen del outbox | NFR2 | 0001, 0007 | 013 | done |
 | 015-ci-pipeline | GitHub Actions: `pnpm check`, e2e con NATS e imagen en cada PR | — | — | 014 | done |
-| 016-published-contracts | OpenAPI (comandos para api-core) + AsyncAPI (eventos) + guía de integración, verificados por tests | FR1–FR4, FR9, FR10, NFR1, NFR3 | 0002–0005, 0007 | 015 | approved |
+| 016-published-contracts | OpenAPI (comandos para api-core) + AsyncAPI (eventos) + guía de integración, verificados por tests | FR1–FR4, FR9, FR10, NFR1, NFR3 | 0002–0005, 0007 | 015 | done |
 
 ## Por qué 004-006 esperan
 Su design depende del comportamiento real de la API de Traccar (detección de `uniqueId` duplicado, si `PUT` exige el objeto completo, filtros de `GET /api/groups`, permisos), que verifica 003-T01. Diseñarlos antes sería suponer.
