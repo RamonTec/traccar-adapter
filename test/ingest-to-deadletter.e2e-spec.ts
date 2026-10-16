@@ -18,6 +18,7 @@ import {
   deleteStreamIfExists,
   NATS_TEST_URL,
 } from './support/nats.js';
+import { checkStreamsContract } from './support/event-contract.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
 const TOKEN = TEST_ENV.WEBHOOK_TOKEN!;
@@ -45,6 +46,7 @@ describe('Traccar webhook → dead-letter (e2e)', () => {
   });
 
   afterEach(async () => {
+    expect(await checkStreamsContract(jsm)).toEqual([]);
     await app?.close();
     app = undefined;
     await resetLoggerState();

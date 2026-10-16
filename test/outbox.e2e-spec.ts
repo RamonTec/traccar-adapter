@@ -27,6 +27,7 @@ import {
   deleteStreamIfExists,
   NATS_TEST_URL,
 } from './support/nats.js';
+import { checkStreamsContract } from './support/event-contract.js';
 import { TEST_ENV, testConfig } from './support/test-env.js';
 
 const TOKEN = TEST_ENV.WEBHOOK_TOKEN!;
@@ -80,6 +81,7 @@ describe('Delivery outbox (e2e)', () => {
   });
 
   afterEach(async () => {
+    expect(await checkStreamsContract(jsm)).toEqual([]);
     await app?.close();
     app = undefined;
     await traccar.close();

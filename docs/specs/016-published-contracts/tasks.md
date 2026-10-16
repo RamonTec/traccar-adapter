@@ -9,7 +9,7 @@ spec: 016-published-contracts
 | T01 | Dependencias, cargador/validador de contratos y test de validez de documentos | — | done |
 | T02 | `openapi.yaml` completo y test de rutas | T01 | done |
 | T03 | Registro de respuestas en e2e y validación contra el OpenAPI | T02 | done |
-| T04 | `asyncapi.yaml` completo y validación de mensajes en e2e de ingesta | T01 | todo |
+| T04 | `asyncapi.yaml` completo y validación de mensajes en e2e de ingesta | T01 | done |
 | T05 | Guía de integración, política de versiones y enlace en README | T02, T04 | todo |
 
 ## Cobertura AC → tasks
