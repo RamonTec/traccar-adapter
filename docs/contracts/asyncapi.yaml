@@ -1,0 +1,281 @@
+asyncapi: 3.0.0
+info:
+  title: traccar-adapter events
+  version: 1.0.0
+  description: |
+    Telemetry that traccar-adapter publishes to NATS JetStream (ADR-0004). Consumers: telemetry-service,
+    realtime-gateway and any future service. Integration guide: `docs/contracts/README.md`.
+
+    **Delivery guarantees**
+    - **At least once.** Every message is published with `Nats-Msg-Id` = payload `id`. JetStream drops duplicates
+      inside the stream's `duplicate_window` (10 min by default); outside it a consumer may see the same `id` twice
+      and **must deduplicate by `id`**.
+    - **Order per device** is preserved by the adapter, including after a NATS outage (messages buffered in its
+      outbox are published in arrival order before new ones, ADR-0007). Use `occurredAt` / `data.fixTime` as the
+      business time; `receivedAt` is when the adapter got it.
+    - **Nothing is dropped silently**: payloads that cannot be normalized go to `telemetry.deadletter.traccar`.
+    - **Retention** (NFR6): events 7 days, dead-letters 30 days (configurable). A consumer down for longer loses data.
+
+    **Versioning**: `version` in the payload is the message schema version (currently `1`). A breaking change publishes
+    `version: 2` while `version: 1` keeps being published during the migration; additive changes (new optional fields,
+    new `attributes` keys) do not bump it. Consumers must ignore unknown fields.
+  tags:
+    - name: telemetry
+defaultContentType: application/json
+servers:
+  local:
+    host: nats:4222
+    protocol: nats
+    description: NATS JetStream inside the platform network (local stack).
+channels:
+  positions:
+    address: telemetry.events.position
+    description: One message per position reported by a device.
+    x-jetstream:
+      stream: TELEMETRY_EVENTS
+      maxAgeDays: 7
+      duplicateWindowMinutes: 10
+    messages:
+      positionReported:
+        $ref: '#/components/messages/PositionReported'
+  deviceEvents:
+    address: telemetry.events.device-event
+    description: Events computed by Traccar for a device (alarms, ignition, geofence, …).
+    x-jetstream:
+      stream: TELEMETRY_EVENTS
+      maxAgeDays: 7
+      duplicateWindowMinutes: 10
+    messages:
+      deviceEvent:
+        $ref: '#/components/messages/DeviceEvent'
+  deadLetters:
+    address: telemetry.deadletter.traccar
+    description: Payloads from Traccar that could not be turned into an event (FR10), kept for analysis.
+    x-jetstream:
+      stream: TELEMETRY_DEADLETTER
+      maxAgeDays: 30
+      duplicateWindowMinutes: 10
+    messages:
+      deadLetter:
+        $ref: '#/components/messages/DeadLetter'
+operations:
+  publishPosition:
+    action: send
+    channel:
+      $ref: '#/channels/positions'
+  publishDeviceEvent:
+    action: send
+    channel:
+      $ref: '#/channels/deviceEvents'
+  publishDeadLetter:
+    action: send
+    channel:
+      $ref: '#/channels/deadLetters'
+components:
+  messages:
+    PositionReported:
+      name: position.reported
+      title: Position reported
+      headers:
+        $ref: '#/components/schemas/Headers'
+      payload:
+        $ref: '#/components/schemas/PositionReported'
+    DeviceEvent:
+      name: device.event
+      title: Device event
+      headers:
+        $ref: '#/components/schemas/Headers'
+      payload:
+        $ref: '#/components/schemas/DeviceEvent'
+    DeadLetter:
+      name: deadletter
+      title: Dead-lettered Traccar payload
+      headers:
+        $ref: '#/components/schemas/Headers'
+      payload:
+        $ref: '#/components/schemas/DeadLetter'
+  schemas:
+    Headers:
+      type: object
+      required: [Nats-Msg-Id]
+      properties:
+        Nats-Msg-Id:
+          type: string
+          description: Equal to the payload `id` (JetStream deduplication key).
+        x-correlation-id:
+          type: string
+          description: Equal to the payload `correlationId` (ADR-0002).
+    Timestamp:
+      type: string
+      format: date-time
+      description: ISO-8601, UTC.
+    Envelope:
+      type: object
+      required: [id, type, version, source, occurredAt, receivedAt, correlationId, data]
+      properties:
+        id:
+          type: string
+          description: Unique message id; deduplicate by it.
+        type:
+          type: string
+        version:
+          const: 1
+        source:
+          const: traccar
+        occurredAt:
+          $ref: '#/components/schemas/Timestamp'
+          description: When it happened on the device (position fix time / event time).
+        receivedAt:
+          $ref: '#/components/schemas/Timestamp'
+          description: When the adapter received it from Traccar.
+        correlationId:
+          type: string
+        data:
+          type: object
+    PositionReported:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            id:
+              type: string
+              pattern: '^traccar-position-[0-9]+-[0-9]+$'
+              description: '`traccar-position-<deviceId>-<fixTime epoch ms>`.'
+            type:
+              const: position.reported
+            data:
+              $ref: '#/components/schemas/PositionData'
+    PositionData:
+      type: object
+      additionalProperties: false
+      required:
+        - positionId
+        - deviceId
+        - groupId
+        - fixTime
+        - deviceTime
+        - serverTime
+        - valid
+        - latitude
+        - longitude
+        - altitude
+        - speedKmh
+        - course
+        - accuracy
+        - attributes
+      properties:
+        positionId:
+          type: [integer, 'null']
+          description: Traccar position id; `null` because Traccar forwards positions before storing them.
+        deviceId:
+          type: integer
+          description: Same `deviceId` returned by `POST /devices`.
+        groupId:
+          type: integer
+        fixTime:
+          $ref: '#/components/schemas/Timestamp'
+        deviceTime:
+          $ref: '#/components/schemas/Timestamp'
+        serverTime:
+          $ref: '#/components/schemas/Timestamp'
+        valid:
+          type: boolean
+          description: Whether the device reported a valid GPS fix.
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        altitude:
+          type: number
+          description: Meters.
+        speedKmh:
+          type: number
+          minimum: 0
+          description: km/h (converted once from Traccar's knots).
+        course:
+          type: number
+          description: Degrees.
+        accuracy:
+          type: number
+        attributes:
+          type: object
+          description: Traccar attributes as received (ignition, battery, …); keys vary by device.
+    DeviceEvent:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            id:
+              type: string
+              pattern: '^traccar-event-[0-9]+$'
+              description: '`traccar-event-<eventId>`.'
+            type:
+              const: device.event
+            data:
+              $ref: '#/components/schemas/DeviceEventData'
+    DeviceEventData:
+      type: object
+      additionalProperties: false
+      required: [eventId, eventType, deviceId, groupId, eventTime, positionId, attributes]
+      properties:
+        eventId:
+          type: integer
+        eventType:
+          type: string
+          description: Traccar event type as received (e.g. `alarm`, `ignitionOn`, `geofenceEnter`).
+        deviceId:
+          type: integer
+        groupId:
+          type: integer
+        eventTime:
+          $ref: '#/components/schemas/Timestamp'
+        positionId:
+          type: [integer, 'null']
+        attributes:
+          type: object
+          description: 'Traccar attributes as received (e.g. `alarm` = `sos`).'
+    DeadLetter:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - source
+        - kind
+        - reason
+        - detail
+        - receivedAt
+        - correlationId
+        - rawPayload
+        - rawEncoding
+        - truncated
+      properties:
+        id:
+          type: string
+          pattern: '^traccar-deadletter-[0-9a-f]{64}$'
+          description: '`traccar-deadletter-<sha256 of the raw body>`.'
+        source:
+          const: traccar
+        kind:
+          enum: [position, event]
+          description: Webhook the payload arrived on.
+        reason:
+          enum: [INVALID_JSON, SCHEMA_MISMATCH, MISSING_GROUP, PAYLOAD_TOO_LARGE, PROCESSING_ERROR]
+        detail:
+          type: string
+          maxLength: 500
+          description: Short explanation, never secrets.
+        receivedAt:
+          $ref: '#/components/schemas/Timestamp'
+        correlationId:
+          type: string
+        rawPayload:
+          type: string
+          description: Original body (first 64 KiB), encoded as `rawEncoding`.
+        rawEncoding:
+          enum: [utf8, base64]
+        truncated:
+          type: boolean

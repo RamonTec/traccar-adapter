@@ -13,6 +13,7 @@ import {
   type FakeTraccarServer,
 } from './support/fake-traccar.js';
 import { createLogCapture, type LogCapture } from './support/log-capture.js';
+import { checkHttpContract, recordResponses } from './support/http-contract.js';
 import { testConfig } from './support/test-env.js';
 
 const TOKEN = 'audit-e2e-token-value';
@@ -42,6 +43,7 @@ async function resetLoggerState(): Promise<void> {
 
 describe('Operation audit (e2e)', () => {
   let app: INestApplication;
+  let contract: ReturnType<typeof recordResponses>;
   let traccar: FakeTraccarServer;
   let logs: LogCapture;
 
@@ -60,10 +62,12 @@ describe('Operation audit (e2e)', () => {
     }).compile();
     app = moduleRef.createNestApplication({ bufferLogs: true });
     app.useLogger(app.get(Logger));
+    contract = recordResponses(app);
     await app.init();
   });
 
   afterEach(async () => {
+    if (contract) expect(checkHttpContract(contract.take())).toEqual([]);
     await app?.close();
     await traccar?.close();
     await resetLoggerState();

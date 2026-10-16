@@ -13,6 +13,7 @@ import {
   type FakeTraccarDevice,
   type FakeTraccarServer,
 } from './support/fake-traccar.js';
+import { checkHttpContract, recordResponses } from './support/http-contract.js';
 import { testConfig } from './support/test-env.js';
 
 const VALID_TOKEN = 'test-token-valid';
@@ -65,6 +66,7 @@ function seedDevice(
 
 describe('Device Status (e2e)', () => {
   let app: INestApplication;
+  let contract: ReturnType<typeof recordResponses>;
   let traccar: FakeTraccarServer;
 
   beforeEach(async () => {
@@ -86,10 +88,12 @@ describe('Device Status (e2e)', () => {
 
     app = moduleFixture.createNestApplication({ bufferLogs: true });
     app.useLogger(app.get(Logger));
+    contract = recordResponses(app);
     await app.init();
   });
 
   afterEach(async () => {
+    if (contract) expect(checkHttpContract(contract.take())).toEqual([]);
     if (app) await app.close();
     if (traccar) await traccar.close();
     await resetLoggerState();

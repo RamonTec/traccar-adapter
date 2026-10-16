@@ -1,0 +1,478 @@
+openapi: 3.1.0
+info:
+  title: traccar-adapter
+  version: 1.0.0
+  summary: Commands on Traccar groups and devices for the telemetry platform.
+  description: |
+    traccar-adapter is the only service that talks to Traccar. It exposes **commands only**: queries on groups and
+    devices belong to api-core (its own database) and GPS positions to telemetry-service / realtime-gateway (fed by
+    the events in `asyncapi.yaml`). Integration guide: `docs/contracts/README.md`.
+
+    - **Authentication**: Keycloak service token (OAuth2 client credentials) as `Authorization: Bearer <token>`.
+      The token must contain `aud: traccar-adapter` and the client role named in `x-required-role` under
+      `resource_access.traccar-adapter.roles`. The token's `azp` is recorded as the actor in the audit log.
+    - **Idempotency** (`x-idempotent`): repeating a command with the same input returns the same result and never
+      duplicates anything in Traccar, so a caller may retry after a timeout or network error.
+    - **Retries** (`x-retryable` per response): `true` means the same request may succeed later (back off and retry);
+      `false` means retrying the same request will fail the same way.
+    - **Correlation**: send `x-correlation-id` to trace a request; it is echoed in the response header and in
+      `ErrorBody.correlationId`, and generated when absent.
+    - **Never**: there is no operation to move a device to another group, nor to delete groups or devices.
+servers:
+  - url: http://traccar-adapter:3000
+    description: Inside the platform network (local stack)
+tags:
+  - name: groups
+  - name: devices
+  - name: health
+security:
+  - keycloak: []
+paths:
+  /groups:
+    post:
+      tags: [groups]
+      operationId: createGroup
+      summary: Create a group, or return the existing one with the same name
+      description: |
+        Get-or-create by exact name (no trimming, case-sensitive). The name is an opaque external key chosen by
+        api-core. Store the returned `groupId`: it is needed to register devices.
+      x-required-role: groups:write
+      x-idempotent: true
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Group created.
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '200':
+          description: A group with this exact name already existed; it is returned unchanged.
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: |
+            `GROUP_NAME_AMBIGUOUS`: Traccar already has more than one group with this name (created outside the
+            adapter). Needs manual reconciliation; nothing was created.
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+                properties:
+                  code:
+                    const: GROUP_NAME_AMBIGUOUS
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+  /devices:
+    post:
+      tags: [devices]
+      operationId: registerDevice
+      summary: Register a GPS device in a group, or return it if already registered there
+      description: |
+        Get-or-create by `uniqueId` (IMEI):
+
+        - An **enabled** device with this IMEI in the **same group** → returned unchanged (`200`).
+        - A **disabled** device with this IMEI (any group) → it is retired (its `uniqueId` becomes
+          `<imei>:retired:<deviceId>`, its group never changes) and a new device is created (`201`). The retired
+          device keeps its history and can never be enabled again.
+        - An **enabled** device with this IMEI in **another group** → `409 DEVICE_ALREADY_REGISTERED`. Disable it
+          first: devices are never moved between groups.
+
+        Store the returned `deviceId`: it identifies the device in commands and in every event.
+      x-required-role: devices:write
+      x-idempotent: true
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '201':
+          description: Device created (possibly after retiring a disabled device with the same IMEI).
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '200':
+          description: An enabled device with this IMEI already existed in this group; it is returned unchanged.
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: '`GROUP_NOT_FOUND`: `groupId` does not exist in Traccar.'
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+                properties:
+                  code:
+                    const: GROUP_NOT_FOUND
+        '409':
+          description: '`DEVICE_ALREADY_REGISTERED`: an enabled device with this IMEI belongs to another group.'
+          x-retryable: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBody'
+                properties:
+                  code:
+                    const: DEVICE_ALREADY_REGISTERED
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+  /devices/{deviceId}/disable:
+    post:
+      tags: [devices]
+      operationId: disableDevice
+      summary: Disable a device (stops accepting its positions in Traccar)
+      description: Disabling an already disabled device succeeds without changes.
+      x-required-role: devices:write
+      x-idempotent: true
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        $ref: '#/components/requestBodies/Empty'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeviceStatus'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+        '409':
+          $ref: '#/components/responses/DeviceRetired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+  /devices/{deviceId}/enable:
+    post:
+      tags: [devices]
+      operationId: enableDevice
+      summary: Enable a disabled device
+      description: Enabling an already enabled device succeeds without changes. A retired device cannot be enabled.
+      x-required-role: devices:write
+      x-idempotent: true
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        $ref: '#/components/requestBodies/Empty'
+      responses:
+        '200':
+          $ref: '#/components/responses/DeviceStatus'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+        '409':
+          $ref: '#/components/responses/DeviceRetired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/UpstreamUnavailable'
+  /health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Liveness
+      description: The process is up. Does not check dependencies.
+      security: []
+      responses:
+        '200':
+          description: Alive.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    const: ok
+  /health/ready:
+    get:
+      tags: [health]
+      operationId: getReadiness
+      summary: Readiness
+      description: |
+        Whether the service can do its job. `traccar` and `outbox` are critical; `nats` is not: while NATS is down,
+        messages are buffered in the outbox and the service stays ready (`nats: down`).
+      security: []
+      responses:
+        '200':
+          description: Ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+        '503':
+          description: Not ready (a critical check failed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Readiness'
+components:
+  securitySchemes:
+    keycloak:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Keycloak access token (realm `telemetry`, client credentials) with `aud` containing `traccar-adapter` and the
+        operation's role in `resource_access.traccar-adapter.roles`.
+      x-audience: traccar-adapter
+  parameters:
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      description: Traccar device id returned by `POST /devices`.
+      schema:
+        type: string
+        pattern: '^[1-9][0-9]*$'
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      required: false
+      description: Correlation id (ADR-0002); generated when absent and echoed in the response.
+      schema:
+        type: string
+  requestBodies:
+    Empty:
+      required: false
+      description: No body, or an empty JSON object.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+  responses:
+    DeviceStatus:
+      description: Current status after the command (unchanged if it already was in that state).
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceStatusResponse'
+    ValidationError:
+      description: '`VALIDATION_ERROR`: malformed JSON, unknown fields or invalid values. `details` lists each issue.'
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: VALIDATION_ERROR
+    Unauthorized:
+      description: '`UNAUTHORIZED`: missing, invalid or expired token, or wrong issuer/audience. Get a new token.'
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: UNAUTHORIZED
+    Forbidden:
+      description: '`FORBIDDEN`: the token lacks the role in `x-required-role`.'
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: FORBIDDEN
+    DeviceNotFound:
+      description: '`DEVICE_NOT_FOUND`: no device with this id in Traccar.'
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: DEVICE_NOT_FOUND
+    DeviceRetired:
+      description: '`DEVICE_RETIRED`: the device was retired when its IMEI was reused; it cannot change status.'
+      x-retryable: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: DEVICE_RETIRED
+    UpstreamUnavailable:
+      description: '`UPSTREAM_UNAVAILABLE`: Traccar did not answer or failed. Retry with backoff.'
+      x-retryable: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: UPSTREAM_UNAVAILABLE
+    InternalError:
+      description: '`INTERNAL_ERROR`: unexpected error. Retry with backoff; report it if it persists.'
+      x-retryable: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+            properties:
+              code:
+                const: INTERNAL_ERROR
+  schemas:
+    CreateGroupRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 128
+          pattern: '\S'
+          description: Opaque external key; not blank; kept exactly as sent.
+          examples: ['tenant-42']
+    GroupResponse:
+      type: object
+      additionalProperties: false
+      required: [groupId, name]
+      properties:
+        groupId:
+          type: integer
+          minimum: 1
+          description: Traccar group id.
+        name:
+          type: string
+    RegisterDeviceRequest:
+      type: object
+      additionalProperties: false
+      required: [uniqueId, name, groupId]
+      properties:
+        uniqueId:
+          type: string
+          pattern: '^[0-9]{15}$'
+          description: IMEI (exactly 15 digits). Validating it as a business rule is api-core's job.
+          examples: ['359000000000017']
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        groupId:
+          type: integer
+          minimum: 1
+          description: '`groupId` returned by `POST /groups`.'
+    DeviceResponse:
+      type: object
+      additionalProperties: false
+      required: [deviceId, uniqueId, groupId]
+      properties:
+        deviceId:
+          type: integer
+          minimum: 1
+          description: Traccar device id; the `deviceId` in every event of this device.
+        uniqueId:
+          type: string
+        groupId:
+          type: integer
+          minimum: 1
+    DeviceStatusResponse:
+      type: object
+      additionalProperties: false
+      required: [deviceId, disabled]
+      properties:
+        deviceId:
+          type: integer
+          minimum: 1
+        disabled:
+          type: boolean
+    Readiness:
+      type: object
+      required: [status, checks]
+      properties:
+        status:
+          enum: [ok, error]
+        checks:
+          type: object
+          description: One entry per dependency (`traccar`, `nats`, `outbox`).
+          additionalProperties:
+            enum: [ok, error, down]
+        outbox:
+          type: object
+          required: [pending, oldestAgeMs]
+          properties:
+            pending:
+              type: integer
+              minimum: 0
+            oldestAgeMs:
+              type: [integer, 'null']
+              minimum: 0
+    ErrorBody:
+      type: object
+      description: Error format of the platform (ADR-0002).
+      additionalProperties: false
+      required: [code, message, correlationId]
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable code; branch on this, never on `message`.
+        message:
+          type: string
+        correlationId:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            required: [path, message]
+            properties:
+              path:
+                type: string
+              message:
+                type: string
