@@ -62,8 +62,9 @@ describe('Container image (spec 014)', () => {
     await removeAll(containers.splice(0));
   });
 
-  it('AC-1: pins the Node version of the image', async () => {
-    expect(await shell('node --version')).toBe('v24.22.0');
+  it('AC-1: pins the Node version of the image to .node-version', async () => {
+    const expected = readFileSync('.node-version', 'utf8').trim();
+    expect(await shell('node --version')).toBe(`v${expected}`);
   });
 
   it('AC-1: the build fails when package.json and the lockfile disagree', async () => {
