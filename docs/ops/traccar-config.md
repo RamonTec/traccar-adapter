@@ -41,8 +41,9 @@ Fuente: `src/main/java/org/traccar/config/Keys.java` y `handler/PositionForwardi
 | `forward.retry.limit` | `100` | `10000` | Posiciones pendientes máximas; por encima de este número **no se reintenta**. |
 | `forward.connectTimeout` / `forward.writeTimeout` | — | — | Existen en 6.15.3; no se ajustan. |
 
-Cualquier respuesta no-2xx o error de red cuenta como fallo. Por eso el adapter responde `503` cuando no
-puede publicar en JetStream, y `200` cuando el payload acaba en el dead-letter.
+Cualquier respuesta no-2xx o error de red cuenta como fallo. El adapter responde `200` cuando el mensaje está
+publicado en JetStream, guardado en su outbox local porque NATS no está disponible (ADR-0007) o en el dead-letter.
+Solo responde `503` si ni JetStream ni el outbox pueden aceptarlo (outbox lleno o error de disco).
 
 **Los eventos (`event.forward.*`) no tienen reintentos** en 6.15.3: el reintento solo existe en
 `PositionForwardingHandler`. Ver §3.
@@ -73,9 +74,11 @@ durante la caída, `forward.retry.delay=200`, `forward.retry.count=5` → ventan
 En B y D las posiciones **sí quedan guardadas** en la base de datos de Traccar (`GET /api/positions`), así que la
 reconciliación por polling (spec 011) puede recuperarlas. Los eventos de D no existen en ninguna parte.
 
-**Riesgos que quedan abiertos** (ADR-0005 §5, spec 011):
+**Riesgos que quedan abiertos** (ADR-0005 §5 enmendado por ADR-0007, spec 011). Una caída de **NATS** ya no pierde
+datos mientras el outbox tenga espacio. Siguen abiertos los de una caída del **propio adapter**:
 1. Una caída mayor que la ventana pierde posiciones para JetStream (no en Traccar) y sus eventos derivados.
-2. Si el adapter responde `503` a un **evento** (p.ej. NATS caído), Traccar no lo reintenta: se pierde.
+2. Cualquier **evento** que llegue con el adapter caído (o con el outbox lleno, `503`) se pierde: Traccar no lo
+   reintenta. Mitigación: ≥ 2 réplicas con despliegue escalonado.
 3. Más de `forward.retry.limit` posiciones pendientes: las nuevas no se reintentan.
 
 ## 4. Diferencias con la configuración local heredada
