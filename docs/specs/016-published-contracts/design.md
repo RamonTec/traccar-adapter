@@ -18,7 +18,7 @@ status: approved       # draft | approved
 | test | `test/support/http-contract.ts` | N | AC-6: middleware que registra respuestas y las valida contra el OpenAPI |
 | test | `test/{group-create,device-register,device-status,app}.e2e-spec.ts` | M | Instalan el registro y comprueban el contrato en `afterEach` |
 | test | `test/{ingest-to-jetstream,ingest-to-deadletter,outbox}.e2e-spec.ts` | M | AC-7: cada mensaje leído del stream se valida contra el AsyncAPI |
-| raíz | `package.json` | M | devDependencies: `yaml`, `ajv`, `ajv-formats`, `@readme/openapi-parser`, `@asyncapi/parser` |
+| raíz | `package.json` | M | devDependencies: `yaml`, `ajv`, `ajv-formats`, `@readme/openapi-parser`, `@asyncapi/specs` (JSON Schema oficial) |
 
 ## Contratos internos
 ```ts
@@ -76,7 +76,7 @@ JSON Schema; `x-jetstream` por canal (stream, `max_age`, `duplicate_window`); ga
   AsyncAPI) y generar desde zod (solo cubre requests).
 - **Validación con las suites existentes** (registro de respuestas) en vez de una suite de contrato aparte: reutiliza
   todos los casos de error que ya se prueban y evita duplicarlos.
-- **Validadores oficiales de documento** (`@readme/openapi-parser`, `@asyncapi/parser`) solo como devDependencies;
+- **Validadores oficiales de documento** (`@readme/openapi-parser`, `@asyncapi/specs` (JSON Schema oficial)) solo como devDependencies;
   `ajv` para validar valores contra los esquemas (OpenAPI 3.1 y AsyncAPI usan JSON Schema).
 - **Versión inicial `1.0.0`** en ambos documentos; mayor = cambio incompatible (política en la guía).
 
